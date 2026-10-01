@@ -1,0 +1,121 @@
+// Point d'entrée : compilé en dist/style.css.
+@use "polices";
+@use "../kit/styles/app";
+@use "mixins" as *;
+
+$fond: #0b0910;
+$encre: #f1ede4;
+$encre-douce: rgba(241, 237, 228, .6);
+$or: #c8a15a;
+$tuile: rgba(255, 255, 255, .05);
+$sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+$manuscrit: "Caveat", "Bradley Hand", "Noteworthy", cursive;
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+	@include user-select(none);
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: $fond;
+	color: $encre;
+}
+
+body {
+	position: fixed;
+	inset: 0;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	font-family: $sans;
+}
+
+// Un rideau de velours sombre, éclairé d'en haut : la coulisse d'où partent les tours.
+#app {
+	background:
+		radial-gradient(90% 55% at 50% 0%, rgba(200, 161, 90, .14), transparent 70%),
+		repeating-linear-gradient(90deg, rgba(255, 255, 255, .018) 0 2px, transparent 2px 22px),
+		$fond;
+}
+
+#menu-principal {
+	position: absolute;
+	inset: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	touch-action: manipulation;
+	padding: calc(var(--safe-t) + 28px) calc(var(--safe-r) + 18px) calc(var(--safe-b) + 24px) calc(var(--safe-l) + 18px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+h1 {
+	margin: 0 0 22px;
+	font: 700 52px/1 $manuscrit;
+	color: $or;
+}
+
+#tours {
+	width: 100%;
+	max-width: 520px;
+	display: grid;
+	gap: 12px;
+}
+
+.tour {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 88px;
+	padding: 12px 16px;
+	border-radius: 18px;
+	background: $tuile;
+	border: 1px solid rgba(241, 237, 228, .1);
+	color: inherit;
+	text-decoration: none;
+
+	&:active {
+		background: rgba(200, 161, 90, .16);
+		border-color: $or;
+	}
+
+	img {
+		flex: none;
+		width: 64px;
+		height: 64px;
+		border-radius: 14px;
+	}
+}
+
+.tour-texte {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.tour-nom {
+	font-size: 19px;
+	font-weight: 600;
+}
+
+.tour-description {
+	font-size: 14px;
+	color: $encre-douce;
+}
+
+#version {
+	margin: auto 0 0;
+	padding-top: 24px;
+	font-size: 12px;
+	color: rgba(241, 237, 228, .35);
+	font-variant-numeric: tabular-nums;
+}
