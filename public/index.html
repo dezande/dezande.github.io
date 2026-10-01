@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self'">
+	<meta name="theme-color" content="#0b0910">
+	<meta name="color-scheme" content="dark">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Mes tours">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="description" content="Tous mes accessoires de scène dans une seule app : boule de cristal, pile ou face, les six prédictions, Analyseur Q. 100 % hors-ligne.">
+	<title>Mes tours</title>
+	<link rel="manifest" href="manifest.json">
+	<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+	<link rel="apple-touch-icon" href="icons/icon-192.png">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<!-- Toute l'app : pivote en paysage pour rester en portrait (src/kit/web/orientation.ts). -->
+	<div id="app">
+		<main id="menu-principal">
+			<h1>Mes tours</h1>
+			<!-- Une tuile par tour, construites par src/menu.ts depuis src/content/tours.ts. -->
+			<nav id="tours" aria-label="Tours"></nav>
+			<p id="version"></p>
+		</main>
+	</div>
+
+	<script type="module" src="app.js"></script>
+</body>
+</html>

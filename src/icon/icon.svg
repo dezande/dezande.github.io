@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Icône de l'app : les icônes des quatre tours, en carré sur un fond de velours sombre. Le dessin
+	occupe le centre : les coins sont perdus par les masques d'icône d'Android (purpose « maskable »).
+	public/icons/icon-192.png et icon-512.png en sont rendus (voir README, « Icônes ») ; les images
+	viennent de public/tours/, copies des icônes des tours.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="512" height="512">
+	<defs>
+		<radialGradient id="fond" cx="50%" cy="20%" r="85%">
+			<stop offset="0" stop-color="#2a2131"/>
+			<stop offset="100%" stop-color="#0b0910"/>
+		</radialGradient>
+		<clipPath id="c1"><rect x="106" y="106" width="144" height="144" rx="28"/></clipPath>
+		<clipPath id="c2"><rect x="262" y="106" width="144" height="144" rx="28"/></clipPath>
+		<clipPath id="c3"><rect x="106" y="262" width="144" height="144" rx="28"/></clipPath>
+		<clipPath id="c4"><rect x="262" y="262" width="144" height="144" rx="28"/></clipPath>
+	</defs>
+	<rect width="512" height="512" fill="url(#fond)"/>
+	<image href="../../public/tours/boule-de-cristal.png" x="106" y="106" width="144" height="144" clip-path="url(#c1)"/>
+	<image href="../../public/tours/pile-ou-face.png" x="262" y="106" width="144" height="144" clip-path="url(#c2)"/>
+	<image href="../../public/tours/six-predictions.png" x="106" y="262" width="144" height="144" clip-path="url(#c3)"/>
+	<image href="../../public/tours/analyseur-q.png" x="262" y="262" width="144" height="144" clip-path="url(#c4)"/>
+	<g fill="none" stroke="#c8a15a" stroke-opacity=".7" stroke-width="3">
+		<rect x="106" y="106" width="144" height="144" rx="28"/>
+		<rect x="262" y="106" width="144" height="144" rx="28"/>
+		<rect x="106" y="262" width="144" height="144" rx="28"/>
+		<rect x="262" y="262" width="144" height="144" rx="28"/>
+	</g>
+</svg>

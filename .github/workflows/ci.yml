@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Types, tests, build et tests dans Chrome
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Historique complet : le numéro de version est le nombre de commits.
+          fetch-depth: 0
+          # Le kit commun (src/kit, dépôt kit-scene).
+          submodules: true
+
+      - uses: actions/setup-node@v7
+        with:
+          # Version de Node figée pour tout le monde (.nvmrc).
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Chaque changement doit s'accompagner d'une entrée dans CHANGELOG.md.
+      - name: Journal des versions
+        run: node src/kit/node/check-changelog.ts --base "${{ github.event.pull_request.base.sha || github.event.before }}"
+
+      - run: npm ci
+
+      # Types et tests tournent sur la pull request, dont la branche doit être à jour avec main
+      # et la CI verte pour fusionner : après la fusion en rebase, main porte exactement l'arbre
+      # déjà vérifié. On ne le revérifie donc pas, on le construit et on le publie.
+      # « workflow_dispatch » (lancement à la main) rejoue tout.
+      - name: Vérification des types
+        if: github.event_name != 'push'
+        run: npm run typecheck
+
+      - name: Tests unitaires
+        if: github.event_name != 'push'
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # L'app compilée dans Chrome sans interface, sur un écran de téléphone simulé :
+      # le menu des tours, les liens vers les tours, le service worker de la racine et le hors-ligne.
+      # Google Chrome est préinstallé sur les machines ubuntu de GitHub (variable CHROME_BIN).
+      # En cas d'échec, rien n'est publié.
+      - name: Tests dans Chrome
+        if: github.event_name != 'push'
+        run: npm run test:e2e
+
+      - name: Artefact GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Déploiement GitHub Pages
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
