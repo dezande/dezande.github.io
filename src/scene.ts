@@ -13,6 +13,7 @@
 
 import { $ } from './kit/web/dom.ts';
 import type { Langue } from './content/textes.ts';
+import { TOURS } from './content/tours.ts';
 import type { MessageTour } from './tours/pont.ts';
 
 const scene = $('#scene');
@@ -30,7 +31,9 @@ export function ouvrir(dossier: string, nom: string, lang: Langue, reglages = fa
 	cadre = document.createElement('iframe');
 	cadre.title = nom;
 	// index.html et non le dossier : c'est sous ce nom que le service worker met la page en cache.
-	cadre.src = `tours/${dossier}/index.html?lang=${lang}${reglages ? '&reglages' : ''}`;
+	// La langue du menu, et le nom du tour pour l'en-tête de ses réglages (src/tours/pont.ts).
+	const nomDuTour = TOURS.find((tour) => tour.dossier === dossier)?.nom[lang] ?? '';
+	cadre.src = `tours/${dossier}/index.html?lang=${lang}&nom=${encodeURIComponent(nomDuTour)}${reglages ? '&reglages' : ''}`;
 	// Écran allumé (API Screen Wake Lock, ou vidéo muette lue sans geste) depuis le cadre.
 	cadre.allow = 'screen-wake-lock; autoplay; fullscreen';
 	// Le clavier et la télécommande parlent au tour, pas au menu.
@@ -81,3 +84,7 @@ window.addEventListener('message', (event: MessageEvent<{ mesTours?: MessageTour
 
 // Geste retour d'Android (ou bouton retour) : le tour se referme.
 window.addEventListener('popstate', fermer);
+
+// Un rechargement garde l'entrée d'historique du dernier tour ouvert : au démarrage, aucun tour
+// n'est ouvert, elle ne doit pas coûter un « retour » pour rien.
+if ((history.state as { tour?: string } | null)?.tour) history.replaceState(null, '');

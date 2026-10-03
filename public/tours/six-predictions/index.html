@@ -34,30 +34,15 @@
 
 		<section id="menu" hidden data-texte-label="menu.titre">
 			<div class="sheet">
+				<!-- En-tête commun à tous les tours (« Mes tours ») : « Réglages » et le nom du tour,
+				     remplis par src/tours/pont.ts, et la croix qui ferme. -->
 				<header class="menu-head">
 					<div>
-						<h1 data-texte="menu.titre"></h1>
-						<p class="menu-version" id="menu-version"></p>
+						<h1 class="titre-reglages"></h1>
+						<p class="menu-version nom-du-tour"></p>
 					</div>
-					<span id="menu-position" hidden></span>
+					<button type="button" id="close-btn" class="croix" data-texte-label="menu.fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
 				</header>
-
-				<!-- Le menu ne s'ouvre plus qu'en réglages (écrou ⚙) : ni carte à choisir, ni paquet à remettre. -->
-				<div class="card" hidden>
-					<div class="row-label" data-texte="menu.aller"></div>
-					<div id="carte-list" class="carte-list"></div>
-				</div>
-
-				<div class="actions">
-					<button type="button" id="reset-btn" data-texte="menu.remettre" hidden></button>
-					<button type="button" id="close-btn" class="primary" data-texte="menu.fermer"></button>
-				</div>
-
-				<!-- La langue se choisit dans le menu principal de Mes tours (bouton FR / EN), pour tous les tours. -->
-				<div class="card" hidden>
-					<div class="row-label" data-texte="menu.langue"></div>
-					<div class="seg" id="langue-seg" role="radiogroup" data-texte-label="menu.langue"></div>
-				</div>
 
 				<!-- Les dos et les couleurs se choisissent en les regardant : chaque bouton montre
 				     la carte telle qu'elle sera, pas le nom du style (settings/panel.ts). -->
@@ -81,13 +66,6 @@
 					<div><span id="wake-text"></span><small id="wake-detail"></small></div>
 				</div>
 
-				<div class="card about">
-					<div class="about-row"><span data-texte="menu.version"></span> <span id="about-version"></span></div>
-					<div class="about-row"><span data-texte="menu.cache"></span> <span id="about-cache"></span></div>
-					<div class="about-row"><span data-texte="menu.stockage"></span> <span id="about-storage"></span></div>
-					<div class="about-row"><span data-texte="menu.affichage"></span> <span id="about-display"></span></div>
-				</div>
-
 				<details class="card help">
 					<summary data-texte="aide.titre"></summary>
 					<ul>
@@ -100,6 +78,30 @@
 				</details>
 
 				<button type="button" id="defaults-btn" class="link" data-texte="menu.defauts"></button>
+
+				<!-- Ce qui ne sert qu'au tour ouvert seul (hors de « Mes tours ») : gardé pour son code,
+				     jamais affiché ici. -->
+				<div hidden>
+					<div class="card about">
+						<div class="about-row"><span data-texte="menu.version"></span> <span id="about-version"></span></div>
+						<div class="about-row"><span data-texte="menu.cache"></span> <span id="about-cache"></span></div>
+						<div class="about-row"><span data-texte="menu.stockage"></span> <span id="about-storage"></span></div>
+						<div class="about-row"><span data-texte="menu.affichage"></span> <span id="about-display"></span></div>
+					</div>
+					<p id="menu-version"></p>
+					<span id="menu-position"></span>
+					<div class="card">
+						<div class="row-label" data-texte="menu.aller"></div>
+						<div id="carte-list" class="carte-list"></div>
+					</div>
+					<div class="actions">
+						<button type="button" id="reset-btn" data-texte="menu.remettre" hidden></button>
+					</div>
+					<div class="card">
+						<div class="row-label" data-texte="menu.langue"></div>
+						<div class="seg" id="langue-seg" role="radiogroup" data-texte-label="menu.langue"></div>
+					</div>
+				</div>
 			</div>
 		</section>
 	</div>
