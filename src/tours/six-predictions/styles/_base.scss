@@ -1,0 +1,46 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+// Hygiène tactile : ni surbrillance, ni callout, ni sélection.
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+	@include user-select(none);
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: $bg;
+	color: $ink;
+}
+
+body {
+	position: fixed;
+	inset: 0;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	font-family: $sans;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+// Lu par les lecteurs d'écran, invisible à l'œil (l'écran doit rester nu devant le public).
+.sr-only {
+	position: fixed;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

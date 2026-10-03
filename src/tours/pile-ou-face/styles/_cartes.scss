@@ -1,0 +1,225 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+/*
+ * La carte, seule au centre du tapis : celle des six prédictions, en plus grand.
+ *
+ * Deux transformations se superposent, chacune sur son élément pour ne pas se gêner :
+ *   .carte-pivot  la retourne (rotateY) ;
+ *   .carte-face   le dos et l'avant, dos à dos (backface-visibility).
+ */
+
+#table {
+	/*
+	 * La plus grande carte qui tienne dans la place disponible : le rapport 2,5 × 3,5 pouces
+	 * d'une carte à jouer commande sa largeur, et elle ne dépasse ni 94 % de la largeur ni 90 %
+	 * de la hauteur libre — qu'elle soit sur un téléphone haut, court, ou pivoté avec lui.
+	 */
+	--ratio: .714;
+	--dispo-h: calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 32px);
+	--carte-h: min(
+		calc(var(--app-w) * .94 / var(--ratio)),
+		calc(var(--dispo-h) * .9),
+		680px
+	);
+	--carte-w: calc(var(--carte-h) * var(--ratio));
+	--rayon: clamp(12px, calc(var(--carte-w) * .055), 26px);
+	// Marge de papier du bord du dos. En longueur absolue : un pourcentage n'est pas admis
+	// dans l'étalement d'une ombre, et rendrait toute la déclaration invalide.
+	--marge: clamp(7px, calc(var(--carte-w) * .038), 16px);
+	position: relative;
+	width: var(--carte-w);
+	height: var(--carte-h);
+}
+
+/*
+ * Les quatre couleurs de dos, pour la carte de la scène comme pour les vignettes du menu
+ * (styles/_menu.scss).
+ *   --dos-clair / --dos-fonce  le fond, du haut vers le bas ;
+ *   --trait                    le dessin du dos (stage/dos.ts), doré sur fond sombre, encre sur blanc.
+ */
+.carte,
+.vignette {
+	--dos-clair: #23242b;
+	--dos-fonce: #0e0f13;
+	--trait: #c8a15a;
+
+	&[data-couleur="rouge"] {
+		--dos-clair: #93222a;
+		--dos-fonce: #430e13;
+		--trait: #e8ca88;
+	}
+
+	&[data-couleur="bleu"] {
+		--dos-clair: #23508f;
+		--dos-fonce: #0b1c38;
+		--trait: #ddc88c;
+	}
+
+	// Un dos clair : le dessin passe à l'encre, sans quoi l'or disparaîtrait.
+	&[data-couleur="blanc"] {
+		--dos-clair: #f4eee2;
+		--dos-fonce: #d9d0bc;
+		--trait: #2f3442;
+	}
+}
+
+.carte {
+	// Échelle du texte de la prédiction, calculée par stage/carte.ts pour remplir la carte.
+	--fit: 1;
+	@include cover;
+	// La carte tourne autour de son propre centre.
+	perspective: 1200px;
+}
+
+.carte-pivot {
+	@include cover;
+	transform-style: preserve-3d;
+	transition: transform .62s cubic-bezier(.4, .02, .2, 1);
+}
+
+.carte.retournee .carte-pivot {
+	transform: rotateY(180deg);
+}
+
+.carte-face {
+	@include cover;
+	@include backface-hidden;
+	border-radius: var(--rayon);
+	overflow: hidden;
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, .5),
+		0 18px 36px rgba(0, 0, 0, .45);
+}
+
+/* ---------- Le dos ---------- */
+
+.dos {
+	background: linear-gradient(155deg, var(--dos-clair), var(--dos-fonce));
+	// La marge de papier du bord, puis un filet sombre juste à l'intérieur : les ombres se
+	// peignent dans l'ordre, la première par-dessus les suivantes.
+	box-shadow:
+		inset 0 0 0 var(--marge) $papier,
+		inset 0 0 0 calc(var(--marge) + 1px) rgba(0, 0, 0, .3),
+		0 1px 2px rgba(0, 0, 0, .5),
+		0 18px 36px rgba(0, 0, 0, .45);
+	// Le motif est dessiné en SVG (stage/dos.ts) : il prend cette couleur.
+	color: var(--trait);
+}
+
+/**
+ * Le motif du dos, dessiné à l'intérieur de la marge de papier. Il occupe exactement la place
+ * qu'il lui reste, quelle que soit la taille de la carte (le SVG s'étire avec elle).
+ */
+.dos-motif {
+	position: absolute;
+	inset: calc(var(--marge, 3px) + 1px);
+	display: block;
+	width: auto;
+	height: auto;
+}
+
+/* ---------- L'avant : la prédiction ---------- */
+
+.avant {
+	display: grid;
+	// Une colonne qui ne dépasse jamais la carte : sans « minmax(0, 1fr) », la grille s'élargit
+	// au texte le plus large, et l'ajustement (stage/carte.ts) ne voit plus aucun débordement.
+	grid-template-columns: minmax(0, 1fr);
+	place-items: center;
+	// Marge serrée sur les côtés : la prédiction est ajustée à la largeur, et chaque pixel gagné
+	// ici la fait grandir d'autant. Plus d'air en haut et en bas, où elle a de la place de reste.
+	padding: clamp(14px, 7%, 34px) clamp(6px, 2.5%, 14px);
+	transform: rotateY(180deg);
+	// Papier crème, un peu plus sombre vers les bords, avec un liseré d'encre.
+	background:
+		radial-gradient(120% 90% at 50% 30%, #fbf6ea, $papier 58%, $papier-ombre 140%);
+	box-shadow:
+		inset 0 0 0 1px rgba(28, 39, 67, .16),
+		0 1px 2px rgba(0, 0, 0, .5),
+		0 18px 36px rgba(0, 0, 0, .45);
+	color: $encre;
+	text-align: center;
+}
+
+.carte-corps {
+	width: 100%;
+	position: relative;
+	z-index: 1;
+}
+
+/*
+ * Le bloc écrit : la prédiction et son soulignement. Il se serre sur le texte (largeur du contenu)
+ * pour être mesuré tel quel (stage/carte.ts : fit).
+ */
+.ecriture {
+	display: inline-block;
+	// --fit : échelle calculée par stage/carte.ts pour que le bloc remplisse la carte.
+	font-size: calc(var(--fit) * 38px);
+}
+
+// Le soulignement, juste sous les mots, étiré à leur largeur (stage/ecriture.ts).
+.soulignement {
+	display: block;
+	width: 100%;
+	height: .26em;
+	margin-top: -.03em;
+	// La même encre que les mots : c'est le même stylo qui a souligné.
+	color: inherit;
+	overflow: visible;
+
+	/*
+	 * Le trait a la grosseur des lettres. Deux précautions pour cela : l'épaisseur est donnée en
+	 * `em`, donc relative à la taille du texte, et « non-scaling-stroke » l'empêche de suivre
+	 * l'étirement du repère du dessin — sans quoi le trait s'amincirait sur les mots longs et
+	 * s'épaissirait sur les courts.
+	 */
+	path {
+		stroke-width: .075em;
+		vector-effect: non-scaling-stroke;
+	}
+}
+
+
+/*
+ * La pièce de 20 centimes, dessinée sous la prédiction (stage/dessin-piece.ts). Sa taille est
+ * donnée en `em` : elle grandit avec le texte, et l'ajustement (stage/carte.ts) la mesure avec lui.
+ */
+.piece {
+	display: block;
+	width: 2.7em;
+	height: 2.7em;
+	margin: .18em auto 0;
+	color: inherit;
+	overflow: visible;
+}
+
+// La prédiction elle-même, écrite à la main. Sa taille vient du bloc écrit (.ecriture).
+.prediction {
+	margin: 0;
+	/*
+	 * Une écriture penchée déborde de la case que le navigateur mesure : l'encre d'un « ! » ou
+	 * d'une majuscule inclinée sort de sa largeur d'avance, et le mot venait frôler le bord de la
+	 * carte. Cette marge entre dans la mesure de l'ajustement (stage/carte.ts), et comme elle est
+	 * donnée en `em`, elle grandit avec le texte.
+	 */
+	padding: .06em .14em;
+	font-family: $manuscrit;
+	font-weight: 600;
+	line-height: 1.22;
+	// L'encre d'un stylo : un bleu-noir jamais tout à fait uniforme.
+	color: $encre;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+	/*
+	 * Jamais de coupure automatique : une ligne reste d'un seul tenant, et c'est le retour à la
+	 * ligne écrit dans content/predictions.ts qui décide où ça casse. L'ajustement (stage/carte.ts)
+	 * réduit alors la taille jusqu'à ce que la plus large des lignes tienne dans la carte.
+	 */
+	white-space: nowrap;
+	hyphens: none;
+}
+
+// Au démarrage, la carte apparaît directement à sa place, sans retournement.
+#table.no-anim .carte-pivot {
+	transition: none;
+}

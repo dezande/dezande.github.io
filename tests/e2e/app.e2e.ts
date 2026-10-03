@@ -1,15 +1,25 @@
 // Tests de bout en bout : l'app compilée (dist/) dans un vrai Chrome sans interface, sur un écran
-// de téléphone. Lancer : npm run build && npm run test:e2e
+// de téléphone, avec de vrais événements tactiles. Lancer : npm run build && npm run test:e2e
+//
+// Chaque tour est joué en entier, depuis sa tuile jusqu'au retour au menu principal. Le détail de
+// chaque tour (gestes fins, réglages, rotation…) est testé dans son dépôt d'origine ; ici, on teste
+// ce que l'app ajoute : le menu, l'écrou ⚙, la fin de routine, la sortie de secours, le retour
+// d'Android et le hors-ligne de l'ensemble.
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { Browser, SCREEN, type Page } from '../../src/kit/node/chrome.ts';
+import { setTimeout as sleep } from 'node:timers/promises';
+import { Browser, SCREEN, type Page, type Point } from '../../src/kit/node/chrome.ts';
 import { startStaticServer, type StaticServer } from '../../src/kit/node/static-server.ts';
 import { TOURS } from '../../src/content/tours.ts';
 import { APP_VERSION } from '../../src/version.ts';
 
-const TIMEOUT = { timeout: 60_000 };
-const PRET = `document.querySelectorAll('#tours a.tour').length === ${TOURS.length}`;
+const TIMEOUT = { timeout: 90_000 };
+const PRET = `document.querySelectorAll('#tours .tour').length === ${TOURS.length}`;
+/** Le menu principal est à l'écran : aucun tour ouvert. */
+const AU_MENU = `document.querySelector('#scene').hidden && !document.querySelector('#scene iframe')`;
+const HAUT: Point = { x: SCREEN.width / 2, y: SCREEN.height * .2 };
+const CENTRE: Point = { x: SCREEN.width / 2, y: SCREEN.height / 2 };
 
 let server: StaticServer;
 let browser: Browser;
@@ -30,6 +40,8 @@ async function withApp(run: (page: Page) => Promise<void>, url = server.url): Pr
 	const page = await browser.newPage();
 	try {
 		await page.goto(url);
+		await page.evaluate(`localStorage.clear(); sessionStorage.clear()`);
+		await page.reload();
 		await page.waitFor(PRET, 'menu construit');
 		await run(page);
 		assert.deepEqual(page.errors, [], 'erreurs JavaScript dans la page');
@@ -38,46 +50,181 @@ async function withApp(run: (page: Page) => Promise<void>, url = server.url): Pr
 	}
 }
 
-test('le menu montre les quatre tours, avec leur nom et leur icône', TIMEOUT, async () => {
+/** Expression évaluée dans le document du tour ouvert (même origine : accessible depuis l'app). */
+const dansLeTour = (expression: string): string =>
+	`(() => { const document = window.document.querySelector('#scene iframe')?.contentDocument; if (!document || document.readyState !== 'complete') return null; return (${expression}); })()`;
+
+/** Touche la tuile du tour (ou son écrou ⚙), puis attend que la page du tour soit prête. */
+async function ouvrir(page: Page, dossier: string, pret: string, reglages = false): Promise<void> {
+	const bouton = `#tours .tour[data-dossier="${dossier}"] ${reglages ? '.tour-reglages' : '.tour-lancer'}`;
+	const centre = await page.evaluate<Point>(`(() => { const r = document.querySelector('${bouton}').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+	await page.tap(centre);
+	await page.waitFor(`!document.querySelector('#scene').hidden`, 'tour affiché');
+	await page.waitFor(dansLeTour(pret), `${dossier} prêt`, 10_000);
+	// Le temps que l'écran du tour se pose (premières transitions, police).
+	await sleep(400);
+}
+
+async function attendreLeMenu(page: Page, timeoutMs = 5000): Promise<void> {
+	await page.waitFor(AU_MENU, 'retour au menu principal', timeoutMs);
+}
+
+async function appuiLong(page: Page, point: Point = CENTRE): Promise<void> {
+	await page.touchStart(point);
+	await sleep(3400);
+	await page.touchEnd();
+}
+
+async function pressKey(page: Page, key: string): Promise<void> {
+	await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key });
+	await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key });
+}
+
+/* ================= Le menu principal ================= */
+
+test('le menu montre les quatre tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
 	await withApp(async (page) => {
-		const tuiles = await page.evaluate<{ nom: string; href: string; icone: boolean }[]>(`[...document.querySelectorAll('#tours a.tour')].map((a) => ({
-			nom: a.querySelector('.tour-nom').textContent,
-			href: new URL(a.href).pathname,
-			icone: a.querySelector('img').complete && a.querySelector('img').naturalWidth > 0,
+		const tuiles = await page.evaluate<{ nom: string; icone: boolean; ecrou: string | null }[]>(`[...document.querySelectorAll('#tours .tour')].map((t) => ({
+			nom: t.querySelector('.tour-nom').textContent,
+			icone: t.querySelector('img').complete && t.querySelector('img').naturalWidth > 0,
+			ecrou: t.querySelector('.tour-reglages svg') ? t.querySelector('.tour-reglages').getAttribute('aria-label') : null,
 		}))`);
 		assert.deepEqual(tuiles.map((t) => t.nom), TOURS.map((t) => t.nom));
-		assert.deepEqual(tuiles.map((t) => t.href), TOURS.map((t) => `/${t.dossier}/`), 'chaque tuile ouvre le dossier du tour, à la racine du site');
 		assert.ok(tuiles.every((t) => t.icone), 'une icône ne s’affiche pas');
+		assert.deepEqual(tuiles.map((t) => t.ecrou), TOURS.map((t) => `Réglages : ${t.nom}`));
 		assert.match(await page.evaluate<string>(`document.querySelector('#version').textContent`), new RegExp(APP_VERSION.replace(/\./g, '\\.')));
-	});
-});
-
-test('les tuiles tiennent dans l’écran d’un téléphone', TIMEOUT, async () => {
-	await withApp(async (page) => {
 		const bas = await page.evaluate<number>(`Math.round(document.querySelector('#tours').getBoundingClientRect().bottom)`);
 		assert.ok(bas <= SCREEN.height, `les tuiles descendent jusqu’à ${bas} px pour un écran de ${SCREEN.height}`);
 	});
 });
 
-test('toucher une tuile ouvre le tour', TIMEOUT, async () => {
+/* ================= Chaque routine, jusqu'au retour au menu ================= */
+
+test('Pile ou face : toucher le haut, puis le double toucher de fin ramène au menu', TIMEOUT, async () => {
 	await withApp(async (page) => {
-		const centre = await page.evaluate<{ x: number; y: number }>(`(() => { const r = document.querySelector('#tours a[data-dossier="pile-ou-face"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
-		await page.tap(centre);
-		await page.waitFor(`location.pathname === '/pile-ou-face/'`, 'navigation vers le tour');
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
+		await page.tap(HAUT);
+		await page.waitFor(dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'carte retournée', 3000);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#table .carte').dataset.cote`)), 'pile');
+		await sleep(600);
+		await page.doubleTap(CENTRE);
+		await attendreLeMenu(page);
 	});
 });
 
-test('le service worker de la racine ne prend pas la place des tours', TIMEOUT, async () => {
-	// Le lanceur est à la racine du site : son service worker contrôle aussi les dossiers des tours.
-	// Il ne doit renvoyer sa propre page que pour sa propre adresse (kit-scene v1.3.1).
+test('Les six prédictions : les six cartes jouées, le double toucher sur la table vide ramène au menu', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'six-predictions', `document.querySelectorAll('#paquet .carte').length === 6`);
+		for (let i = 0; i < 12; i++) {
+			await page.tap(CENTRE);
+			await sleep(750);
+		}
+		await page.waitFor(dansLeTour(`document.querySelector('#paquet').classList.contains('vide')`), 'paquet vide', 3000);
+		await page.doubleTap(CENTRE);
+		await attendreLeMenu(page);
+	});
+});
+
+test('Boule de cristal : un nombre apparaît, le double toucher l’efface et ramène au menu', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'boule-de-cristal', `Boolean(document.querySelector('#number'))`);
+		await page.tap(HAUT);
+		await page.waitFor(dansLeTour(`document.querySelector('#number').classList.contains('shown')`), 'nombre affiché', 8000);
+		await sleep(500);
+		await page.doubleTap(CENTRE);
+		// Le nombre s'estompe d'abord (fondu), puis l'app revient au menu.
+		await attendreLeMenu(page, 6000);
+	});
+});
+
+test('Analyseur Q : après la dernière slide, « suivante » ramène au menu', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'analyseur-q', `document.querySelector('.slide.current')?.dataset.index === '0'`);
+		await pressKey(page, 'End');
+		await page.waitFor(dansLeTour(`document.querySelector('.slide.current')?.dataset.index === String(document.querySelectorAll('.slide').length - 1)`), 'dernière slide', 3000);
+		await sleep(600);
+		await pressKey(page, 'ArrowRight');
+		await attendreLeMenu(page);
+	});
+});
+
+test('rouvrir un tour commence une nouvelle routine', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'analyseur-q', `document.querySelector('.slide.current')?.dataset.index === '0'`);
+		await pressKey(page, 'End');
+		await sleep(600);
+		await pressKey(page, 'ArrowRight');
+		await attendreLeMenu(page);
+		await ouvrir(page, 'analyseur-q', `Boolean(document.querySelector('.slide.current'))`);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('.slide.current').dataset.index`)), '0', 'l’analyseur reprend à la première slide');
+	});
+});
+
+/* ================= Sortir d'un tour ================= */
+
+test('appui de 3 s pendant un tour : sortie de secours, retour au menu', TIMEOUT, async () => {
+	// Le doigt se relève au centre, sur la tuile des six prédictions : il ne doit pas la relancer
+	// (src/scene.ts, la garde après la fermeture d'un tour).
+	await withApp(async (page) => {
+		await ouvrir(page, 'six-predictions', `document.querySelectorAll('#paquet .carte').length === 6`);
+		await page.tap(CENTRE);
+		await sleep(750);
+		await appuiLong(page);
+		await attendreLeMenu(page);
+		await sleep(800);
+		assert.equal(await page.evaluate<boolean>(AU_MENU), true, 'le doigt relevé a relancé un tour');
+	});
+});
+
+test('geste retour d’Android pendant un tour : retour au menu', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte'))`);
+		await page.evaluate(`history.back()`);
+		await attendreLeMenu(page);
+	});
+});
+
+/* ================= L'écrou ⚙ ================= */
+
+test('écrou ⚙ : les réglages du tour s’ouvrent seuls, « Fermer » ramène au menu', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		for (const [dossier, panneau] of [
+			['boule-de-cristal', '#settings'],
+			['pile-ou-face', '#menu'],
+			['six-predictions', '#menu'],
+			['analyseur-q', '#menu'],
+		] as const) {
+			await ouvrir(page, dossier, `Boolean(document.querySelector('${panneau}')) && !document.querySelector('${panneau}').hidden`, true);
+			// Rien du déroulé du tour dans ses réglages : ni « aller à », ni « remettre ».
+			assert.equal(await page.evaluate(dansLeTour(`[...document.querySelectorAll('${panneau} button')].some((b) => !b.closest('[hidden]') && b.id === 'reset-btn')`)), false, `${dossier} : bouton de remise visible`);
+			await page.evaluate(dansLeTour(`document.querySelector('#close-btn').click()`));
+			await attendreLeMenu(page);
+		}
+	});
+});
+
+test('écrou ⚙ : un réglage changé vaut pour la routine suivante', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#couleur-choix button'))`, true);
+		await page.evaluate(dansLeTour(`document.querySelector('#couleur-choix button[data-valeur="rouge"]').click()`));
+		await page.evaluate(dansLeTour(`document.querySelector('#close-btn').click()`));
+		await attendreLeMenu(page);
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte'))`);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#table .carte').dataset.couleur`)), 'rouge');
+	});
+});
+
+/* ================= Service worker et hors-ligne ================= */
+
+test('le service worker de la racine laisse se charger les anciennes adresses des tours', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await page.waitFor(`navigator.serviceWorker.controller`, 'service worker actif', 15_000);
 		await page.goto(`${server.url}boule-de-cristal/`);
-		assert.equal(await page.evaluate<boolean>(`Boolean(document.querySelector('#tours'))`), false, 'le dossier d’un tour a reçu la page du lanceur');
+		assert.equal(await page.evaluate<boolean>(`Boolean(document.querySelector('#tours'))`), false, 'une ancienne adresse a reçu la page du menu');
 	});
 });
 
-test('hors-ligne : une fois ouvert, le menu redémarre serveur arrêté', TIMEOUT, async () => {
+test('hors-ligne : le menu et les tours s’ouvrent serveur arrêté', TIMEOUT, async () => {
 	const offlineServer = await startStaticServer('dist', 0);
 	let closed = false;
 	try {
@@ -87,7 +234,12 @@ test('hors-ligne : une fois ouvert, le menu redémarre serveur arrêté', TIMEOU
 			closed = true;
 			await page.reload();
 			await page.waitFor(PRET, 'menu rechargé hors-ligne', 10_000);
-			assert.equal(await page.evaluate<boolean>(`[...document.querySelectorAll('#tours img')].every((i) => i.naturalWidth > 0)`), true, 'icônes hors-ligne');
+			await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
+			await page.tap(HAUT);
+			await page.waitFor(dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'routine jouée hors-ligne', 3000);
+			await page.evaluate(`history.back()`);
+			await attendreLeMenu(page);
+			await ouvrir(page, 'analyseur-q', `Boolean(document.querySelector('.slide.current'))`);
 		}, offlineServer.url);
 	} finally {
 		if (!closed) await offlineServer.close();

@@ -1,0 +1,292 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+/*
+ * Les six cartes, étalées de haut en bas au centre de la scène.
+ *
+ * Trois transformations se superposent, chacune sur son élément pour ne pas se gêner :
+ *   .carte        place la carte dans la pile (--profondeur), puis la fait sortir du cadre ;
+ *   .carte-pivot  la retourne (rotateY) ;
+ *   .carte-face   le dos et l'avant, dos à dos (backface-visibility).
+ */
+
+#paquet {
+	/*
+	 * La taille de la carte, puis l'étalement du paquet, se calculent dans cet ordre à partir de
+	 * la place réellement disponible — l'étalement dépend de la carte, jamais l'inverse.
+	 *
+	 *   1. la carte prend la plus grande taille qui tienne en largeur, sans dépasser 58 % de la
+	 *      hauteur libre (le rapport 2,5 × 3,5 pouces commande sa largeur) ;
+	 *   2. tout ce qui reste en dessous se partage entre les cinq cartes du fond, sans qu'une
+	 *      carte découvre plus que le huitième de sa voisine.
+	 *
+	 * Les deux plafonds se répondent : 58 % pour la carte et 12 % de la carte pour chacun des cinq
+	 * crans font au plus 93 % de la hauteur libre. Le paquet remplit donc l'écran sans jamais en
+	 * sortir ni le toucher, qu'il soit haut, court, ou pivoté avec le téléphone.
+	 */
+	--ratio: .714;
+	--dispo-h: calc(var(--app-h) - var(--safe-t) - var(--safe-b) - 32px);
+	--carte-h: min(
+		calc(var(--app-w) * .76 / var(--ratio)),
+		calc(var(--dispo-h) * .58),
+		500px
+	);
+	--carte-w: calc(var(--carte-h) * var(--ratio));
+	// Décalage vertical d'une carte à la suivante.
+	--etalement: max(12px, min(calc((var(--dispo-h) - var(--carte-h)) / 5), calc(var(--carte-h) * .12)));
+	// Hauteur occupée par l'étalement, sous la carte du dessus (cinq cartes en dessous).
+	--pile: calc(var(--etalement) * 5);
+	--rayon: clamp(12px, calc(var(--carte-w) * .055), 26px);
+	// Marge de papier du bord des dos. En longueur absolue : un pourcentage n'est pas admis
+	// dans l'étalement d'une ombre, et rendrait toute la déclaration invalide.
+	--marge: clamp(7px, calc(var(--carte-w) * .038), 16px);
+	position: relative;
+	width: var(--carte-w);
+	height: var(--carte-h);
+	// La pile descend sous la carte du dessus : cette marge la remet au centre de l'écran.
+	margin-bottom: var(--pile);
+	/*
+	 * Volontairement plat (transform-style par défaut) : chaque carte porte sa propre perspective.
+	 * Dans un espace 3D partagé, la carte qui tourne couperait le plan des cartes posées à plat,
+	 * et le navigateur découperait les polygones sur la ligne d'intersection — une couture bien
+	 * visible au milieu de la carte, sur l'axe même du retournement.
+	 */
+
+}
+
+/*
+ * Les quatre couleurs de dos, pour les cartes de la scène comme pour les vignettes du menu
+ * (styles/_menu.scss). Elles sont posées sur chaque carte et non sur le paquet : le réglage
+ * « mix » en donne une différente à chaque carte (stage/paquet.ts, logic/settings.ts).
+ *   --dos-clair / --dos-fonce  le fond, du haut vers le bas ;
+ *   --trait                    le dessin du dos (stage/dos.ts), doré sur fond sombre, encre sur blanc.
+ */
+.carte,
+.vignette {
+	--dos-clair: #23242b;
+	--dos-fonce: #0e0f13;
+	--trait: #c8a15a;
+
+	&[data-couleur="rouge"] {
+		--dos-clair: #93222a;
+		--dos-fonce: #430e13;
+		--trait: #e8ca88;
+	}
+
+	&[data-couleur="bleu"] {
+		--dos-clair: #23508f;
+		--dos-fonce: #0b1c38;
+		--trait: #ddc88c;
+	}
+
+	// Un dos clair : le dessin passe à l'encre, sans quoi l'or disparaîtrait.
+	&[data-couleur="blanc"] {
+		--dos-clair: #f4eee2;
+		--dos-fonce: #d9d0bc;
+		--trait: #2f3442;
+	}
+}
+
+.carte {
+	/*
+	 * Où la carte est posée, et à quel rang du paquet. Les quatre valeurs sont écrites une fois
+	 * pour toutes par stage/paquet.ts, d'après l'étalement tiré au sort (logic/etalement.ts) :
+	 *   --dy    descente, en nombre de crans (0 pour la première carte) ;
+	 *   --dx    décalage latéral, en pixels ;
+	 *   --rot   inclinaison, en degrés ;
+	 *   --rang  place dans le paquet, pour l'ordre d'empilement.
+	 *
+	 * Elles ne dépendent pas du nombre de cartes déjà sorties : une carte posée là y reste, et
+	 * quand celle du dessus s'envole, les autres ne remontent pas.
+	 */
+	--dy: 0;
+	--dx: 0;
+	--rot: 0;
+	--rang: 0;
+	// Échelle du texte de la prédiction, calculée par stage/paquet.ts pour remplir la carte.
+	// Elle se pose ici, sur la carte : redéclarée plus bas, elle écraserait la valeur calculée.
+	--fit: 1;
+	@include cover;
+	z-index: calc(100 - var(--rang));
+	// La carte tourne autour de son propre centre : la perspective est posée ici, et nulle part
+	// plus haut, pour qu'aucune carte ne partage d'espace 3D avec une autre.
+	perspective: 1200px;
+	// Les cartes du dessous descendent, s'inclinent et rapetissent : un paquet étalé à la main.
+	transform:
+		translate(calc(var(--dx) * 1px), calc(var(--dy) * var(--etalement)))
+		rotate(calc(var(--rot) * 1deg))
+		scale(calc(1 - var(--dy) * .012));
+	transition: transform .5s cubic-bezier(.22, .61, .36, 1), opacity .4s ease;
+}
+
+/*
+ * Sortie du cadre : la carte part vers le haut, en tournant, et disparaît. Elle passe par-dessus
+ * tout le paquet le temps de son vol.
+ *
+ * Le vol part de la place où la carte était posée, et la remonte d'une hauteur d'écran plus une
+ * hauteur de carte : d'où qu'elle parte, même du bas de l'étalement, elle finit hors du cadre.
+ */
+.carte.sortie {
+	z-index: 200;
+	opacity: 0;
+	transform:
+		translate(
+			calc(var(--dx) * 1px - 26%),
+			calc(var(--dy) * var(--etalement) - var(--app-h) - var(--carte-h) - 20px)
+		)
+		rotate(calc(var(--rot) * 1deg - 17deg))
+		scale(calc(1 - var(--dy) * .012));
+	transition: transform .65s cubic-bezier(.45, 0, .75, .5), opacity .35s ease .34s;
+}
+
+.carte-pivot {
+	@include cover;
+	transform-style: preserve-3d;
+	transition: transform .62s cubic-bezier(.4, .02, .2, 1);
+}
+
+.carte.retournee .carte-pivot {
+	transform: rotateY(180deg);
+}
+
+.carte-face {
+	@include cover;
+	@include backface-hidden;
+	border-radius: var(--rayon);
+	overflow: hidden;
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, .5),
+		0 18px 36px rgba(0, 0, 0, .45);
+}
+
+/* ---------- Le dos ---------- */
+
+.dos {
+	background: linear-gradient(155deg, var(--dos-clair), var(--dos-fonce));
+	// La marge de papier du bord, puis un filet sombre juste à l'intérieur : les ombres se
+	// peignent dans l'ordre, la première par-dessus les suivantes.
+	box-shadow:
+		inset 0 0 0 var(--marge) $papier,
+		inset 0 0 0 calc(var(--marge) + 1px) rgba(0, 0, 0, .3),
+		0 1px 2px rgba(0, 0, 0, .5),
+		0 18px 36px rgba(0, 0, 0, .45);
+	// Le motif est dessiné en SVG (stage/dos.ts) : il prend cette couleur.
+	color: var(--trait);
+}
+
+/**
+ * Le motif du dos, dessiné à l'intérieur de la marge de papier. Il occupe exactement la place
+ * qu'il lui reste, quelle que soit la taille de la carte (le SVG s'étire avec elle).
+ */
+.dos-motif {
+	position: absolute;
+	inset: calc(var(--marge, 3px) + 1px);
+	display: block;
+	width: auto;
+	height: auto;
+}
+
+/* ---------- L'avant : la prédiction ---------- */
+
+.avant {
+	display: grid;
+	// Une colonne qui ne dépasse jamais la carte : sans « minmax(0, 1fr) », la grille s'élargit
+	// au texte le plus large, et l'ajustement (stage/paquet.ts) ne voit plus aucun débordement.
+	grid-template-columns: minmax(0, 1fr);
+	place-items: center;
+	// Marge serrée sur les côtés : la prédiction est ajustée à la largeur, et chaque pixel gagné
+	// ici la fait grandir d'autant. Plus d'air en haut et en bas, où elle a de la place de reste.
+	padding: clamp(14px, 7%, 34px) clamp(10px, 4.5%, 22px);
+	transform: rotateY(180deg);
+	// Papier crème, un peu plus sombre vers les bords, avec un liseré d'encre.
+	background:
+		radial-gradient(120% 90% at 50% 30%, #fbf6ea, $papier 58%, $papier-ombre 140%);
+	box-shadow:
+		inset 0 0 0 1px rgba(28, 39, 67, .16),
+		0 1px 2px rgba(0, 0, 0, .5),
+		0 18px 36px rgba(0, 0, 0, .45);
+	color: $encre;
+	text-align: center;
+}
+
+.carte-corps {
+	width: 100%;
+	position: relative;
+	z-index: 1;
+}
+
+/*
+ * Le bloc écrit : la prédiction et son soulignement. Il se serre sur le texte (largeur du contenu)
+ * pour être mesuré tel quel, et pivote d'un bloc — les mots les plus longs sont écrits le long de
+ * la diagonale de la carte (stage/paquet.ts : fit).
+ */
+.ecriture {
+	display: inline-block;
+	// --fit : échelle calculée par stage/paquet.ts pour que le bloc remplisse la carte.
+	font-size: calc(var(--fit) * 38px);
+	transform: rotate(var(--angle, 0deg));
+}
+
+// Le soulignement, juste sous les mots, étiré à leur largeur (stage/ecriture.ts).
+.soulignement {
+	display: block;
+	width: 100%;
+	height: .26em;
+	margin-top: -.03em;
+	// La même encre que les mots : c'est le même stylo qui a souligné.
+	color: inherit;
+	overflow: visible;
+
+	/*
+	 * Le trait a la grosseur des lettres. Deux précautions pour cela : l'épaisseur est donnée en
+	 * `em`, donc relative à la taille du texte, et « non-scaling-stroke » l'empêche de suivre
+	 * l'étirement du repère du dessin — sans quoi le trait s'amincirait sur les mots longs et
+	 * s'épaissirait sur les courts.
+	 */
+	path {
+		stroke-width: .075em;
+		vector-effect: non-scaling-stroke;
+	}
+}
+
+
+.entete {
+	margin: 0 0 calc(var(--fit) * 18px);
+	font: 600 calc(var(--fit) * 12px) / 1.2 $sans;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	color: rgba(28, 39, 67, .5);
+}
+
+// La prédiction elle-même, écrite à la main. Sa taille vient du bloc écrit (.ecriture).
+.prediction {
+	margin: 0;
+	/*
+	 * Une écriture penchée déborde de la case que le navigateur mesure : l'encre d'un « ! » ou
+	 * d'une majuscule inclinée sort de sa largeur d'avance, et le mot venait frôler le bord de la
+	 * carte. Cette marge entre dans la mesure de l'ajustement (stage/paquet.ts), et comme elle est
+	 * donnée en `em`, elle grandit avec le texte.
+	 */
+	padding: .06em .14em;
+	font-family: $manuscrit;
+	font-weight: 600;
+	line-height: 1.22;
+	// L'encre d'un stylo : un bleu-noir jamais tout à fait uniforme.
+	color: $encre;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+	/*
+	 * Jamais de coupure automatique : une ligne reste d'un seul tenant, et c'est le retour à la
+	 * ligne écrit dans content/cartes.ts qui décide où ça casse. L'ajustement (stage/paquet.ts)
+	 * réduit alors la taille jusqu'à ce que la plus large des lignes tienne dans la carte.
+	 */
+	white-space: nowrap;
+	hyphens: none;
+}
+
+// Au démarrage, le paquet repris apparaît directement à sa place, sans vol ni retournement.
+#paquet.no-anim {
+	.carte,
+	.carte-pivot {
+		transition: none;
+	}
+}

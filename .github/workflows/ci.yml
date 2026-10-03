@@ -50,7 +50,7 @@ jobs:
         run: npm run build
 
       # L'app compilée dans Chrome sans interface, sur un écran de téléphone simulé :
-      # le menu des tours, les liens vers les tours, le service worker de la racine et le hors-ligne.
+      # chaque routine jusqu’au retour au menu, l’écrou des réglages, la sortie de secours et le hors-ligne.
       # Google Chrome est préinstallé sur les machines ubuntu de GitHub (variable CHROME_BIN).
       # En cas d'échec, rien n'est publié.
       - name: Tests dans Chrome

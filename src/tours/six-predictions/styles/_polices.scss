@@ -1,0 +1,24 @@
+/*
+ * Caveat, l'écriture manuscrite des prédictions, embarquée avec l'app.
+ *
+ * Le fichier est servi par l'app elle-même (`public/fonts/`, donc `dist/fonts/`) : il part dans le
+ * cache hors-ligne avec le reste, la Content-Security-Policy l'autorise (`font-src 'self'`), et
+ * l'écriture est identique sur tous les appareils — sans elle, Android n'a aucune police
+ * manuscrite à proposer et retombe sur une cursive quelconque.
+ *
+ * C'est une police variable : une seule graisse déclarée de 400 à 700 couvre tout ce dont l'app a
+ * besoin. Le sous-ensemble latin suffit (lettres accentuées et apostrophe typographique comprises).
+ *
+ * Caveat, par The Caveat Project Authors, sous licence SIL Open Font License 1.1 — le texte de la
+ * licence accompagne le fichier, dans `public/fonts/OFL.txt`.
+ */
+@font-face {
+	font-family: "Caveat";
+	font-style: normal;
+	font-weight: 400 700;
+	// « block » et non « swap » : la taille du texte est calculée d'après la police (stage/paquet.ts),
+	// et un changement de police en cours de route ferait sauter la mise en page sous les yeux du
+	// public. Le fichier venant du cache, l'attente est de toute façon imperceptible.
+	font-display: block;
+	src: url("../../fonts/caveat-latin.woff2") format("woff2");
+}

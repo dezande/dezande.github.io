@@ -1,0 +1,31 @@
+// Couleurs et typographies, figées à la compilation.
+// L'échelle du texte de chaque prédiction (--fit) est calculée à l'exécution : voir stage/carte.ts.
+
+// Le tapis de jeu : un feutre vert sombre, comme une table de casino.
+$tapis: #10361f;
+$tapis-clair: #1a5130;
+$tapis-sombre: #071a0f;
+$bg: $tapis-sombre;
+$ink: #f1ede4;
+$ink-soft: rgba(241, 237, 228, .6);
+$ink-faint: rgba(241, 237, 228, .14);
+$accent: #c8a15a;
+$panel: #151518;
+
+// Les cartes : papier crème, encre bleu-noir.
+$papier: #f3ecdd;
+$papier-ombre: #ded3bd;
+$encre: #1c2743;
+
+$sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+$serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
+
+/*
+ * Écriture à la main des prédictions : Caveat, embarquée avec l'app (public/fonts/), et non
+ * téléchargée depuis un serveur de polices — l'app est hors-ligne, et sa Content-Security-Policy
+ * n'autorise que ses propres fichiers. Elle est donc la même sur tous les appareils.
+ *
+ * Les polices système suivent, au cas où le fichier manquerait : Bradley Hand et Noteworthy sur
+ * iPhone et iPad, Segoe Script et Ink Free sur Windows, la cursive du système en dernier recours.
+ */
+$manuscrit: "Caveat", "Bradley Hand", "Noteworthy", "Segoe Script", "Ink Free", cursive;
