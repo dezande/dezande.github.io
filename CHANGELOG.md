@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.6.4] | 14 | 2026-10-03 | De retour d'un tour, les tuiles répondent, appui bref ou long |
 | [0.6.3] | 13 | 2026-10-03 | Un appui long sur un bouton du menu agit aussi |
 | [0.6.2] | 12 | 2026-10-03 | De retour au menu, les tuiles répondent tout de suite |
 | [0.6.1] | 11 | 2026-10-03 | Le « 5 » et le « î » redessinés dans la police du menu |
@@ -21,6 +22,14 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.6.4] — 2026-10-03
+
+14 commits
+
+- **De retour d'un tour, les tuiles répondent enfin, appui bref ou long.** Observé sur le téléphone (Nothing Phone, Chrome, débogage sans fil) : après la fermeture d'un tour, le menu ne reçoit plus, pendant un moment, les événements « pointer » du doigt — seulement les événements tactiles et le clic, et pas de clic après un appui long. La version 0.6.3 s'appuyait justement sur les événements « pointer » et ignorait le clic : la tuile s'enfonçait sans rien ouvrir. Les boutons du menu suivent maintenant le doigt par les événements tactiles, qui arrivent toujours, et agissent quand il se relève ; le clic reste un secours, pour un appui commencé sur le bouton. La souris, le clavier et la télécommande fonctionnent comme avant.
+- Le doigt de l'appui de 3 s qui quitte un tour ne relance toujours rien en se relevant sur le menu : il ne s'est pas posé sur le bouton.
+- Test dans Chrome : sans aucun événement « pointer » et sans clic après un appui long, comme sur le téléphone, un toucher bref et un appui long ouvrent la tuile. Il échoue avec la version 0.6.3.
 
 ## [0.6.3] — 2026-10-03
 
@@ -148,6 +157,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.6.4]: https://github.com/dezande/mes-tours/releases/tag/v0.6.4
 [0.6.3]: https://github.com/dezande/mes-tours/releases/tag/v0.6.3
 [0.6.2]: https://github.com/dezande/mes-tours/releases/tag/v0.6.2
 [0.6.1]: https://github.com/dezande/mes-tours/releases/tag/v0.6.1

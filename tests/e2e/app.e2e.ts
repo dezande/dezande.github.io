@@ -237,6 +237,27 @@ test('un appui long sur une tuile ou un écrou ⚙ agit aussi, au lever du doigt
 	});
 });
 
+test('sans événements « pointer », comme sur Android au retour d’un tour, les tuiles répondent', TIMEOUT, async () => {
+	// Observé sur le téléphone : de retour d'un tour, le menu ne reçoit plus de pointerdown ni de
+	// pointerup pour le doigt, seulement les événements tactiles — et pas de clic après un appui long.
+	await withApp(async (page) => {
+		await page.evaluate(`for (const t of ['pointerdown', 'pointerup', 'pointermove']) window.addEventListener(t, (e) => { if (e.pointerType === 'touch') e.stopImmediatePropagation(); }, true);
+			document.addEventListener('click', (e) => { if (e.detail > 0 && performance.now() - (window.__debut ?? 0) > 400) e.stopImmediatePropagation(); }, true);
+			window.addEventListener('touchstart', () => { window.__debut = performance.now(); }, true);`);
+		const centre = async (selecteur: string) => page.evaluate<Point>(`(() => { const r = document.querySelector('${selecteur}').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+		// Un toucher bref.
+		await page.tap(await centre('#tours .tour[data-dossier="pile-ou-face"] .tour-lancer'));
+		await page.waitFor(`!document.querySelector('#scene').hidden`, 'toucher bref sans pointer', 2000);
+		await page.evaluate(`history.back()`);
+		await attendreLeMenu(page);
+		// Un appui long.
+		await page.touchStart(await centre('#tours .tour[data-dossier="six-predictions"] .tour-lancer'));
+		await sleep(1500);
+		await page.touchEnd();
+		await page.waitFor(`!document.querySelector('#scene').hidden`, 'appui long sans pointer ni clic', 2000);
+	});
+});
+
 test('un doigt qui glisse hors du bouton ne déclenche rien', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		const r = await page.evaluate<{ x: number; y: number; bas: number }>(`(() => { const r = document.querySelector('#tours .tour[data-dossier="pile-ou-face"] .tour-lancer').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, bas: r.bottom }; })()`);
