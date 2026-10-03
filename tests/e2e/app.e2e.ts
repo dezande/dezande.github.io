@@ -214,6 +214,42 @@ test('de retour au menu, une tuile répond au premier toucher, tout de suite', T
 	});
 });
 
+test('un appui long sur une tuile ou un écrou ⚙ agit aussi, au lever du doigt', TIMEOUT, async () => {
+	// Sur Android, un doigt qui reste posé ne produit pas de clic : le bouton s'enfonçait sans agir.
+	// Chrome sur ordinateur, lui, envoie le clic quand même : on le supprime pour faire comme Android
+	// (les clics du clavier, sans doigt, passent toujours).
+	await withApp(async (page) => {
+		await page.evaluate(`document.addEventListener('click', (e) => { if (e.detail > 0) e.stopImmediatePropagation(); }, true)`);
+		const centre = async (selecteur: string) => page.evaluate<Point>(`(() => { const r = document.querySelector('${selecteur}').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+		for (const selecteur of ['#tours .tour[data-dossier="six-predictions"] .tour-lancer', '#tours .tour[data-dossier="pile-ou-face"] .tour-reglages']) {
+			await page.touchStart(await centre(selecteur));
+			await sleep(1500);
+			await page.touchEnd();
+			await page.waitFor(`!document.querySelector('#scene').hidden`, `appui long sur ${selecteur}`, 2000);
+			await page.evaluate(`history.back()`);
+			await attendreLeMenu(page);
+		}
+		// Le choix de la langue aussi.
+		await page.touchStart(await centre('#langues button[data-langue="en"]'));
+		await sleep(1500);
+		await page.touchEnd();
+		await page.waitFor(`document.documentElement.lang === 'en'`, 'appui long sur EN', 2000);
+	});
+});
+
+test('un doigt qui glisse hors du bouton ne déclenche rien', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		const r = await page.evaluate<{ x: number; y: number; bas: number }>(`(() => { const r = document.querySelector('#tours .tour[data-dossier="pile-ou-face"] .tour-lancer').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, bas: r.bottom }; })()`);
+		await page.touchStart({ x: r.x, y: r.y });
+		await sleep(300);
+		await page.touchMove({ x: r.x, y: r.bas + 60 });
+		await sleep(200);
+		await page.touchEnd();
+		await sleep(600);
+		assert.equal(await page.evaluate<boolean>(AU_MENU), true, 'le doigt glissé hors de la tuile a ouvert le tour');
+	});
+});
+
 test('l’historique ne grandit pas d’un tour à l’autre', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		const depart = await page.evaluate<number>(`history.length`);

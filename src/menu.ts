@@ -17,6 +17,7 @@ import { $ } from './kit/web/dom.ts';
 import { langue, onLangue, setLangue } from './langue.ts';
 import { dessinPixel } from './pixel.ts';
 import { ouvrir } from './scene.ts';
+import { surToucher } from './toucher.ts';
 import { APP_VERSION } from './version.ts';
 
 const liste = $('#tours');
@@ -30,7 +31,7 @@ for (const choix of LANGUES) {
 	bouton.setAttribute('role', 'radio');
 	bouton.dataset.langue = choix;
 	bouton.textContent = choix.toUpperCase();
-	bouton.addEventListener('click', () => setLangue(choix));
+	surToucher(bouton, () => setLangue(choix));
 }
 
 /* ---------- Les tuiles ---------- */
@@ -65,7 +66,7 @@ function construire(): void {
 		const description = texte.appendChild(document.createElement('span'));
 		description.className = 'tour-description';
 		description.textContent = tour.description[lang];
-		lancer.addEventListener('click', () => ouvrir(tour.dossier, nomDuTour, lang));
+		surToucher(lancer, () => ouvrir(tour.dossier, nomDuTour, lang));
 
 		const reglages = tuile.appendChild(document.createElement('button'));
 		reglages.type = 'button';
@@ -73,7 +74,7 @@ function construire(): void {
 		const titreReglages = `${TEXTES.reglagesDe[lang]}${nomDuTour}`;
 		reglages.setAttribute('aria-label', titreReglages);
 		reglages.appendChild(dessinPixel(ECROU, 'ecrou'));
-		reglages.addEventListener('click', () => ouvrir(tour.dossier, titreReglages, lang, true));
+		surToucher(reglages, () => ouvrir(tour.dossier, titreReglages, lang, true));
 	}
 
 	$('#version').textContent = `${TEXTES.version[lang]} ${APP_VERSION} — build ${BUILD.version} (${BUILD.commit})`;

@@ -28,19 +28,8 @@ export const enReglages = parametres.has('reglages');
 /** La langue choisie dans le menu principal (bouton FR / EN), ou null si le tour est ouvert seul. */
 export const langueDemandee: 'fr' | 'en' | null = ((valeur) => (valeur === 'fr' || valeur === 'en' ? valeur : null))(parametres.get('lang'));
 
-/*
- * Les doigts posés sur l'écran du tour. Quand le tour rend la main pendant qu'un doigt est encore
- * posé (l'appui de 3 s), le menu doit ignorer ce doigt quand il se relève ; sinon, il répond tout
- * de suite (src/scene.ts).
- */
-const doigts = new Set<number>();
-document.addEventListener('pointerdown', (event) => doigts.add(event.pointerId), true);
-for (const fin of ['pointerup', 'pointercancel'] as const) {
-	document.addEventListener(fin, (event) => doigts.delete(event.pointerId), true);
-}
-
 function envoyer(message: MessageTour): void {
-	if (window.parent !== window) window.parent.postMessage({ mesTours: message, doigtPose: doigts.size > 0 }, location.origin);
+	if (window.parent !== window) window.parent.postMessage({ mesTours: message }, location.origin);
 	else location.href = '../../';
 }
 
