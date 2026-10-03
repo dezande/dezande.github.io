@@ -10,11 +10,22 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.4.0] | 8 | 2026-10-03 | Un bouton FR / EN dans le menu, pour le menu et tous les tours |
 | [0.3.0] | 7 | 2026-10-03 | Le menu principal en pixel art, façon console 8 bits |
 | [0.2.0] | 6 | 2026-10-03 | Tous les tours dans une seule application, un écrou ⚙ par tour, à sa nouvelle adresse |
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.4.0] — 2026-10-03
+
+8 commits
+
+- **Un bouton FR / EN dans le menu principal**, sous le titre, en pixel art comme le reste. Il change aussitôt la langue du menu — noms et descriptions des tours, « Choisis un tour » / « Pick a trick », étiquettes des écrous — et elle est gardée d'une ouverture à l'autre. À la toute première ouverture, l'app suit la langue du téléphone.
+- **La langue du menu vaut pour tous les tours.** Chaque tour s'ouvre dans la langue choisie : Pile ou face écrit « 0.20 euro / tails » en anglais, les six prédictions et l'analyseur passent en anglais avec leurs menus.
+- **Plus de choix de langue dans les tours** : il disparaît des réglages de Pile ou face et des six prédictions, et les petits boutons FR / EN de la première slide de l'analyseur aussi. On ne choisit la langue qu'à un endroit.
+- La boule de cristal n'a qu'une interface en français ; ce qu'elle montre au public, un nombre, ne dépend pas de la langue.
+- Tests dans Chrome : le menu qui change de langue et s'en souvient, les tours qui suivent (en anglais puis de retour en français), et l'absence de tout autre choix de langue.
 
 ## [0.3.0] — 2026-10-03
 
@@ -79,6 +90,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.4.0]: https://github.com/dezande/mes-tours/releases/tag/v0.4.0
 [0.3.0]: https://github.com/dezande/mes-tours/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dezande/mes-tours/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dezande/mes-tours/releases/tag/v0.1.0

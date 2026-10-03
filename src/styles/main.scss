@@ -80,6 +80,48 @@ h1 {
 	text-shadow: $px $px 0 $rouge;
 }
 
+/*
+ * Un cadre pixel : quatre ombres sans flou, une par côté, qui laissent les coins vides — les coins
+ * crénelés des boutons des vieux jeux. Une cinquième, sous le bouton, lui donne son relief.
+ */
+@mixin cadre($couleur) {
+	box-shadow:
+		0 (-$px) 0 0 $couleur,
+		0 $px 0 0 $couleur,
+		(-$px) 0 0 0 $couleur,
+		$px 0 0 0 $couleur,
+		0 ($px * 2) 0 0 $nuit;
+}
+
+// Le bouton FR / EN : deux petites touches pixel, la langue choisie en or.
+#langues {
+	display: flex;
+	gap: 14px;
+	margin-top: 22px;
+
+	button {
+		min-width: 52px;
+		padding: 8px 10px;
+		border: 0;
+		border-radius: 0;
+		background: $ardoise;
+		color: $gris;
+		font: 400 10px/1 $pixel;
+		cursor: pointer;
+		@include cadre($gris);
+
+		&[aria-checked="true"] {
+			background: $bleu;
+			color: $or;
+			@include cadre($or);
+		}
+
+		&:active {
+			transform: translateY($px);
+		}
+	}
+}
+
 // « Choisis un tour » clignote, en tout ou rien, comme l'écran titre d'un jeu.
 .invite {
 	margin: 18px 0 26px;
@@ -116,18 +158,6 @@ h1 {
 	gap: 18px;
 }
 
-/*
- * Un cadre pixel : quatre ombres sans flou, une par côté, qui laissent les coins vides — les coins
- * crénelés des boutons des vieux jeux. Une cinquième, sous le bouton, lui donne son relief.
- */
-@mixin cadre($couleur) {
-	box-shadow:
-		0 (-$px) 0 0 $couleur,
-		0 $px 0 0 $couleur,
-		(-$px) 0 0 0 $couleur,
-		$px 0 0 0 $couleur,
-		0 ($px * 2) 0 0 $nuit;
-}
 
 .tour-lancer,
 .tour-reglages {

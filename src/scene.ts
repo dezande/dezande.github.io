@@ -12,6 +12,7 @@
  */
 
 import { $ } from './kit/web/dom.ts';
+import type { Langue } from './content/textes.ts';
 import type { MessageTour } from './tours/pont.ts';
 
 const scene = $('#scene');
@@ -21,15 +22,15 @@ let cadre: HTMLIFrameElement | null = null;
 export const tourOuvert = (): boolean => cadre !== null;
 
 /**
- * Ouvre le tour `dossier` en plein écran. `reglages` : seulement ses réglages (écrou ⚙), que
- * l'on ferme pour revenir au menu.
+ * Ouvre le tour `dossier` en plein écran, dans la langue `lang` du menu (bouton FR / EN).
+ * `reglages` : seulement ses réglages (écrou ⚙), que l'on ferme pour revenir au menu.
  */
-export function ouvrir(dossier: string, nom: string, reglages = false): void {
+export function ouvrir(dossier: string, nom: string, lang: Langue, reglages = false): void {
 	fermer();
 	cadre = document.createElement('iframe');
 	cadre.title = nom;
 	// index.html et non le dossier : c'est sous ce nom que le service worker met la page en cache.
-	cadre.src = `tours/${dossier}/index.html${reglages ? '?reglages' : ''}`;
+	cadre.src = `tours/${dossier}/index.html?lang=${lang}${reglages ? '&reglages' : ''}`;
 	// Écran allumé (API Screen Wake Lock, ou vidéo muette lue sans geste) depuis le cadre.
 	cadre.allow = 'screen-wake-lock; autoplay; fullscreen';
 	// Le clavier et la télécommande parlent au tour, pas au menu.

@@ -8,14 +8,22 @@
  * `enReglages` dit si le tour a été ouvert par l'écrou ⚙ du menu principal : il ne montre alors
  * que son panneau de réglages, et le fermer ramène au menu.
  *
+ * `langueDemandee` est la langue choisie par le bouton FR / EN du menu principal : elle vaut pour
+ * tous les tours, qui n'ont plus de choix de langue à eux.
+ *
  * Un tour ouvert seul, hors du cadre (adresse tapée à la main), revient à la racine de l'app.
  */
 
 /** Ce qu'un tour peut dire à l'app. */
 export type MessageTour = 'fin' | 'quitter';
 
+const parametres = new URLSearchParams(location.search);
+
 /** Le tour a été ouvert par l'écrou ⚙ : seulement ses réglages. */
-export const enReglages = new URLSearchParams(location.search).has('reglages');
+export const enReglages = parametres.has('reglages');
+
+/** La langue choisie dans le menu principal (bouton FR / EN), ou null si le tour est ouvert seul. */
+export const langueDemandee: 'fr' | 'en' | null = ((valeur) => (valeur === 'fr' || valeur === 'en' ? valeur : null))(parametres.get('lang'));
 
 function envoyer(message: MessageTour): void {
 	if (window.parent !== window) window.parent.postMessage({ mesTours: message }, location.origin);

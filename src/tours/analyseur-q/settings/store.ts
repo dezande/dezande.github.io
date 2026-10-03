@@ -10,6 +10,7 @@
  */
 
 import { readStored, writeStored } from '../../../kit/web/storage.ts';
+import { langueDemandee } from '../../pont.ts';
 import { deviceLang } from '../logic/i18n.ts';
 import { sanitizeSettings, type Settings } from '../logic/settings.ts';
 
@@ -23,13 +24,14 @@ const LEGACY_SETTINGS_KEY = 'rain-man:settings:v1';
  * anglais, français sinon). Le choix fait dans l'app est ensuite enregistré comme les autres
  * réglages, et « Rétablir les réglages par défaut » revient à la langue du téléphone.
  */
-const DEFAULT_LANG = deviceLang(navigator.languages);
+// Dans « Mes tours », la langue est celle du bouton FR / EN du menu principal, pour tous les tours.
+const DEFAULT_LANG = langueDemandee ?? deviceLang(navigator.languages);
 
 /**
  * Réglages en cours. Les autres modules lisent ce binding (toujours à jour) et peuvent modifier
  * ses champs, puis appellent storeSettings() pour valider et enregistrer.
  */
-export let settings: Settings = sanitizeSettings(readStored(SETTINGS_KEY, LEGACY_SETTINGS_KEY), DEFAULT_LANG);
+export let settings: Settings = { ...sanitizeSettings(readStored(SETTINGS_KEY, LEGACY_SETTINGS_KEY), DEFAULT_LANG), ...(langueDemandee ? { langue: langueDemandee } : {}) };
 
 /** Valide et enregistre les réglages. Avec `null` : rétablit les réglages par défaut. */
 export function storeSettings(next: unknown = settings): void {
