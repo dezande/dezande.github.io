@@ -10,7 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
-| [1.0.0] | 24 | 2026-10-03 | L'app réécrite en React, styles et images regroupés, tests avec Jest |
+| [1.0.0] | 25 | 2026-10-03 | L'app réécrite en React, styles et images regroupés, tests avec Jest |
 | [0.10.0] | 22 | 2026-10-03 | La carte de visite, nouveau tour en largeur ; dans le navigateur, le menu dit que c'est une app |
 | [0.9.0] | 20 | 2026-10-03 | À la fin de la routine, on reste dans le tour ; l'appui de 3 s ramène au menu |
 | [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
@@ -33,7 +33,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ## [1.0.0] — 2026-10-03
 
-24 commits
+25 commits
 
 - **L'app est réécrite en React**, construite par Vite, comme une app classique, avant d'y ajouter d'autres tours ; la carte de visite et le bandeau d'installation de la 0.10.0 compris. Pour l'artiste, rien ne change : les mêmes tours, les mêmes gestes, les mêmes réglages (gardés sur le téléphone).
   - Une seule page : le menu et chaque tour sont des pages React (`#/`, `#/tours/<dossier>`), un tour chargé à sa première ouverture. Le menu, le panneau de réglages, la jauge de l'appui long, les boutons qui agissent au lever du doigt et les dos de cartes sont des composants partagés.
@@ -48,6 +48,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
   - le panneau de réglages porte lui-même les aides à la répétition et « Rétablir les réglages par défaut » ; le choix illustré des dos de cartes est commun aux deux tours à cartes ;
   - les styles des briques deviennent des mixins (`src/styles/components/`) : la feuille compilée est identique, règle pour règle ;
   - la vérification des types refuse désormais le code inutilisé.
+- **Des adresses strictes.** Seule l'adresse exacte d'un tour publié l'ouvre (`#/tours/<dossier>`, avec `?reglages` pour ses réglages seuls) ; un nom inventé ou hérité de JavaScript (« constructor »), une majuscule, un « / » final ou un paramètre inconnu ramènent au menu. Le registre des tours et leur liste doivent nommer les mêmes tours : un tour en préparation n'est ni compilé ni publié.
 - Test dans Chrome : la police du menu, qui arrive du cache hors-ligne de façon asynchrone, est attendue au lieu d'être vérifiée à l'instant (le test échouait parfois).
 
 ## [0.10.0] — 2026-10-03

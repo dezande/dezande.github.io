@@ -49,6 +49,8 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 L'adresse après le « # » ne change pas la page demandée au serveur : le service worker n'a qu'une page à servir, et chaque tour s'ouvre hors-ligne.
 
+**Les adresses sont strictes** : une route exacte par tour publié, sensible à la casse, et `?reglages` comme seul paramètre. Toute autre adresse (un nom inventé, une majuscule, un « / » final, un paramètre inconnu) ramène au menu ; `tests/composants/Adresses.test.tsx` en essaie une douzaine. Le site étant public, tout ce qui est publié peut être lu : **un tour en préparation reste hors du registre** (`src/tours/registre.ts`), et son code n'est alors pas compilé du tout. Le registre et la liste des tours doivent nommer les mêmes tours (un test le vérifie).
+
 ```
 index.html              la page de l'app (React s'y monte dans #app)
 vite.config.ts          le build
