@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.9.0] | 20 | 2026-10-03 | À la fin de la routine, on reste dans le tour ; l'appui de 3 s ramène au menu |
 | [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
 | [0.8.1] | 18 | 2026-10-03 | Les dos de cartes symétriques, de haut en bas et de gauche à droite |
 | [0.8.0] | 17 | 2026-10-03 | L'app allégée : code regroupé, icônes nettes, fiche d'installation |
@@ -27,6 +28,18 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.9.0] — 2026-10-03
+
+20 commits
+
+- **À la fin de la routine, on reste dans le tour.** Le geste de fin remet le tour en place pour une nouvelle routine, comme dans les apps d'origine, au lieu de revenir au menu :
+  - **Boule de cristal** : le double toucher efface le nombre, la boule se réarme ;
+  - **Pile ou face** : le double toucher remet la carte face cachée ;
+  - **Les six prédictions** : le double toucher sur la table vide remet le paquet, faces en bas ;
+  - **Analyseur Q** : « suivante » sur la dernière slide ne fait plus rien.
+  **Seul l'appui de 3 s ramène au menu** (ou Échap / M au clavier, et le geste retour d'Android). La touche R remet le tour en place. Les aides des réglages le disent.
+- Tests dans Chrome : pour chaque tour, le geste de fin remet le tour en place sans quitter sa page, et l'appui de 3 s ramène au menu.
 
 ## [0.8.2] — 2026-10-03
 
@@ -209,6 +222,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.9.0]: https://github.com/dezande/mes-tours/releases/tag/v0.9.0
 [0.8.2]: https://github.com/dezande/mes-tours/releases/tag/v0.8.2
 [0.8.1]: https://github.com/dezande/mes-tours/releases/tag/v0.8.1
 [0.8.0]: https://github.com/dezande/mes-tours/releases/tag/v0.8.0

@@ -52,16 +52,16 @@ export const INTERFACE = {
 		en: 'With a delay, the card flips by itself once the delay set above has passed. Once the choice is made, another tap changes nothing.',
 	},
 	'aide.double': {
-		fr: 'Deux touchers rapprochés : fin de la routine, retour au menu de Mes tours.',
-		en: 'Two quick taps: end of the routine, back to the Mes tours menu.',
+		fr: 'Deux touchers rapprochés : la carte revient face cachée, prête pour un nouveau tour.',
+		en: 'Two quick taps: the card turns back face down, ready for another round.',
 	},
 	'aide.appui': {
 		fr: 'Appui de 3 s pendant le tour : on le quitte, retour au menu de Mes tours. Ces réglages s\'ouvrent par l\'écrou ⚙ du menu.',
 		en: 'Press and hold for 3 s during the routine: leave it, back to the Mes tours menu. These settings open from the ⚙ in the menu.',
 	},
 	'aide.clavier': {
-		fr: 'Clavier ou télécommande : ↑ ou Page précédente pour pile, ↓ ou Page suivante pour face, R pour finir la routine, Échap ou M pour quitter le tour.',
-		en: 'Keyboard or presenter remote: ↑ or Page Up for pile, ↓ or Page Down for face, R to end the routine, Esc or M to leave.',
+		fr: 'Clavier ou télécommande : ↑ ou Page précédente pour pile, ↓ ou Page suivante pour face, R pour remettre la carte, Échap ou M pour quitter le tour.',
+		en: 'Keyboard or presenter remote: ↑ or Page Up for pile, ↓ or Page Down for face, R to reset the card, Esc or M to leave.',
 	},
 
 	/*

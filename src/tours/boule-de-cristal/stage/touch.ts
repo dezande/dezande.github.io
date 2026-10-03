@@ -11,7 +11,7 @@ import { GestureTracker, HOLD, isMouseAfterTouch, type PointerId } from '../logi
 import { zoneIndexForPoint } from '../logic/zone-logic.ts';
 import { hideHoldRing, showHoldRing } from '../rehearsal/hold-ring.ts';
 import { flashZone } from '../rehearsal/test-mode.ts';
-import { finDeRoutine, quitter } from '../../pont.ts';
+import { quitter } from '../../pont.ts';
 import { settings, zoneCount } from '../settings/store.ts';
 import { stage } from '../system/dom.ts';
 import { arm, fadeOut, isArmed, isLocked } from './ball.ts';
@@ -60,9 +60,9 @@ function press(id: PointerId, clientX: number, clientY: number, fingers: number)
 	showHoldRing(point.x, point.y, HOLD.settingsMs);
 
 	if (action === 'reset') {
-		// Le nombre s'estompe : la routine est finie. Retour au menu principal une fois le fondu fini.
+		// Le nombre s'estompe et la boule se réarme, pour un nouveau tour. On ne quitte la boule que
+		// par l'appui de 3 s.
 		fadeOut();
-		window.setTimeout(finDeRoutine, settings.fade * 1000 + 150);
 	} else if (action === 'arm') {
 		const index = zoneIndexForPoint(point.x, point.y, stage.clientWidth, stage.clientHeight, zoneCount(settings));
 		if (index >= 0) {

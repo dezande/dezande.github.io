@@ -44,16 +44,16 @@ export const INTERFACE = {
 		en: 'Second tap: the card leaves the frame, uncovering the next one.',
 	},
 	'aide.vide': {
-		fr: 'Les six cartes sorties, l\'écran reste vide. Deux touchers rapprochés : fin de la routine, retour au menu de Mes tours.',
-		en: 'Once all six cards are gone, the screen stays empty. Two quick taps: end of the routine, back to the Mes tours menu.',
+		fr: 'Les six cartes sorties, l\'écran reste vide. Deux touchers rapprochés remettent le paquet, faces en bas.',
+		en: 'Once all six cards are gone, the screen stays empty. Two quick taps put the deck back, face down.',
 	},
 	'aide.appui': {
 		fr: 'Appui de 3 s pendant le tour : on le quitte, retour au menu de Mes tours. Ces réglages s\'ouvrent par l\'écrou ⚙ du menu.',
 		en: 'Press and hold for 3 s during the routine: leave it, back to the Mes tours menu. These settings open from the ⚙ in the menu.',
 	},
 	'aide.clavier': {
-		fr: 'Clavier ou télécommande : → espace Page suivante pour toucher la carte, R pour finir la routine, Échap ou M pour quitter le tour.',
-		en: 'Keyboard or presenter remote: → space Page Down to tap the card, R to end the routine, Esc or M to leave.',
+		fr: 'Clavier ou télécommande : → espace Page suivante pour toucher la carte, R pour remettre le paquet, Échap ou M pour quitter le tour.',
+		en: 'Keyboard or presenter remote: → space Page Down to tap the card, R to reset the deck, Esc or M to leave.',
 	},
 
 	/*

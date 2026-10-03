@@ -2,12 +2,12 @@
 
 Tous mes accessoires de scène dans **une seule application** : https://dezande.github.io/mes-tours/
 
-| Tour | Fin de la routine (retour au menu) | Copie de |
+| Tour | Fin de la routine (le tour se remet en place, on y reste) | Copie de |
 | --- | --- | --- |
-| Boule de cristal | double toucher après le nombre (une fois le fondu fini) | [boule-de-cristal](https://github.com/dezande/boule-de-cristal) |
-| Pile ou face | double toucher après la carte retournée | [pile-ou-face](https://github.com/dezande/pile-ou-face) |
-| Les six prédictions | double toucher sur la table vide | [six-predictions](https://github.com/dezande/six-predictions) |
-| Analyseur Q | « suivante » après la dernière slide | [analyseur-q](https://github.com/dezande/analyseur-q) |
+| Boule de cristal | double toucher après le nombre : il s'efface, la boule est prête pour un nouveau nombre | [boule-de-cristal](https://github.com/dezande/boule-de-cristal) |
+| Pile ou face | double toucher après la carte retournée : elle revient face cachée | [pile-ou-face](https://github.com/dezande/pile-ou-face) |
+| Les six prédictions | double toucher sur la table vide : le paquet revient, faces en bas | [six-predictions](https://github.com/dezande/six-predictions) |
+| Analyseur Q | « suivante » après la dernière slide : rien, on reste sur la dernière slide | [analyseur-q](https://github.com/dezande/analyseur-q) |
 
 ## Utilisation
 
@@ -16,16 +16,16 @@ Tous mes accessoires de scène dans **une seule application** : https://dezande.
 | **FR / EN**, sous le titre | La langue du menu **et de tous les tours** ; gardée d'une ouverture à l'autre |
 | **Toucher une tuile** (bref ou long) | Le tour s'ouvre en plein écran, prêt pour une nouvelle routine ; les boutons du menu agissent au lever du doigt |
 | **Toucher l'écrou ⚙** d'une tuile | Les réglages du tour, seuls ; la **croix** en haut à droite ramène au menu |
-| **Fin de la routine** (voir le tableau) | Retour au menu principal |
-| **Appui de 3 s** pendant un tour | Sortie de secours : retour au menu sans finir la routine |
+| **Fin de la routine** (voir le tableau) | Le tour se remet en place pour une nouvelle routine : **on reste dans le tour** |
+| **Appui de 3 s** pendant un tour | **Le seul geste qui ramène au menu**, à tout moment de la routine |
 | **Geste retour** d'Android | Retour au menu |
-| Touche **R** (télécommande) | Fin de la routine ; **Échap** ou **M** : quitter le tour |
+| Touche **R** (télécommande) | Remise en place du tour ; **Échap** ou **M** : retour au menu |
 
 **Les réglages des quatre tours ont la même structure**, chacun dans ses couleurs : une barre d'en-tête qui reste en haut quand on fait défiler — « Réglages » et, dessous, le nom du tour, avec la croix qui ferme —, puis les réglages propres au tour, les aides à la répétition (le test des zones de la boule y est), et « Rétablir les réglages par défaut ». Plus de version, d'état de l'écran, d'aide des gestes ni d'informations techniques : la version de l'app est en bas du menu principal.
 
 **La langue se choisit une fois, dans le menu principal** : les tours n'ont plus de choix de langue à eux (ni dans leurs réglages, ni sur la première slide de l'analyseur). En anglais, Pile ou face écrit « 0.20 euro / tails » et « heads ». La boule de cristal n'a qu'une interface en français ; ce qu'elle montre au public, un nombre, n'a pas de langue. À la toute première ouverture, l'app suit la langue du téléphone.
 
-Les réglages de chaque tour (dos des cartes, délai, routine de la boule…) sont gardés d'une ouverture à l'autre ; le menu du tour ne s'ouvre plus pendant la routine, seulement par l'écrou ⚙. Le doigt de l'appui de 3 s, relevé sur le menu, ne relance pas la tuile placée dessous ; après la croix ou la fin d'une routine, le menu répond au premier toucher.
+Les réglages de chaque tour (dos des cartes, délai, routine de la boule…) sont gardés d'une ouverture à l'autre ; le menu du tour ne s'ouvre plus pendant la routine, seulement par l'écrou ⚙. Le doigt de l'appui de 3 s, relevé sur le menu, ne relance pas la tuile placée dessous ; après la croix ou l'appui de 3 s, le menu répond au premier toucher.
 
 ### Installer sur le téléphone
 
@@ -40,14 +40,14 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 - **Chaque tour est une copie de son app** : son code dans `src/tours/<dossier>/`, sa page et ses images dans `public/tours/<dossier>/`, compilés dans `dist/tours/<dossier>/`. Les dépôts d'origine ne sont pas touchés, et leurs adresses (`dezande.github.io/<dossier>/`) continuent de fonctionner seules. Une correction faite dans un dépôt d'origine est à recopier ici.
 - **Chaque tour s'ouvre dans sa propre page**, à la place du menu, dans la même app installée ([`src/scene.ts`](src/scene.ts)) : ses styles, ses identifiants et ses gestes restent les siens, et il reçoit les vraies marges de l'écran (rien sous la caméra frontale). Il revient au menu par l'historique, si bien que le menu réapparaît tel qu'on l'a laissé et que l'historique ne grandit pas. Les tours s'affichaient d'abord dans un cadre (iframe) : sur Android, le fermer privait ensuite le menu et le tour rouvert des événements « pointer » du doigt (ils ne répondaient plus), et dans un cadre les marges de l'écran valent 0.
-- **Le pont** ([`src/tours/pont.ts`](src/tours/pont.ts)) : à la fin de sa routine, à l'appui de 3 s ou quand ses réglages se ferment, le tour revient au menu. Ouvert par l'écrou, il reçoit `?reglages` et n'affiche que son panneau de réglages ; il reçoit toujours `?lang=fr` ou `?lang=en`, la langue du menu, qui remplace la sienne.
-- Ce qui a changé dans les copies : le geste de fin de routine et l'appui de 3 s passent par le pont ; le menu du tour n'a plus que ses réglages (plus d'« aller à », de « remettre », de version, ni de bouton « Mes tours »), avec l'en-tête commun que remplit le pont (`remplirEntete()`, d'après `?nom=`) ; ce qui ne sert qu'au tour ouvert seul reste dans un bloc caché, pour son code ; le tour n'enregistre plus de service worker ni de manifeste à lui ; l'analyseur commence toujours à la première slide.
+- **Le pont** ([`src/tours/pont.ts`](src/tours/pont.ts)) : à l'appui de 3 s ou quand ses réglages se ferment, le tour revient au menu (`quitter()`) ; la fin de la routine, elle, remet le tour en place sans passer par le pont. Ouvert par l'écrou, il reçoit `?reglages` et n'affiche que son panneau de réglages ; il reçoit toujours `?lang=fr` ou `?lang=en`, la langue du menu, qui remplace la sienne.
+- Ce qui a changé dans les copies : l'appui de 3 s passe par le pont ; le menu du tour n'a plus que ses réglages (plus d'« aller à », de « remettre », de version, ni de bouton « Mes tours »), avec l'en-tête commun que remplit le pont (`remplirEntete()`, d'après `?nom=`) ; ce qui ne sert qu'au tour ouvert seul reste dans un bloc caché, pour son code ; le tour n'enregistre plus de service worker ni de manifeste à lui ; l'analyseur commence toujours à la première slide.
 - **Un seul service worker** (celui du kit, v1.3.1 ou plus) met tout en cache, tours compris. Une nouvelle version ne s'affiche jamais pendant un tour.
 
 ## Ajouter un tour
 
 1. Copier son `src/` (sans `kit`, `sw`, `icon`) dans `src/tours/<dossier>/` et son `public/` (sans manifeste, icônes ni polices) dans `public/tours/<dossier>/` ; faire pointer ses imports du kit vers `src/kit`.
-2. Brancher le pont : `finDeRoutine()` au geste de fin, `quitter()` à l'appui de 3 s et à la fermeture des réglages, `enReglages` pour n'ouvrir que les réglages.
+2. Brancher le pont : `quitter()` à l'appui de 3 s (le geste de fin garde sa remise en place) et à la fermeture des réglages, `enReglages` pour n'ouvrir que les réglages.
 3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), son icône en pixels (32 × 32, ajoutée à `outils/icones-16-bits.py`) dans [`src/content/pixels.ts`](src/content/pixels.ts), sa feuille de style dans le script `build` de `package.json`.
 4. Ses tests unitaires dans `tests/tours/<dossier>/`, et sa routine dans les tests dans Chrome.
 

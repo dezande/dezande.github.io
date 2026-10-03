@@ -10,7 +10,7 @@ import { keepScreenAwake } from '../../../kit/web/wake-lock.ts';
 import { GESTURE, GestureTracker } from '../logic/gestures.ts';
 import { keyAction } from '../logic/keys.ts';
 import { coteDuPoint, type Etat } from '../logic/piece.ts';
-import { finDeRoutine, quitter } from '../../pont.ts';
+import { quitter } from '../../pont.ts';
 import { closeMenu, holdReleased, isMenuOpen } from '../settings/panel.ts';
 import { settings } from '../settings/store.ts';
 import { armer, cacher, etatCourant, geste } from './carte.ts';
@@ -45,8 +45,6 @@ function applyGesture(type: 'tap' | 'double', y: number): void {
 	if (!cote) return;
 	const avant = etatCourant();
 	geste(type, cote, type === 'double' ? avantDernierTap : avant);
-	// La carte revient face cachée : la routine est finie, retour au menu principal.
-	if (avant.phase !== 'cachee' && etatCourant().phase === 'cachee') finDeRoutine();
 	if (type === 'tap') avantDernierTap = avant;
 }
 
@@ -142,11 +140,7 @@ document.addEventListener('keydown', (event) => {
 	touchedSinceShown = true;
 	void keepScreenAwake();
 	if (action === 'menu') quitter();
-	else if (action === 'cacher') {
-		const enJeu = etatCourant().phase !== 'cachee';
-		cacher();
-		if (enJeu) finDeRoutine();
-	}
+	else if (action === 'cacher') cacher();
 	else armer(action);
 });
 

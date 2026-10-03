@@ -41,8 +41,8 @@ export const INTERFACE = {
 	// Aide (gestes et touches)
 	'aide.titre': { fr: 'Gestes et touches', en: 'Gestures and keys' },
 	'aide.tapDroite': {
-		fr: 'Tap sur la droite de l\'écran, ou glisser vers la gauche : slide suivante. Après la dernière slide : fin de la routine, retour au menu de Mes tours.',
-		en: 'Tap the right of the screen, or swipe left: next slide. After the last slide: end of the routine, back to the Mes tours menu.',
+		fr: 'Tap sur la droite de l\'écran, ou glisser vers la gauche : slide suivante..',
+		en: 'Tap the right of the screen, or swipe left: next slide..',
 	},
 	'aide.tapGauche': {
 		fr: 'Tap sur le tiers gauche, ou glisser vers la droite : slide précédente.',

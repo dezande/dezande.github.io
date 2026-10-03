@@ -3,7 +3,7 @@
  * ajustement du texte à l'écran, fausse barre de chargement, note et écran noir.
  */
 
-import { finDeRoutine, langueDemandee } from '../../pont.ts';
+import { langueDemandee } from '../../pont.ts';
 import { ui } from '../content/interface.ts';
 import { SLIDES } from '../content/slides.ts';
 import { applyMove, clampIndex, counterLabel, type Move } from '../logic/deck.ts';
@@ -405,8 +405,6 @@ export function move(m: Move): void {
 	else if (m === 'next' && waitingForButton && destination(index) > index) {
 		if (buttonReady()) pressButton();
 	}
-	// « Suivante » sur la dernière slide : la routine est finie, retour au menu principal.
-	else if (m === 'next' && index === slideCount - 1) finDeRoutine();
 	else goTo(applyMove(index, m, slideCount));
 }
 
