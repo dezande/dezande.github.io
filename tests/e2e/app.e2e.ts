@@ -93,6 +93,11 @@ test('le menu montre les quatre tours, chacun avec son icône et son écrou ⚙'
 		assert.ok(tuiles.every((t) => t.icone), 'une icône ne s’affiche pas');
 		assert.deepEqual(tuiles.map((t) => t.ecrou), TOURS.map((t) => `Réglages : ${t.nom}`));
 		assert.match(await page.evaluate<string>(`document.querySelector('#version').textContent`), new RegExp(APP_VERSION.replace(/\./g, '\\.')));
+		// L'app a son propre identifiant, dans son dossier du site : pas celui de la racine.
+		assert.deepEqual(
+			await page.evaluate(`fetch('manifest.json').then((r) => r.json()).then((m) => [m.id, m.start_url, m.scope])`),
+			['/mes-tours/', './', './'],
+		);
 		const bas = await page.evaluate<number>(`Math.round(document.querySelector('#tours').getBoundingClientRect().bottom)`);
 		assert.ok(bas <= SCREEN.height, `les tuiles descendent jusqu’à ${bas} px pour un écran de ${SCREEN.height}`);
 	});
@@ -216,11 +221,11 @@ test('écrou ⚙ : un réglage changé vaut pour la routine suivante', TIMEOUT, 
 
 /* ================= Service worker et hors-ligne ================= */
 
-test('le service worker de la racine laisse se charger les anciennes adresses des tours', TIMEOUT, async () => {
+test('le service worker ne renvoie le menu que pour l’adresse de l’app, jamais pour une autre page du site', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await page.waitFor(`navigator.serviceWorker.controller`, 'service worker actif', 15_000);
 		await page.goto(`${server.url}boule-de-cristal/`);
-		assert.equal(await page.evaluate<boolean>(`Boolean(document.querySelector('#tours'))`), false, 'une ancienne adresse a reçu la page du menu');
+		assert.equal(await page.evaluate<boolean>(`Boolean(document.querySelector('#tours'))`), false, 'une autre page du site a reçu la page du menu');
 	});
 });
 

@@ -1,5 +1,5 @@
 /*
- * LES TOURS de l'app « Mes tours » : un par accessoire de scène publié sur dezande.github.io.
+ * LES TOURS de l'app « Mes tours » : un par accessoire de scène.
  *
  * Chaque tour est une copie de son app, dans src/tours/<dossier>/ (code) et public/tours/<dossier>/
  * (page et fichiers) ; ses dépôts d'origine ne sont pas touchés. Il s'ouvre en plein écran depuis

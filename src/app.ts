@@ -1,7 +1,7 @@
 /*
  * Mes tours : point d'entrée de l'app.
  *
- * Tous les accessoires de scène dans une seule app, installée à la racine de dezande.github.io.
+ * Tous les accessoires de scène dans une seule app, publiée sur https://dezande.github.io/mes-tours/.
  * Le menu principal lance chaque tour en plein écran ; l'écrou ⚙ de sa tuile ouvre ses réglages ;
  * la fin de la routine ramène au menu.
  *
