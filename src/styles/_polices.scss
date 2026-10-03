@@ -1,23 +1,21 @@
 /*
- * Caveat, l'écriture manuscrite du titre, la même que celle des prédictions, embarquée avec l'app.
+ * Press Start 2P, la police pixel du menu principal, embarquée avec l'app.
  *
  * Le fichier est servi par l'app elle-même (`public/fonts/`, donc `dist/fonts/`) : il part dans le
- * cache hors-ligne avec le reste, la Content-Security-Policy l'autorise (`font-src 'self'`), et
- * l'écriture est identique sur tous les appareils — sans elle, Android n'a aucune police
- * manuscrite à proposer et retombe sur une cursive quelconque.
+ * cache hors-ligne avec le reste, et la Content-Security-Policy l'autorise (`font-src 'self'`).
+ * Sous-ensemble latin : 5 ko, lettres accentuées comprises.
  *
- * C'est une police variable : une seule graisse déclarée de 400 à 700 couvre tout ce dont l'app a
- * besoin. Le sous-ensemble latin suffit (lettres accentuées et apostrophe typographique comprises).
+ * Press Start 2P, par The Press Start 2P Project Authors, sous licence SIL Open Font License 1.1 —
+ * le texte de la licence accompagne le fichier, dans `public/fonts/OFL-press-start-2p.txt`.
  *
- * Caveat, par The Caveat Project Authors, sous licence SIL Open Font License 1.1 — le texte de la
- * licence accompagne le fichier, dans `public/fonts/OFL.txt`.
+ * (Caveat, l'écriture des prédictions, reste dans `public/fonts/` : les tours s'en servent.)
  */
 @font-face {
-	font-family: "Caveat";
+	font-family: "Press Start 2P";
 	font-style: normal;
-	font-weight: 400 700;
-	// « block » et non « swap » : le titre ne change pas d'écriture une fois affiché. Le fichier
+	font-weight: 400;
+	// « block » et non « swap » : le menu ne change pas de police une fois affiché. Le fichier
 	// venant du cache, l'attente est de toute façon imperceptible.
 	font-display: block;
-	src: url("fonts/caveat-latin.woff2") format("woff2");
+	src: url("fonts/press-start-2p-latin.woff2") format("woff2");
 }

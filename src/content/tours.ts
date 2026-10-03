@@ -9,8 +9,8 @@
  *   nom          ce qui est écrit sur la tuile ;
  *   description  une ligne pour se souvenir de ce qu'il fait.
  *
- * L'icône de chaque tour est public/tours/<dossier>.png, copie de la sienne. Les tests
- * (tests/logic/tours.test.ts) vérifient la forme de ce fichier et la présence des icônes.
+ * L'icône de chaque tour est dessinée en pixels dans content/pixels.ts. Les tests
+ * (tests/logic/tours.test.ts) vérifient la forme de ce fichier et la présence de chaque copie.
  */
 
 export interface Tour {

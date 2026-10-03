@@ -43,7 +43,7 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 1. Copier son `src/` (sans `kit`, `sw`, `icon`) dans `src/tours/<dossier>/` et son `public/` (sans manifeste, icônes ni polices) dans `public/tours/<dossier>/` ; faire pointer ses imports du kit vers `src/kit`.
 2. Brancher le pont : `finDeRoutine()` au geste de fin, `quitter()` à l'appui de 3 s et à la fermeture des réglages, `enReglages` pour n'ouvrir que les réglages.
-3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), son icône en `public/tours/<dossier>.png`, sa feuille de style dans le script `build` de `package.json`.
+3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), son icône en pixels (16 × 16, dans la palette) dans [`src/content/pixels.ts`](src/content/pixels.ts), sa feuille de style dans le script `build` de `package.json`.
 4. Ses tests unitaires dans `tests/tours/<dossier>/`, et sa routine dans les tests dans Chrome.
 
 ## Publication et développement
@@ -62,12 +62,18 @@ npm run typecheck
 npm run check:changelog
 ```
 
+### Le menu en pixel art
+
+Le menu principal a l'allure d'une console 8 bits : palette réduite (« Sweetie 16 »), police pixel **[Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P)** embarquée avec l'app (`public/fonts/`, 5 ko, licence [SIL OFL 1.1](public/fonts/OFL-press-start-2p.txt)), cadres aux coins crénelés, ombres sans flou, et « Choisis un tour » qui clignote comme un écran titre. Les tours eux-mêmes gardent leur allure : ce que voit le public ne change pas.
+
+Les icônes des tours et l'écrou ⚙ sont des **grilles de 16 × 16 caractères**, un par pixel, dans [`src/content/pixels.ts`](src/content/pixels.ts) ; [`src/pixel.ts`](src/pixel.ts) en fait des SVG nets à toutes les tailles. L'écrou est calculé, et les tests vérifient qu'il est symétrique dans tous les sens, son trou de 4 × 4 pixels au centre exact.
+
 ### Icônes
 
-L'icône ([`src/icon/icon.svg`](src/icon/icon.svg)) assemble les icônes des quatre tours, copiées en `public/tours/<dossier>.png`. Les PNG de `public/icons/` en sont rendus avec Chrome sans interface :
+L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes en pixels des quatre tours, chacune dans son cadre ; elle est engendrée depuis `src/content/pixels.ts`. Les PNG de `public/icons/` en sont rendus avec Chrome sans interface :
 
 ```sh
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --allow-file-access-from-files \
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
 	--screenshot="public/icons/icon-512.png" --window-size=512,512 "file://$PWD/src/icon/icon.svg"
 cp public/icons/icon-512.png public/icons/icon-192.png
 sips -z 192 192 public/icons/icon-192.png

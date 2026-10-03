@@ -1,15 +1,22 @@
 // Point d'entrée : compilé en dist/style.css.
+// Le menu principal en pixel art, façon console 8 bits : palette réduite (la même que les icônes,
+// content/pixels.ts), police pixel, cadres aux coins crénelés, ombres sans flou.
 @use "polices";
 @use "../kit/styles/app";
 @use "mixins" as *;
 
-$fond: #0b0910;
-$encre: #f1ede4;
-$encre-douce: rgba(241, 237, 228, .6);
-$or: #c8a15a;
-$tuile: rgba(255, 255, 255, .05);
+$nuit: #1a1c2c;
+$ardoise: #333c57;
+$gris: #94b0c2;
+$blanc: #f4f4f4;
+$or: #ffcd75;
+$rouge: #b13e53;
+$bleu: #3b5dc9;
 $sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
-$manuscrit: "Caveat", "Bradley Hand", "Noteworthy", cursive;
+$pixel: "Press Start 2P", ui-monospace, monospace;
+
+// La taille d'un « pixel » de l'interface : cadres, ombres et décalages en sont des multiples.
+$px: 4px;
 
 *,
 *::before,
@@ -26,8 +33,8 @@ body {
 	height: 100%;
 	overflow: hidden;
 	overscroll-behavior: none;
-	background: $fond;
-	color: $encre;
+	background: $nuit;
+	color: $blanc;
 }
 
 body {
@@ -38,12 +45,17 @@ body {
 	font-family: $sans;
 }
 
-// Un rideau de velours sombre, éclairé d'en haut : la coulisse d'où partent les tours.
+// Un ciel de nuit en pixels : quelques étoiles carrées sur le bleu-noir, et de légères lignes de
+// balayage, comme sur un vieil écran.
 #app {
 	background:
-		radial-gradient(90% 55% at 50% 0%, rgba(200, 161, 90, .14), transparent 70%),
-		repeating-linear-gradient(90deg, rgba(255, 255, 255, .018) 0 2px, transparent 2px 22px),
-		$fond;
+		repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 2px, transparent 2px $px),
+		radial-gradient(circle at 12% 18%, $gris 0 2px, transparent 2px),
+		radial-gradient(circle at 84% 9%, $or 0 2px, transparent 2px),
+		radial-gradient(circle at 70% 31%, $gris 0 1px, transparent 1px),
+		radial-gradient(circle at 27% 88%, $gris 0 2px, transparent 2px),
+		radial-gradient(circle at 91% 76%, $gris 0 1px, transparent 1px),
+		$nuit;
 }
 
 #menu-principal {
@@ -52,44 +64,91 @@ body {
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	touch-action: manipulation;
-	padding: calc(var(--safe-t) + 28px) calc(var(--safe-r) + 18px) calc(var(--safe-b) + 24px) calc(var(--safe-l) + 18px);
+	padding: calc(var(--safe-t) + 32px) calc(var(--safe-r) + 20px) calc(var(--safe-b) + 24px) calc(var(--safe-l) + 20px);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	font-family: $pixel;
 }
 
 h1 {
-	margin: 0 0 22px;
-	font: 700 52px/1 $manuscrit;
+	margin: 0;
+	font: 400 26px/1.2 $pixel;
 	color: $or;
+	text-transform: uppercase;
+	// Une ombre portée sans flou, décalée d'un pixel d'écran rétro.
+	text-shadow: $px $px 0 $rouge;
+}
+
+// « Choisis un tour » clignote, en tout ou rien, comme l'écran titre d'un jeu.
+.invite {
+	margin: 18px 0 26px;
+	font-size: 10px;
+	text-transform: uppercase;
+	color: $blanc;
+	animation: clignote 1.2s steps(1, end) infinite;
+}
+
+@keyframes clignote {
+	50% {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.invite {
+		animation: none;
+	}
 }
 
 #tours {
 	width: 100%;
 	max-width: 520px;
 	display: grid;
-	gap: 12px;
+	// L'écart laisse la place aux cadres, dessinés hors de la tuile.
+	gap: 22px;
+	padding: $px;
 }
 
 .tour {
 	display: flex;
 	align-items: stretch;
-	gap: 8px;
+	gap: 18px;
 }
 
-// La tuile elle-même : toucher lance le tour.
+/*
+ * Un cadre pixel : quatre ombres sans flou, une par côté, qui laissent les coins vides — les coins
+ * crénelés des boutons des vieux jeux. Une cinquième, sous le bouton, lui donne son relief.
+ */
+@mixin cadre($couleur) {
+	box-shadow:
+		0 (-$px) 0 0 $couleur,
+		0 $px 0 0 $couleur,
+		(-$px) 0 0 0 $couleur,
+		$px 0 0 0 $couleur,
+		0 ($px * 2) 0 0 $nuit;
+}
+
 .tour-lancer,
 .tour-reglages {
-	border-radius: 18px;
-	background: $tuile;
-	border: 1px solid rgba(241, 237, 228, .1);
+	border: 0;
+	border-radius: 0;
+	background: $ardoise;
 	color: inherit;
 	font: inherit;
 	cursor: pointer;
+	@include cadre($blanc);
 
+	// Le bouton s'enfonce d'un pixel, et passe en couleurs d'action.
 	&:active {
-		background: rgba(200, 161, 90, .16);
-		border-color: $or;
+		background: $bleu;
+		transform: translateY($px);
+		@include cadre($or);
+	}
+
+	&:focus-visible {
+		outline: none;
+		@include cadre($or);
 	}
 }
 
@@ -98,55 +157,62 @@ h1 {
 	min-width: 0;
 	display: flex;
 	align-items: center;
-	gap: 16px;
+	gap: 14px;
 	min-height: 88px;
-	padding: 12px 16px;
+	padding: 12px;
 	text-align: left;
+}
 
-	img {
-		flex: none;
-		width: 64px;
-		height: 64px;
-		border-radius: 14px;
-	}
+.tour-icone {
+	flex: none;
+	width: 64px;
+	height: 64px;
+}
+
+.tour-texte {
+	display: grid;
+	gap: 8px;
+	min-width: 0;
+}
+
+.tour-nom {
+	font-size: 11px;
+	line-height: 1.5;
+	color: $or;
+	text-transform: uppercase;
+}
+
+.tour-description {
+	font-size: 8px;
+	line-height: 1.7;
+	color: $gris;
 }
 
 // L'écrou ⚙ : les réglages du tour, sans le lancer.
 .tour-reglages {
 	flex: none;
-	width: 64px;
+	width: 60px;
 	display: grid;
 	place-items: center;
 	color: $or;
 
-	svg {
-		width: 30px;
-		height: 30px;
+	&:active {
+		color: $blanc;
 	}
 }
 
-.tour-texte {
-	display: grid;
-	gap: 4px;
-	min-width: 0;
-}
-
-.tour-nom {
-	font-size: 19px;
-	font-weight: 600;
-}
-
-.tour-description {
-	font-size: 14px;
-	color: $encre-douce;
+.ecrou {
+	width: 32px;
+	height: 32px;
 }
 
 #version {
 	margin: auto 0 0;
-	padding-top: 24px;
-	font-size: 12px;
-	color: rgba(241, 237, 228, .35);
-	font-variant-numeric: tabular-nums;
+	padding-top: 28px;
+	font-size: 7px;
+	line-height: 1.6;
+	color: rgba($gris, .55);
+	text-align: center;
 }
 
 // Le tour ouvert, en plein écran par-dessus le menu (src/scene.ts).

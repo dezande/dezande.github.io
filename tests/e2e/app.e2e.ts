@@ -82,17 +82,19 @@ async function pressKey(page: Page, key: string): Promise<void> {
 
 /* ================= Le menu principal ================= */
 
-test('le menu montre les quatre tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
+test('le menu en pixel art montre les quatre tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		const tuiles = await page.evaluate<{ nom: string; icone: boolean; ecrou: string | null }[]>(`[...document.querySelectorAll('#tours .tour')].map((t) => ({
 			nom: t.querySelector('.tour-nom').textContent,
-			icone: t.querySelector('img').complete && t.querySelector('img').naturalWidth > 0,
-			ecrou: t.querySelector('.tour-reglages svg') ? t.querySelector('.tour-reglages').getAttribute('aria-label') : null,
+			icone: t.querySelectorAll('svg.tour-icone rect').length > 10,
+			ecrou: t.querySelector('.tour-reglages svg.ecrou rect') ? t.querySelector('.tour-reglages').getAttribute('aria-label') : null,
 		}))`);
 		assert.deepEqual(tuiles.map((t) => t.nom), TOURS.map((t) => t.nom));
 		assert.ok(tuiles.every((t) => t.icone), 'une icône ne s’affiche pas');
 		assert.deepEqual(tuiles.map((t) => t.ecrou), TOURS.map((t) => `Réglages : ${t.nom}`));
 		assert.match(await page.evaluate<string>(`document.querySelector('#version').textContent`), new RegExp(APP_VERSION.replace(/\./g, '\\.')));
+		// La police pixel, embarquée avec l'app, est bien chargée.
+		assert.equal(await page.evaluate<boolean>(`document.fonts.check('11px "Press Start 2P"')`), true, 'police pixel absente');
 		// L'app a son propre identifiant, dans son dossier du site : pas celui de la racine.
 		assert.deepEqual(
 			await page.evaluate(`fetch('manifest.json').then((r) => r.json()).then((m) => [m.id, m.start_url, m.scope])`),
@@ -239,6 +241,7 @@ test('hors-ligne : le menu et les tours s’ouvrent serveur arrêté', TIMEOUT, 
 			closed = true;
 			await page.reload();
 			await page.waitFor(PRET, 'menu rechargé hors-ligne', 10_000);
+			assert.equal(await page.evaluate<boolean>(`document.fonts.check('11px "Press Start 2P"')`), true, 'police pixel absente hors-ligne');
 			await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
 			await page.tap(HAUT);
 			await page.waitFor(dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'routine jouée hors-ligne', 3000);
