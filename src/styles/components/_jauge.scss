@@ -1,0 +1,75 @@
+// La jauge de l'appui long, #hold-ring (src/components/JaugeAppui.tsx) : un anneau invisible au
+// début, qui se remplit sous le doigt jusqu'au retour au menu. La même dans tous les tours, à leurs
+// couleurs.
+//
+// Posée sur la scène, elle laisse passer les touchers. Positionnée par JaugeAppui.tsx au point
+// touché : « fixed » se place dans le repère de l'app, pivotée avec elle (kit/web/orientation.ts).
+//
+// Dans un nouveau tour, une ligne dans l'un de ses partiels (chargés sous .scene-<dossier>) :
+//
+//   @use "../../components/jauge";
+//   @include jauge.jauge($prefixe: "xyz", $couleur: $accent, $piste: rgba($ink, .18));
+//
+// Paramètres :
+//   $prefixe  le préfixe des animations du tour (« xyz » donne xyz-ring-show et xyz-ring-fill) ;
+//   $couleur  le remplissage ;
+//   $piste    l'anneau vide, dessous ;
+//   $z-index  sa place dans l'empilement de la scène (30 par défaut : au-dessus de la scène, sous le menu) ;
+//   $taille   le diamètre (96px par défaut), centré sur le point touché.
+@mixin jauge($prefixe, $couleur, $piste, $z-index: 30, $taille: 96px) {
+	#hold-ring {
+		position: fixed;
+		z-index: $z-index;
+		width: $taille;
+		height: $taille;
+		margin: (-$taille * .5) 0 0 (-$taille * .5);
+		opacity: 0;
+		pointer-events: none;
+
+		svg {
+			display: block;
+			width: 100%;
+			height: 100%;
+			// Le remplissage part du haut de l'anneau.
+			transform: rotate(-90deg);
+		}
+
+		circle {
+			fill: none;
+			stroke-width: 6;
+		}
+
+		.track {
+			stroke: $piste;
+		}
+
+		// pathLength="100" : la longueur du cercle vaut 100, le remplissage se joue sur le décalage.
+		.fill {
+			stroke: $couleur;
+			stroke-linecap: round;
+			stroke-dasharray: 100;
+			stroke-dashoffset: 100;
+		}
+
+		// La durée et le délai sont posés par JaugeAppui.tsx (--ring-delay, --ring-duration).
+		&.run {
+			animation: #{$prefixe}-ring-show .2s ease var(--ring-delay) forwards;
+
+			.fill {
+				animation: #{$prefixe}-ring-fill var(--ring-duration) linear var(--ring-delay) forwards;
+			}
+		}
+	}
+
+	@keyframes #{$prefixe}-ring-show {
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes #{$prefixe}-ring-fill {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
+}

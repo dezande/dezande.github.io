@@ -1,5 +1,5 @@
 @use "tokens" as *;
-@use "mixins" as *;
+@use "../../abstracts/mixins" as *;
 
 // Autel : halo, sol, boule et socle, centrés dans la safe area.
 // Classes d'état posées par components/Boule.tsx (src/tours/boule-de-cristal/) : .stirring (nombre armé, la brume s'agite),

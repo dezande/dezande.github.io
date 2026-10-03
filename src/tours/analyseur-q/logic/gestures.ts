@@ -1,5 +1,5 @@
 /*
- * Décision de chaque geste sur la scène, sans DOM : testée sous Node (tests/logic/gestures.test.ts).
+ * Décision de chaque geste sur la scène de l'analyseur, sans DOM : testée sous Node (tests/tours/analyseur-q/gestures.test.ts).
  *
  *   tap à droite (70 % de la largeur)   → slide suivante
  *   tap à gauche (30 % de la largeur)   → slide précédente

@@ -21,12 +21,14 @@
  *     keys.ts        touches du clavier
  *     loading.ts     courbe du faux chargement
  *     settings.ts    forme et validation des réglages
- *     i18n.ts        les deux langues
  * Les styles sont dans src/styles/tours/analyseur-q/.
  */
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
-import { JaugeAppui, useJaugeAppui } from '../../components/JaugeAppui.tsx';
+import { useCallback, useRef, useState, type PointerEvent } from 'react';
+import { JaugeAppui } from '../../components/JaugeAppui.tsx';
+import { useAppuiLong } from '../../hooks/useAppuiLong.ts';
+import { useClavier } from '../../hooks/useClavier.ts';
+import { useQuandLAppSeCache } from '../../hooks/useQuandLAppSeCache.ts';
 import { useReglagesEnregistres } from '../../hooks/useReglagesEnregistres.ts';
 import { appPoint } from '../../kit/web/orientation.ts';
 import { keepScreenAwake } from '../../kit/web/wake-lock.ts';
@@ -36,7 +38,7 @@ import { Deck } from './components/Deck.tsx';
 import { Reglages } from './components/Reglages.tsx';
 import { SLIDES } from './content/slides.ts';
 import { useDiaporama } from './hooks/useDiaporama.ts';
-import { t } from './logic/i18n.ts';
+import { t } from '../../logic/i18n.ts';
 import { GESTURE, GestureTracker } from './logic/gestures.ts';
 import { keyAction } from './logic/keys.ts';
 import { sanitizeSettings } from './logic/settings.ts';
@@ -49,15 +51,9 @@ const CLE_REGLAGES = 'analyseur-q:settings:v1';
 const ANCIENNE_CLE_REGLAGES = 'rain-man:settings:v1';
 const valider = (brut: unknown) => sanitizeSettings(brut);
 
-/** La jauge n'apparaît qu'après un court instant : un tap normal ne la montre jamais. */
-const JAUGE_DELAI_MS = GESTURE.tapMaxMs;
-
 export default function AnalyseurQ() {
 	const { langue, enReglages, quitter } = usePont();
 	const [reglages, enregistrer] = useReglagesEnregistres(CLE_REGLAGES, valider, ANCIENNE_CLE_REGLAGES);
-	const { jauge, montrerJauge, cacherJauge } = useJaugeAppui();
-	const reglagesRef = useRef(reglages);
-	reglagesRef.current = reglages;
 
 	/** Nombre de doigts (ou boutons de souris) posés sur l'écran : le bouton d'une slide attend qu'ils soient levés. */
 	const doigtsPoses = useRef(0);
@@ -68,13 +64,8 @@ export default function AnalyseurQ() {
 	/* ---------- Gestes sur la scène ---------- */
 
 	const [gestures] = useState(() => new GestureTracker());
-	const holdTimer = useRef(0);
-
-	const stopHold = useCallback(() => {
-		clearTimeout(holdTimer.current);
-		holdTimer.current = 0;
-		cacherJauge();
-	}, [cacherJauge]);
+	// La jauge n'apparaît qu'après la durée d'un tap : un toucher de la routine ne la montre jamais.
+	const appui = useAppuiLong({ dureeMs: GESTURE.holdMs, delaiJaugeMs: GESTURE.tapMaxMs, jaugeVisible: reglages.showHoldRing });
 
 	// Coordonnées dans le repère de l'app, qui peut être pivotée (kit/web/orientation.ts).
 	const surAppui = (event: PointerEvent<HTMLElement>): void => {
@@ -86,7 +77,7 @@ export default function AnalyseurQ() {
 		if (event.target instanceof Element && event.target.closest('.bouton')) return;
 		const { x, y } = appPoint(event.clientX, event.clientY);
 		if (!gestures.press(event.pointerId, x, y, performance.now())) {
-			stopHold();
+			appui.arreter();
 			return;
 		}
 		const id = event.pointerId;
@@ -96,22 +87,20 @@ export default function AnalyseurQ() {
 		} catch {
 			// Contact déjà terminé.
 		}
-		if (reglagesRef.current.showHoldRing) montrerJauge(x, y, JAUGE_DELAI_MS, GESTURE.holdMs - JAUGE_DELAI_MS);
-		holdTimer.current = window.setTimeout(() => {
-			stopHold();
-			// Appui de 3 s : sortie de secours, retour au menu principal.
+		// Appui de 3 s : sortie de secours, retour au menu principal.
+		appui.commencer(x, y, () => {
 			if (gestures.holdCompleted(id)) quitter();
-		}, GESTURE.holdMs);
+		});
 	};
 
 	const surDeplacement = (event: PointerEvent<HTMLElement>): void => {
 		const { x, y } = appPoint(event.clientX, event.clientY);
-		if (gestures.move(event.pointerId, x, y)) stopHold();
+		if (gestures.move(event.pointerId, x, y)) appui.arreter();
 	};
 
 	const surRelachement = (event: PointerEvent<HTMLElement>): void => {
 		doigtsPoses.current = Math.max(0, doigtsPoses.current - 1);
-		stopHold();
+		appui.arreter();
 		const { x, y } = appPoint(event.clientX, event.clientY);
 		const tap = gestures.release(event.pointerId, x, y, performance.now(), event.currentTarget.clientWidth);
 		if (tap !== 'none') move(tap);
@@ -119,46 +108,20 @@ export default function AnalyseurQ() {
 
 	const surAnnulation = (event: PointerEvent<HTMLElement>): void => {
 		doigtsPoses.current = Math.max(0, doigtsPoses.current - 1);
-		stopHold();
+		appui.arreter();
 		gestures.cancel(event.pointerId);
 	};
 
 	/* ---------- Clavier et télécommande ---------- */
 
-	// Les touches lisent toujours le dernier diaporama, sans réinstaller l'écouteur à chaque slide.
-	const toucheRef = useRef({ move, basculerNoir });
-	toucheRef.current = { move, basculerNoir };
-
-	useEffect(() => {
-		const surTouche = (event: KeyboardEvent): void => {
-			if (event.metaKey || event.ctrlKey || event.altKey) return;
-			const action = keyAction(event.key);
-			if (!action) return;
-			// Réglages ouverts : Échap ou M les ferment, le reste ne touche pas aux slides.
-			if (enReglages && action !== 'menu') return;
-			event.preventDefault();
-			void keepScreenAwake();
-			if (action === 'menu') quitter();
-			else if (action === 'black') toucheRef.current.basculerNoir();
-			else toucheRef.current.move(action);
-		};
-		document.addEventListener('keydown', surTouche);
-		return () => document.removeEventListener('keydown', surTouche);
-	}, [enReglages, quitter]);
+	// → suivante, ← précédente, B l'écran noir ; Échap ou M : retour au menu.
+	useClavier(keyAction, (action) => (action === 'black' ? basculerNoir() : move(action)));
 
 	// App en arrière-plan : aucun geste commencé ne doit se terminer plus tard.
-	useEffect(() => {
-		const surVisibilite = (): void => {
-			doigtsPoses.current = 0;
-			stopHold();
-			gestures.reset();
-		};
-		document.addEventListener('visibilitychange', surVisibilite);
-		return () => {
-			document.removeEventListener('visibilitychange', surVisibilite);
-			clearTimeout(holdTimer.current);
-		};
-	}, [gestures, stopHold]);
+	useQuandLAppSeCache(() => {
+		doigtsPoses.current = 0;
+		gestures.reset();
+	});
 
 	/* ---------- Affichage ---------- */
 
@@ -194,7 +157,7 @@ export default function AnalyseurQ() {
 			<Cadre langue={langue} />
 			{/* Note pour l'artiste, en bas de l'écran (masquable dans les réglages). */}
 			<div id="note" hidden={!reglages.showNotes || !note}>{note}</div>
-			<JaugeAppui jauge={jauge} />
+			<JaugeAppui jauge={appui.jauge} />
 			<div id="black" hidden={!noir} />
 
 			{/* Ouvert par l'écrou ⚙ : les réglages, que l'on ferme pour revenir au menu. */}

@@ -13,7 +13,7 @@
  * fichier : deux lignes par prédiction, et rien de vide.
  */
 
-import type { Texte } from '../logic/i18n.ts';
+import type { Texte } from '../../../logic/i18n.ts';
 import type { Cote } from '../logic/piece.ts';
 
 export const PREDICTIONS: Readonly<Record<Cote, Texte>> = {

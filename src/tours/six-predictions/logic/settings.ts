@@ -5,7 +5,7 @@
  * tout passe par sanitizeSettings() avant d'être utilisé.
  */
 
-import { isLang, type Lang } from './i18n.ts';
+import { isLang, type Lang } from '../../../logic/i18n.ts';
 
 /** Les dessins de dos, tels qu'ils sont tracés (src/components/cartes/dos.ts). */
 export const DESSINS = ['deco', 'nouveau', 'pixel', 'minimal', 'pop', 'futuriste'] as const;
@@ -36,7 +36,7 @@ export const teinteDeCarte = (couleur: Couleur, index: number): Teinte =>
 	couleur === 'mix' ? TEINTES[((index % TEINTES.length) + TEINTES.length) % TEINTES.length]! : couleur;
 
 export interface Settings {
-	/** Langue des prédictions et de l'interface. */
+	/** Lang des prédictions et de l'interface. */
 	langue: Lang;
 	/** Dessin du dos des cartes, ou « mix » : un dessin différent par carte. */
 	motif: Motif;

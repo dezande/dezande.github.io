@@ -4,12 +4,15 @@
  * montre jamais. Masquable dans les réglages de chaque tour : c'est une aide à la répétition, pas un
  * élément de la scène.
  *
- * Le remplissage est une animation CSS (styles/tours/<dossier>/, #hold-ring.run), réglée par
- * --ring-delay et --ring-duration : rien à calculer à chaque image. Chaque appui remonte l'élément
- * (clé `n`), ce qui relance l'animation depuis le début.
+ * Le remplissage est une animation CSS (styles/components/_jauge.scss, #hold-ring.run), réglée
+ * par --ring-delay et --ring-duration : rien à calculer à chaque image. Chaque appui remonte
+ * l'élément (clé `n`), ce qui relance l'animation depuis le début.
  *
- *   const { jauge, montrerJauge, cacherJauge } = useJaugeAppui();
- *   <JaugeAppui jauge={jauge} />
+ * Un tour ne s'en sert pas directement : l'appui long (hooks/useAppuiLong.ts) tient la jauge, et
+ * le tour l'affiche.
+ *
+ *   const appui = useAppuiLong({ dureeMs: 3000, delaiJaugeMs: 800, jaugeVisible: reglages.showHoldRing });
+ *   <JaugeAppui jauge={appui.jauge} />
  */
 
 import { useCallback, useRef, useState, type CSSProperties } from 'react';

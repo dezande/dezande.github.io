@@ -1,5 +1,6 @@
 @use "tokens" as *;
-@use "mixins" as *;
+@use "../../abstracts/mixins" as *;
+@use "../../components/cartes";
 
 /*
  * Les six cartes, étalées de haut en bas au centre de la scène.
@@ -54,38 +55,10 @@
 
 }
 
-/*
- * Les quatre couleurs de dos, pour les cartes de la scène comme pour les vignettes du menu
- * (_menu.scss). Elles sont posées sur chaque carte et non sur le paquet : le réglage
- * « mix » en donne une différente à chaque carte (components/Paquet.tsx, logic/settings.ts).
- *   --dos-clair / --dos-fonce  le fond, du haut vers le bas ;
- *   --trait                    le dessin du dos (components/cartes/dos.ts), doré sur fond sombre, encre sur blanc.
- */
-.carte,
-.vignette {
-	--dos-clair: #23242b;
-	--dos-fonce: #0e0f13;
-	--trait: #c8a15a;
-
-	&[data-couleur="rouge"] {
-		--dos-clair: #93222a;
-		--dos-fonce: #430e13;
-		--trait: #e8ca88;
-	}
-
-	&[data-couleur="bleu"] {
-		--dos-clair: #23508f;
-		--dos-fonce: #0b1c38;
-		--trait: #ddc88c;
-	}
-
-	// Un dos clair : le dessin passe à l'encre, sans quoi l'or disparaîtrait.
-	&[data-couleur="blanc"] {
-		--dos-clair: #f4eee2;
-		--dos-fonce: #d9d0bc;
-		--trait: #2f3442;
-	}
-}
+// Les couleurs de dos, le retournement, le dos et l'avant écrit à la main (components/_cartes.scss).
+// Chaque carte a ses couleurs : le réglage « mix » en donne une différente à chaque carte
+// (components/Paquet.tsx, logic/settings.ts).
+@include cartes.cartes($marge-texte: clamp(10px, 4.5%, 22px));
 
 .carte {
 	/*
@@ -139,127 +112,11 @@
 	transition: transform .65s cubic-bezier(.45, 0, .75, .5), opacity .35s ease .34s;
 }
 
-.carte-pivot {
-	@include cover;
-	transform-style: preserve-3d;
-	transition: transform .62s cubic-bezier(.4, .02, .2, 1);
-}
-
-.carte.retournee .carte-pivot {
-	transform: rotateY(180deg);
-}
-
-.carte-face {
-	@include cover;
-	@include backface-hidden;
-	border-radius: var(--rayon);
-	overflow: hidden;
-	box-shadow:
-		0 1px 2px rgba(0, 0, 0, .5),
-		0 18px 36px rgba(0, 0, 0, .45);
-}
-
-/* ---------- Le dos ---------- */
-
-.dos {
-	background: linear-gradient(155deg, var(--dos-clair), var(--dos-fonce));
-	// La marge de papier du bord, puis un filet sombre juste à l'intérieur : les ombres se
-	// peignent dans l'ordre, la première par-dessus les suivantes.
-	box-shadow:
-		inset 0 0 0 var(--marge) $papier,
-		inset 0 0 0 calc(var(--marge) + 1px) rgba(0, 0, 0, .3),
-		0 1px 2px rgba(0, 0, 0, .5),
-		0 18px 36px rgba(0, 0, 0, .45);
-	// Le motif est dessiné en SVG (components/cartes/dos.ts) : il prend cette couleur.
-	color: var(--trait);
-}
-
-/**
- * Le motif du dos, dessiné à l'intérieur de la marge de papier. Il occupe exactement la place
- * qu'il lui reste, quelle que soit la taille de la carte (le SVG s'étire avec elle).
- */
-.dos-motif {
-	// La marge de papier, et le filet sombre d'un pixel juste à l'intérieur.
-	--retrait: calc(var(--marge, 3px) + 1px);
-	position: absolute;
-	top: var(--retrait);
-	left: var(--retrait);
-	display: block;
-	/*
-	 * La largeur ET la hauteur sont données : le dessin remplit exactement la place à l'intérieur de
-	 * la marge, la même en haut, en bas et sur les côtés. Avec une hauteur « auto », un SVG prend sa
-	 * hauteur de sa largeur et du rapport 100 × 140 de son dessin ; or, la marge de papier ôtée, la
-	 * place restante n'a plus tout à fait ce rapport : le dessin s'arrêtait avant le bas de la carte
-	 * (4 px de marge en haut, 7 en bas sur une vignette du menu). Le dessin s'étire sans se déformer
-	 * visiblement (preserveAspectRatio « none », components/cartes/dos.ts).
-	 */
-	width: calc(100% - 2 * var(--retrait));
-	height: calc(100% - 2 * var(--retrait));
-}
-
-/* ---------- L'avant : la prédiction ---------- */
-
-.avant {
-	display: grid;
-	// Une colonne qui ne dépasse jamais la carte : sans « minmax(0, 1fr) », la grille s'élargit
-	// au texte le plus large, et l'ajustement (components/Carte.tsx) ne voit plus aucun débordement.
-	grid-template-columns: minmax(0, 1fr);
-	place-items: center;
-	// Marge serrée sur les côtés : la prédiction est ajustée à la largeur, et chaque pixel gagné
-	// ici la fait grandir d'autant. Plus d'air en haut et en bas, où elle a de la place de reste.
-	padding: clamp(14px, 7%, 34px) clamp(10px, 4.5%, 22px);
-	transform: rotateY(180deg);
-	// Papier crème, un peu plus sombre vers les bords, avec un liseré d'encre.
-	background:
-		radial-gradient(120% 90% at 50% 30%, #fbf6ea, $papier 58%, $papier-ombre 140%);
-	box-shadow:
-		inset 0 0 0 1px rgba(28, 39, 67, .16),
-		0 1px 2px rgba(0, 0, 0, .5),
-		0 18px 36px rgba(0, 0, 0, .45);
-	color: $encre;
-	text-align: center;
-}
-
-.carte-corps {
-	width: 100%;
-	position: relative;
-	z-index: 1;
-}
-
-/*
- * Le bloc écrit : la prédiction et son soulignement. Il se serre sur le texte (largeur du contenu)
- * pour être mesuré tel quel, et pivote d'un bloc — les mots les plus longs sont écrits le long de
- * la diagonale de la carte (components/Carte.tsx : fit).
- */
+// Le bloc écrit pivote d'un bloc : les mots les plus longs sont écrits le long de la diagonale de
+// la carte (components/Carte.tsx : fit).
 .ecriture {
-	display: inline-block;
-	// --fit : échelle calculée par components/Carte.tsx pour que le bloc remplisse la carte.
-	font-size: calc(var(--fit) * 38px);
 	transform: rotate(var(--angle, 0deg));
 }
-
-// Le soulignement, juste sous les mots, étiré à leur largeur (components/cartes/soulignement.ts).
-.soulignement {
-	display: block;
-	width: 100%;
-	height: .26em;
-	margin-top: -.03em;
-	// La même encre que les mots : c'est le même stylo qui a souligné.
-	color: inherit;
-	overflow: visible;
-
-	/*
-	 * Le trait a la grosseur des lettres. Deux précautions pour cela : l'épaisseur est donnée en
-	 * `em`, donc relative à la taille du texte, et « non-scaling-stroke » l'empêche de suivre
-	 * l'étirement du repère du dessin — sans quoi le trait s'amincirait sur les mots longs et
-	 * s'épaissirait sur les courts.
-	 */
-	path {
-		stroke-width: .075em;
-		vector-effect: non-scaling-stroke;
-	}
-}
-
 
 .entete {
 	margin: 0 0 calc(var(--fit) * 18px);
@@ -267,31 +124,6 @@
 	letter-spacing: .18em;
 	text-transform: uppercase;
 	color: rgba(28, 39, 67, .5);
-}
-
-// La prédiction elle-même, écrite à la main. Sa taille vient du bloc écrit (.ecriture).
-.prediction {
-	margin: 0;
-	/*
-	 * Une écriture penchée déborde de la case que le navigateur mesure : l'encre d'un « ! » ou
-	 * d'une majuscule inclinée sort de sa largeur d'avance, et le mot venait frôler le bord de la
-	 * carte. Cette marge entre dans la mesure de l'ajustement (components/Carte.tsx), et comme elle est
-	 * donnée en `em`, elle grandit avec le texte.
-	 */
-	padding: .06em .14em;
-	font-family: $manuscrit;
-	font-weight: 600;
-	line-height: 1.22;
-	// L'encre d'un stylo : un bleu-noir jamais tout à fait uniforme.
-	color: $encre;
-	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
-	/*
-	 * Jamais de coupure automatique : une ligne reste d'un seul tenant, et c'est le retour à la
-	 * ligne écrit dans content/cartes.ts qui décide où ça casse. L'ajustement (components/Carte.tsx)
-	 * réduit alors la taille jusqu'à ce que la plus large des lignes tienne dans la carte.
-	 */
-	white-space: nowrap;
-	hyphens: none;
 }
 
 // À l'ouverture et à chaque remise, le paquet apparaît directement à sa place, sans vol ni retournement.

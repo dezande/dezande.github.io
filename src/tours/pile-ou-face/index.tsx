@@ -7,29 +7,27 @@
  *   appui de 3 s n'importe où, Échap ou M : retour au menu principal
  *
  * Organisation du dossier :
- *   index.tsx    ce fichier : la scène, l'état de la carte, les gestes et le clavier
+ *   index.tsx    ce fichier : la scène et l'état de la carte (gestes et clavier : src/hooks/)
  *   components/  Carte (le dos, la prédiction, le retournement), DessinPiece (la pièce de
  *                20 centimes dessinée à la main), Reglages (le panneau de l'écrou ⚙)
  *   content/     LE TEXTE : predictions.ts (pile et face) et interface.ts (les réglages)
  *   logic/       logique pure, sans DOM, testée sous Node (tests/tours/pile-ou-face/)
  *     piece.ts       l'état de la carte, et pile ou face selon la moitié touchée
- *     gestures.ts    décision de chaque geste
  *     keys.ts        touches du clavier
  *     settings.ts    forme et validation des réglages
- *     i18n.ts        les deux langues
  * Les dos de cartes sont partagés avec les six prédictions (src/components/cartes/), les styles
  * sont dans src/styles/tours/pile-ou-face/.
  */
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
-import { JaugeAppui, useJaugeAppui } from '../../components/JaugeAppui.tsx';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { JaugeAppui } from '../../components/JaugeAppui.tsx';
+import { useClavier } from '../../hooks/useClavier.ts';
+import { useGestesDoubleToucher } from '../../hooks/useGestesDoubleToucher.ts';
 import { useReglagesEnregistres } from '../../hooks/useReglagesEnregistres.ts';
-import { appPoint } from '../../kit/web/orientation.ts';
-import { keepScreenAwake } from '../../kit/web/wake-lock.ts';
+import { useSansAnimation } from '../../hooks/useSansAnimation.ts';
 import { usePont } from '../pont.tsx';
 import { annonce, Carte } from './components/Carte.tsx';
 import { Reglages } from './components/Reglages.tsx';
-import { GESTURE, GestureTracker } from './logic/gestures.ts';
 import { keyAction } from './logic/keys.ts';
 import { apresGeste, CACHEE, coteDuPoint, montrer, type Cote, type Etat } from './logic/piece.ts';
 import { sanitizeSettings } from './logic/settings.ts';
@@ -42,13 +40,9 @@ import { sanitizeSettings } from './logic/settings.ts';
 const CLE_REGLAGES = 'pile-ou-face:settings:v1';
 const valider = (brut: unknown) => sanitizeSettings(brut);
 
-/** La jauge n'apparaît qu'après un court instant : un tap normal ne la montre jamais. */
-const JAUGE_DELAI_MS = GESTURE.tapMaxMs;
-
 export default function PileOuFace() {
-	const { langue, enReglages, quitter } = usePont();
+	const { langue, enReglages } = usePont();
 	const [reglages, enregistrer] = useReglagesEnregistres(CLE_REGLAGES, valider);
-	const { jauge, montrerJauge, cacherJauge } = useJaugeAppui();
 
 	/* ---------- L'état de la carte ---------- */
 
@@ -81,130 +75,40 @@ export default function PileOuFace() {
 
 	useEffect(() => () => clearTimeout(delaiTimer.current), []);
 
-	/* ---------- Gestes sur la scène ---------- */
+	/* ---------- Gestes sur la scène, clavier ---------- */
 
-	const [gestures] = useState(() => new GestureTracker());
-	const holdTimer = useRef(0);
 	/** État de la carte avant le dernier tap : un double toucher ne compte que sur une carte déjà armée. */
 	const avantDernierTap = useRef<Etat>(CACHEE);
-
-	const stopHold = useCallback(() => {
-		clearTimeout(holdTimer.current);
-		holdTimer.current = 0;
-		cacherJauge();
-	}, [cacherJauge]);
 
 	/**
 	 * Ce qu'un geste de la scène déclenche, à la hauteur `y` (repère de l'app) :
 	 *   un tap        arme la carte, sur pile en haut de l'écran et sur face en bas ;
 	 *   un double     remet la carte face cachée, si elle était déjà armée au premier toucher.
 	 */
-	const appliquer = (type: 'tap' | 'double', y: number): void => {
+	const { scene, jauge } = useGestesDoubleToucher(reglages.showHoldRing, (geste, { y }) => {
 		// La hauteur de l'app, et non de la fenêtre : l'app peut être pivotée (kit/web/orientation.ts).
 		const cote = coteDuPoint(y, document.getElementById('app')?.clientHeight ?? window.innerHeight);
 		if (!cote) return;
 		const avant = etatRef.current;
-		changer(apresGeste(avant, type, cote, type === 'double' ? avantDernierTap.current : avant));
-		if (type === 'tap') avantDernierTap.current = avant;
-	};
+		changer(apresGeste(avant, geste, cote, geste === 'double' ? avantDernierTap.current : avant));
+		if (geste === 'tap') avantDernierTap.current = avant;
+	});
 
-	// Coordonnées dans le repère de l'app, qui peut être pivotée (kit/web/orientation.ts).
-	const surAppui = (event: PointerEvent<HTMLElement>): void => {
-		if (event.pointerType === 'mouse' && event.button !== 0) return;
-		void keepScreenAwake();
-		const { x, y } = appPoint(event.clientX, event.clientY);
-		if (!gestures.press(event.pointerId, x, y, performance.now())) {
-			stopHold();
-			return;
-		}
-		const id = event.pointerId;
-		// La souris qui sort de la scène ne perd pas son relâchement.
-		try {
-			event.currentTarget.setPointerCapture(id);
-		} catch {
-			// Contact déjà terminé.
-		}
-		if (reglagesRef.current.showHoldRing) montrerJauge(x, y, JAUGE_DELAI_MS, GESTURE.holdMs - JAUGE_DELAI_MS);
-		holdTimer.current = window.setTimeout(() => {
-			stopHold();
-			// Appui de 3 s : sortie de secours, retour au menu principal.
-			if (gestures.holdCompleted(id)) quitter();
-		}, GESTURE.holdMs);
-	};
-
-	const surDeplacement = (event: PointerEvent<HTMLElement>): void => {
-		const { x, y } = appPoint(event.clientX, event.clientY);
-		if (gestures.move(event.pointerId, x, y)) stopHold();
-	};
-
-	const surRelachement = (event: PointerEvent<HTMLElement>): void => {
-		stopHold();
-		const { x, y } = appPoint(event.clientX, event.clientY);
-		const fait = gestures.release(event.pointerId, x, y, performance.now());
-		if (fait !== 'none') appliquer(fait, y);
-	};
-
-	const surAnnulation = (event: PointerEvent<HTMLElement>): void => {
-		stopHold();
-		gestures.cancel(event.pointerId);
-	};
-
-	/* ---------- Clavier et télécommande ---------- */
-
-	useEffect(() => {
-		const surTouche = (event: KeyboardEvent): void => {
-			if (event.metaKey || event.ctrlKey || event.altKey) return;
-			const action = keyAction(event.key);
-			if (!action) return;
-			// Réglages ouverts : Échap ou M les ferment, le reste ne touche pas à la carte.
-			if (enReglages && action !== 'menu') return;
-			event.preventDefault();
-			void keepScreenAwake();
-			if (action === 'menu') quitter();
-			else if (action === 'cacher') changer(CACHEE);
-			else changer(apresGeste(etatRef.current, 'tap', action, etatRef.current));
-		};
-		document.addEventListener('keydown', surTouche);
-		return () => document.removeEventListener('keydown', surTouche);
-	}, [enReglages, quitter, changer]);
-
-	// App en arrière-plan : aucun geste commencé ne doit se terminer plus tard, et le tap qui
-	// attendait son double est oublié.
-	useEffect(() => {
-		const surVisibilite = (): void => {
-			stopHold();
-			gestures.reset();
-		};
-		document.addEventListener('visibilitychange', surVisibilite);
-		return () => {
-			document.removeEventListener('visibilitychange', surVisibilite);
-			clearTimeout(holdTimer.current);
-		};
-	}, [gestures, stopHold]);
+	// ↑ pile, ↓ face, R la carte face cachée ; Échap ou M : retour au menu.
+	useClavier(keyAction, (action) => {
+		if (action === 'cacher') changer(CACHEE);
+		else changer(apresGeste(etatRef.current, 'tap', action, etatRef.current));
+	});
 
 	/* ---------- Affichage ---------- */
 
 	// Sans transition à l'ouverture : la carte apparaît directement à sa place.
-	const [sansAnimation, setSansAnimation] = useState(true);
-	useEffect(() => {
-		let image = requestAnimationFrame(() => {
-			image = requestAnimationFrame(() => setSansAnimation(false));
-		});
-		return () => cancelAnimationFrame(image);
-	}, []);
+	const sansAnimation = useSansAnimation();
 
 	return (
 		<>
 			{/* La scène reçoit tous les touchers. */}
-			<main
-				id="stage"
-				onPointerDown={surAppui}
-				onPointerMove={surDeplacement}
-				onPointerUp={surRelachement}
-				onPointerCancel={surAnnulation}
-				// Pas de menu contextuel ni de loupe sur appui long.
-				onContextMenu={(event) => event.preventDefault()}
-			>
+			<main id="stage" {...scene}>
 				<div id="table" className={sansAnimation ? 'no-anim' : undefined}>
 					<Carte etat={etat} coteEcrit={coteEcrit} langue={langue} motif={reglages.motif} couleur={reglages.couleur} />
 				</div>

@@ -113,7 +113,7 @@ test('le menu 16 bits montre les cinq tours, chacun avec son icône et son écro
 		expect(tuiles.map((t) => t.ecrou)).toStrictEqual(TOURS.map((t) => `Réglages : ${t.nom.fr}`));
 		expect(await page.evaluate<string>(`document.querySelector('#version').textContent`)).toMatch(new RegExp(APP_VERSION.replace(/\./g, '\\.')));
 		// La police pixel, embarquée avec l'app, est bien chargée.
-		expect(await page.evaluate<boolean>(`document.fonts.check('16px "Pixelify Sans"')`), 'police pixel absente').toBe(true);
+		await attendre(page, `document.fonts.check('16px "Pixelify Sans"')`, 'police pixel absente', 3000);
 		// L'app a son propre identifiant, dans son dossier du site : pas celui de la racine.
 		expect(await page.evaluate(`fetch('manifest.json').then((r) => r.json()).then((m) => [m.id, m.start_url, m.scope])`)).toStrictEqual(['/mes-tours/', './', './']);
 		const bas = await page.evaluate<number>(`Math.round(document.querySelector('#tours').getBoundingClientRect().bottom)`);
@@ -688,7 +688,8 @@ test('hors-ligne : le menu et les tours s’ouvrent serveur arrêté', async () 
 			closed = true;
 			await page.reload();
 			await page.waitFor(PRET, 'menu rechargé hors-ligne', 10_000);
-			expect(await page.evaluate<boolean>(`document.fonts.check('16px "Pixelify Sans"')`), 'police pixel absente hors-ligne').toBe(true);
+			// La police vient du cache, de façon asynchrone : on lui laisse le temps d'arriver.
+			await attendre(page, `document.fonts.check('16px "Pixelify Sans"')`, 'police pixel absente hors-ligne', 3000);
 			await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
 			await page.tap(HAUT);
 			await attendre(page, dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'routine jouée hors-ligne', 3000);

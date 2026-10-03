@@ -5,13 +5,13 @@
  * tout passe par sanitizeSettings() avant d'être utilisé.
  */
 
-import { isLang, type Lang } from './i18n.ts';
+import { isLang, type Lang } from '../../../logic/i18n.ts';
 
 export const TRANSITIONS = ['fondu', 'glisse', 'aucune'] as const;
 export type Transition = (typeof TRANSITIONS)[number];
 
 export interface Settings {
-	/** Langue des slides et de l'interface, changée depuis la première slide. */
+	/** Lang des slides et de l'interface, changée depuis la première slide. */
 	langue: Lang;
 	/** Passage d'une slide à l'autre. */
 	transition: Transition;

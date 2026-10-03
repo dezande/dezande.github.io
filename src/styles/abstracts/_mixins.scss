@@ -1,3 +1,6 @@
+// Les mixins communs à toute l'app (menu principal et tours), avec leurs préfixes navigateur.
+
+// Remplit tout le parent positionné.
 @mixin cover {
 	position: absolute;
 	inset: 0;
@@ -6,6 +9,11 @@
 @mixin backface-hidden {
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
+}
+
+@mixin mask-image($value) {
+	-webkit-mask-image: $value;
+	mask-image: $value;
 }
 
 @mixin user-select($value) {

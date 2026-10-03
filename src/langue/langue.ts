@@ -4,24 +4,16 @@
  * comme pour tous les tours (LangueContext.tsx).
  */
 
-import { LANGUES, type Langue } from '../content/textes.ts';
+import { deviceLang, isLang, type Lang } from '../logic/i18n.ts';
 import { readStored, writeStored } from '../kit/web/storage.ts';
 
 const CLE = 'mes-tours:langue';
 
-const estLangue = (valeur: unknown): valeur is Langue => LANGUES.includes(valeur as Langue);
-
-/** Langue du téléphone : anglais s'il est en anglais, français sinon. */
-function langueDuTelephone(): Langue {
-	const premiere = (navigator.languages ?? []).map((tag) => tag.toLowerCase().split('-')[0]).find(estLangue);
-	return premiere ?? 'fr';
-}
-
-export function langueDeDepart(): Langue {
+export function langueDeDepart(): Lang {
 	const enregistree = readStored(CLE);
-	return estLangue(enregistree) ? enregistree : langueDuTelephone();
+	return isLang(enregistree) ? enregistree : deviceLang(navigator.languages);
 }
 
-export function enregistrerLangue(langue: Langue): void {
+export function enregistrerLangue(langue: Lang): void {
 	writeStored(CLE, langue);
 }

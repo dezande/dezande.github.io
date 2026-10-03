@@ -5,25 +5,25 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { Langue } from '../content/textes.ts';
+import type { Lang } from '../logic/i18n.ts';
 import { enregistrerLangue, langueDeDepart } from './langue.ts';
 
 interface ContexteLangue {
-	langue: Langue;
-	setLangue: (langue: Langue) => void;
+	langue: Lang;
+	setLangue: (langue: Lang) => void;
 }
 
 const Contexte = createContext<ContexteLangue | null>(null);
 
 export function LangueProvider({ children }: { children: ReactNode }) {
-	const [langue, setLangueEnCours] = useState<Langue>(langueDeDepart);
+	const [langue, setLangueEnCours] = useState<Lang>(langueDeDepart);
 
 	// La langue du document, pour les lecteurs d'écran.
 	useEffect(() => {
 		document.documentElement.lang = langue;
 	}, [langue]);
 
-	const setLangue = useCallback((nouvelle: Langue) => {
+	const setLangue = useCallback((nouvelle: Lang) => {
 		enregistrerLangue(nouvelle);
 		setLangueEnCours(nouvelle);
 	}, []);

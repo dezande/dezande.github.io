@@ -1,5 +1,5 @@
 @use "tokens" as *;
-@use "mixins" as *;
+@use "../../abstracts/mixins" as *;
 
 // La scène reçoit tous les gestes : le navigateur ne doit ni défiler ni zoomer.
 #stage {

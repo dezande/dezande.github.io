@@ -11,7 +11,8 @@ import { useNavigate } from 'react-router';
 import { BoutonTactile } from '../components/BoutonTactile.tsx';
 import { PixelArt } from '../components/PixelArt.tsx';
 import { ECROU, ICONES, MAIN } from '../content/pixels.ts';
-import { LANGUES, TEXTES } from '../content/textes.ts';
+import { TEXTES } from '../content/textes.ts';
+import { LANGS } from '../logic/i18n.ts';
 import { TOURS } from '../content/tours.ts';
 import { BUILD } from '../kit/web/build.ts';
 import { useLangue } from '../langue/LangueContext.tsx';
@@ -32,7 +33,7 @@ export function Menu() {
 
 			{/* La langue du menu et de tous les tours. */}
 			<div id="langues" role="radiogroup" aria-label={TEXTES.langue[langue]}>
-				{LANGUES.map((choix) => (
+				{LANGS.map((choix) => (
 					<BoutonTactile key={choix} role="radio" data-langue={choix} aria-checked={choix === langue} onAction={() => setLangue(choix)}>
 						{choix.toUpperCase()}
 					</BoutonTactile>

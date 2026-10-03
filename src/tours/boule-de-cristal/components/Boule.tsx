@@ -2,16 +2,35 @@
  * L'autel : halos, sol, la boule de cristal et son socle. Le nombre émerge de la brume.
  * Classes d'état (styles/tours/boule-de-cristal/_ball.scss) : .stirring (nombre armé, la brume
  * s'agite), .revealed (nombre affiché) et .instant (retour au repos sans transition) sur l'autel,
- * .shown sur le nombre. Les phases sont tenues par hooks/useBoule.ts.
+ * .shown sur le nombre. Les phases sont tenues par src/hooks/usePhasesZones.ts.
  */
 
-import { useLayoutEffect, useRef, type CSSProperties } from 'react';
-import { numberScale, type EtatBoule } from '../hooks/useBoule.ts';
+import type { CSSProperties } from 'react';
+import { useReposSansTransition, type EtatZones } from '../../../hooks/usePhasesZones.ts';
+import type { Settings } from '../logic/settings.ts';
 
 interface Props {
-	etat: EtatBoule;
+	etat: EtatZones;
+	reglages: Settings;
 	/** Appelé une fois l'état de repos appliqué sans transition (.instant retiré). */
 	finInstant: () => void;
+}
+
+/** Taille du nombre relative à la boule : plus il a de chiffres, plus il est petit. */
+function numberScale(value: string): number {
+	const length = Array.from(value).length;
+	return length <= 2 ? 0.42 : length === 3 ? 0.32 : length === 4 ? 0.25 : 0.2;
+}
+
+/**
+ * Durée des transitions de la brume et des halos (variable CSS --mist-t), selon la phase : montée
+ * lente pendant le délai (rien de perceptible à l'instant du toucher), apparition plus longue que
+ * le fondu réglé, disparition au rythme du fondu.
+ */
+function dureeDeLaBrume(etat: EtatZones, reglages: Settings): number {
+	if (etat.phase === 'pending') return Math.max(reglages.delay, 1);
+	if (etat.phase === 'shown') return reglages.fade * 1.6;
+	return reglages.fade;
 }
 
 /** Le socle, dessiné une fois pour toutes. */
@@ -54,16 +73,8 @@ const SOCLE = (
 	</svg>
 );
 
-export function Boule({ etat, finInstant }: Props) {
-	const autel = useRef<HTMLDivElement>(null);
-
-	// .instant coupe les transitions le temps de retirer les classes d'état : la lecture de la mise
-	// en page force le navigateur à appliquer l'état sans transition, avant de les réactiver.
-	useLayoutEffect(() => {
-		if (!etat.instant) return;
-		void autel.current?.offsetWidth;
-		finInstant();
-	}, [etat.instant, finInstant]);
+export function Boule({ etat, reglages, finInstant }: Props) {
+	const autel = useReposSansTransition<HTMLDivElement>(etat.instant, finInstant);
 
 	const classes = ['altar'];
 	if (etat.phase === 'pending') classes.push('stirring');
@@ -71,7 +82,7 @@ export function Boule({ etat, finInstant }: Props) {
 	if (etat.instant) classes.push('instant');
 
 	return (
-		<div ref={autel} className={classes.join(' ')} id="altar" style={{ '--mist-t': `${etat.mistT}s` } as CSSProperties}>
+		<div ref={autel} className={classes.join(' ')} id="altar" style={{ '--mist-t': `${dureeDeLaBrume(etat, reglages)}s` } as CSSProperties}>
 			<div className="halo"></div>
 			<div className="halo-warm"></div>
 			<div className="floor"></div>

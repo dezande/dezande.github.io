@@ -1,22 +1,8 @@
 @use "tokens" as *;
+@use "../../components/zones";
 
-// Le tour remplit #app, dans ses couleurs (la remise à zéro commune est dans styles/_base.scss).
-// Valeurs par défaut des réglages appliqués à l'exécution : --fade (sur #stage) et --dim (sur #dim).
+// Le tour remplit #app, dans ses couleurs, sous son voile de luminosité (components/_zones.scss).
 // Taille de la boule : relative à l'app (pivotée ou non, voir kit/styles/_app.scss).
-& {
-	--fade: 1.5s;
-	--dim: 0;
+@include zones.base-du-tour($fade: 1.5s, $couleur: $gold, $police: $sans) {
 	--ball: min(calc(var(--app-w) * .74), calc(var(--app-h) * .42), 520px);
-	color: $gold;
-	font-family: $sans;
-}
-
-// Voile de luminosité, piloté par --dim.
-#dim {
-	position: fixed;
-	inset: 0;
-	z-index: 20;
-	background: #000;
-	opacity: var(--dim);
-	pointer-events: none;
 }

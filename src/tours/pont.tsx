@@ -15,12 +15,12 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { Langue } from '../content/textes.ts';
+import type { Lang } from '../logic/i18n.ts';
 
 export interface Pont {
 	dossier: string;
 	nomDuTour: string;
-	langue: Langue;
+	langue: Lang;
 	enReglages: boolean;
 	quitter: () => void;
 }

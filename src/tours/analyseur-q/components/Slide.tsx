@@ -4,8 +4,9 @@
  */
 
 import { Fragment, useLayoutEffect, useRef, useState } from 'react';
+import { plusGrandeEchelle } from '../../../logic/ajustement.ts';
+import { t, type Lang } from '../../../logic/i18n.ts';
 import { counterLabel } from '../logic/deck.ts';
-import { t, type Lang } from '../logic/i18n.ts';
 import { paragraphs, type Slide as DonneesSlide } from '../logic/slides.ts';
 import { adresseDeLImage } from '../images.ts';
 import type { VueSlide } from '../hooks/useDiaporama.ts';
@@ -24,7 +25,7 @@ const FIT_MARGIN_PX = 4;
 
 /**
  * Plus grande échelle (--fit, entre MIN_FIT et 1) à laquelle le contenu tient dans la slide,
- * sans débordement en hauteur ni mot coupé en largeur. Recherche par dichotomie : il faut mesurer
+ * sans débordement en hauteur ni mot coupé en largeur (src/logic/ajustement.ts). Il faut mesurer
  * la slide à chaque essai, d'où le travail direct sur ses éléments.
  */
 function ajuster(section: HTMLElement): void {
@@ -36,14 +37,7 @@ function ajuster(section: HTMLElement): void {
 		return body.scrollHeight <= height - FIT_MARGIN_PX && body.scrollWidth <= body.clientWidth;
 	};
 	if (fits(1)) return;
-	let lo = MIN_FIT;
-	let hi = 1;
-	for (let step = 0; step < 8; step++) {
-		const mid = (lo + hi) / 2;
-		if (fits(mid)) lo = mid;
-		else hi = mid;
-	}
-	section.style.setProperty('--fit', String(lo));
+	section.style.setProperty('--fit', String(plusGrandeEchelle(fits, MIN_FIT, 1, 8)));
 }
 
 /* ---------- La slide ---------- */

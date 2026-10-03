@@ -1,5 +1,5 @@
 /*
- * Carte de visite : la routine Arcane Système, jouée téléphone tenu en largeur (hooks/usePaysage.ts).
+ * Carte de visite : la routine Arcane Système, jouée téléphone tenu en largeur.
  *
  * Sur une vieille table de bois, la carte de visite du Théâtre Robert-Houdin, le théâtre de magie de
  * Jean-Eugène Robert-Houdin (1845), au 8, boulevard des Italiens, démoli en 1924. Déroulé d'un tour :
@@ -10,222 +10,56 @@
  *   4. un double tap remet la carte sur son recto, pour le tour suivant (on reste dans le tour).
  * Appui de 3 s n'importe où, Échap ou M : retour au menu principal. R : la carte revient sur son recto.
  *
- * Les gestes sont ceux de la boule de cristal, dont ce tour est issu (l'ancienne routine Arcane
- * Système de la boule). Organisation du dossier :
- *   index.tsx    ce fichier : la scène, les gestes et le clavier
- *   components/  Carte (recto imprimé, verso à la plume), Table (la vieille table de bois),
- *                ModeTest (le test des zones), Reglages (le panneau de l'écrou ⚙)
- *   hooks/       useCarte : phases de la carte, armé, retournée, revenue sur son recto ;
- *                usePaysage : la scène pivotée en paysage
+ * Un tour à zones, issu de l'ancienne routine Arcane Système de la boule de cristal : les gestes, le
+ * clavier, les réglages, le test des zones et le paysage sont ceux de
+ * src/components/zones/TourAZones.tsx. Ce dossier n'a que ce qui est propre à la carte :
+ *   index.tsx    ce fichier : les mots de la carte, et son décor
+ *   components/  Carte (recto imprimé, verso à la plume), Table (la vieille table de bois)
  *   content/     les noms des coins
- *   logic/       logique pure, sans DOM, testée sous Node (tests/tours/carte-de-visite/)
- *     zone-logic.ts  zone touchée (4 coins)
- *     gestures.ts    décision de chaque geste : armer, effacer, appui long, annuler
- *     settings.ts    forme et validation des réglages, numéros de la routine
- *     paysage.ts     rotation qui met la scène en paysage
+ *   logic/       settings.ts : les numéros, les réglages par défaut (testés sous Node,
+ *                tests/tours/carte-de-visite/)
  * Les styles sont dans src/styles/tours/carte-de-visite/.
  */
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
-import { JaugeAppui, useJaugeAppui } from '../../components/JaugeAppui.tsx';
-import { useReglagesEnregistres } from '../../hooks/useReglagesEnregistres.ts';
-import { keepScreenAwake } from '../../kit/web/wake-lock.ts';
-import { usePont } from '../pont.tsx';
+import { TourAZones } from '../../components/zones/TourAZones.tsx';
 import { Carte } from './components/Carte.tsx';
-import { ModeTest, type Eclair } from './components/ModeTest.tsx';
-import { Reglages } from './components/Reglages.tsx';
 import { Table } from './components/Table.tsx';
-import { isArmed, isLocked, useCarte } from './hooks/useCarte.ts';
-import { usePaysage } from './hooks/usePaysage.ts';
-import { DOUBLE_TAP, GestureTracker, HOLD, type PointerId } from './logic/gestures.ts';
-import { sanitizeSettings, ZONES } from './logic/settings.ts';
-import { zoneIndexForPoint } from './logic/zone-logic.ts';
+import { ZONE_NAMES } from './content/zones.ts';
+import { NUMEROS, sanitizeSettings, ZONES } from './logic/settings.ts';
 
-/** Les réglages, gardés sur l'appareil. */
-const CLE_REGLAGES = 'carte-de-visite:settings:v1';
-const valider = (brut: unknown) => sanitizeSettings(brut);
+const LIBELLES = {
+	routine: 'Arcane Système',
+	decoupage: '4 coins de l\'écran',
+	delai: 'Délai avant le retournement',
+	duree: 'Durée du retournement',
+};
 
-/** Rien avant ce délai : un tap, même un peu appuyé, ne fait pas apparaître la jauge. */
-const JAUGE_DELAI_MS = DOUBLE_TAP.maxTapMs;
-
-/** Touches du clavier, et des télécommandes de présentation. */
-const TOUCHES: Record<string, 'effacer' | 'menu'> = { r: 'effacer', R: 'effacer', Escape: 'menu', m: 'menu', M: 'menu' };
+const PHASES = {
+	idle: 'Prêt',
+	pending: 'Armé · verrouillé',
+	shown: 'Retournée · verrouillé',
+	clearing: 'Retour au recto…',
+};
 
 export default function CarteDeVisite() {
-	const { enReglages, quitter } = usePont();
-	const [reglages, enregistrer] = useReglagesEnregistres(CLE_REGLAGES, valider);
-	const reglagesRef = useRef(reglages);
-	reglagesRef.current = reglages;
-	const { jauge, montrerJauge, cacherJauge } = useJaugeAppui();
-	const { etat, phaseRef, arm, fadeOut, hardReset, finInstant } = useCarte(reglagesRef);
-
-	/* ---------- Test des zones ---------- */
-
-	const [modeTest, setModeTest] = useState(false);
-	const [eclair, setEclair] = useState<Eclair | null>(null);
-	const modeTestRef = useRef(modeTest);
-	modeTestRef.current = modeTest;
-
-	/** Passe des réglages au mode « Test des zones » (ou en revient) : la carte revient sur son recto. */
-	const testerLesZones = (oui: boolean): void => {
-		cacherJauge();
-		hardReset();
-		setEclair(null);
-		setModeTest(oui);
-	};
-
-	/* ---------- Paysage ---------- */
-
-	const scene = useRef<HTMLElement>(null);
-	// La scène et le test des zones en paysage ; les réglages, ouverts depuis le menu, en portrait.
-	const { appPoint } = usePaysage(!enReglages || modeTest, scene);
-
-	/* ---------- Gestes sur la scène ---------- */
-
-	const [gestures] = useState(() => new GestureTracker());
-	/** Minuterie de l'appui long du contact en cours ; 0 si aucune. */
-	const holdTimer = useRef(0);
-	/** Les doigts posés sur la scène : deux doigts annulent tout geste. */
-	const poses = useRef(new Set<PointerId>());
-
-	const cancelHold = useCallback((): void => {
-		clearTimeout(holdTimer.current);
-		holdTimer.current = 0;
-	}, []);
-
-	/** Identifiant du contact : chaque doigt, ou « mouse » pour répéter sur ordinateur. */
-	const idDe = (event: PointerEvent<HTMLElement>): PointerId => (event.pointerType === 'mouse' ? 'mouse' : event.pointerId);
-
-	const surAppui = (event: PointerEvent<HTMLElement>): void => {
-		if (event.pointerType === 'mouse' && event.button !== 0) return;
-		void keepScreenAwake();
-		cancelHold();
-		const id = idDe(event);
-		poses.current.add(id);
-
-		const phase = phaseRef.current;
-		const action = gestures.press(id, event.clientX, event.clientY, poses.current.size, performance.now(), { armed: isArmed(phase), locked: isLocked(phase) });
-		if (action === 'cancel') {
-			cacherJauge();
-			return;
-		}
-		// La souris qui sort de la scène ne perd pas son relâchement.
-		try {
-			event.currentTarget.setPointerCapture(event.pointerId);
-		} catch {
-			// Contact déjà terminé.
-		}
-
-		// Coordonnées dans le repère de la scène, pivotée en paysage (hooks/usePaysage.ts),
-		// comme attendu par logic/zone-logic.ts : « haut » reste le haut de la scène.
-		const point = appPoint(event.clientX, event.clientY);
-
-		// Tout doigt posé peut devenir l'appui long : sortie de secours, retour au menu principal.
-		holdTimer.current = window.setTimeout(() => {
-			if (gestures.holdCompleted(id)) quitter();
-		}, HOLD.settingsMs);
-		if (reglagesRef.current.showHoldRing) montrerJauge(point.x, point.y, JAUGE_DELAI_MS, HOLD.settingsMs - JAUGE_DELAI_MS);
-		else cacherJauge();
-
-		if (action === 'reset') {
-			// La carte revient sur son recto, pour un nouveau tour. On ne quitte le tour que par
-			// l'appui de 3 s.
-			fadeOut();
-		} else if (action === 'arm') {
-			const stage = event.currentTarget;
-			const index = zoneIndexForPoint(point.x, point.y, stage.clientWidth, stage.clientHeight, ZONES);
-			if (index >= 0) {
-				arm(index);
-				// Le test des zones fait clignoter la zone touchée.
-				if (modeTestRef.current) setEclair((avant) => ({ index, n: (avant?.n ?? 0) + 1 }));
-			}
-		}
-	};
-
-	/** Doigt déplacé : au-delà de la tolérance, l'appui long est abandonné. */
-	const surDeplacement = (event: PointerEvent<HTMLElement>): void => {
-		if (gestures.move(idDe(event), event.clientX, event.clientY) === null) return;
-		cancelHold();
-		cacherJauge();
-	};
-
-	/** Doigt levé, ou contact interrompu par le système (`interrompu`) : il ne compte pas comme tap. */
-	const relacher = (event: PointerEvent<HTMLElement>, interrompu: boolean): void => {
-		const id = idDe(event);
-		poses.current.delete(id);
-		if (!gestures.release(id, performance.now(), interrompu)) return;
-		cancelHold();
-		cacherJauge();
-	};
-
-	/* ---------- Clavier et télécommande ---------- */
-
-	useEffect(() => {
-		const surTouche = (event: KeyboardEvent): void => {
-			if (event.metaKey || event.ctrlKey || event.altKey) return;
-			const action = Object.hasOwn(TOUCHES, event.key) ? TOUCHES[event.key] : null;
-			if (!action) return;
-			// Réglages ouverts : Échap ou M les ferment, R ne touche pas à la carte.
-			if (enReglages && !modeTestRef.current && action !== 'menu') return;
-			event.preventDefault();
-			void keepScreenAwake();
-			if (action === 'menu') quitter();
-			else if (isArmed(phaseRef.current)) fadeOut();
-		};
-		document.addEventListener('keydown', surTouche);
-		return () => document.removeEventListener('keydown', surTouche);
-	}, [enReglages, quitter, fadeOut, phaseRef]);
-
-	// App en arrière-plan : aucun geste commencé ne doit se terminer plus tard.
-	useEffect(() => {
-		const surVisibilite = (): void => {
-			cancelHold();
-			cacherJauge();
-			for (const id of poses.current) gestures.release(id, performance.now(), true);
-			poses.current.clear();
-		};
-		document.addEventListener('visibilitychange', surVisibilite);
-		return () => {
-			document.removeEventListener('visibilitychange', surVisibilite);
-			cancelHold();
-		};
-	}, [gestures, cancelHold, cacherJauge]);
-
-	useEffect(() => {
-		void keepScreenAwake();
-	}, []);
-
-	/* ---------- Affichage ---------- */
-
 	return (
-		<>
-			{/* La scène reçoit tous les touchers : la vieille table, la carte posée au milieu, une lampe
-			    au-dessus. La durée du retournement suit les réglages (--fade). */}
-			<main
-				id="stage"
-				ref={scene}
-				style={{ '--fade': `${reglages.fade}s` } as CSSProperties}
-				onPointerDown={surAppui}
-				onPointerMove={surDeplacement}
-				onPointerUp={(event) => relacher(event, false)}
-				onPointerCancel={(event) => relacher(event, true)}
-				// Pas de menu contextuel ni de loupe sur appui long.
-				onContextMenu={(event) => event.preventDefault()}
-			>
-				<Table />
-				<div className="lampe"></div>
-				<Carte etat={etat} finInstant={finInstant} />
-				<div className="vignette"></div>
-			</main>
-
-			<JaugeAppui jauge={jauge} />
-			{/* Voile de luminosité. */}
-			<div id="dim" style={{ '--dim': String((100 - reglages.brightness) / 100) } as CSSProperties}></div>
-
-			{modeTest && <ModeTest phase={etat.phase} scene={scene} eclair={eclair} surReglages={() => testerLesZones(false)} surQuitter={quitter} />}
-
-			{/* Ouvert par l'écrou ⚙ : les réglages, que l'on ferme pour revenir au menu. */}
-			{enReglages && !modeTest && <Reglages reglages={reglages} enregistrer={enregistrer} surTest={() => testerLesZones(true)} />}
-		</>
+		<TourAZones
+			cleReglages="carte-de-visite:settings:v1"
+			valider={sanitizeSettings}
+			zones={ZONES}
+			noms={ZONE_NAMES}
+			valeurs={NUMEROS}
+			libelles={LIBELLES}
+			libellesPhases={PHASES}
+			paysage
+			// La vieille table, la carte posée au milieu, une lampe au-dessus.
+			decor={(etat, _reglages, finInstant) => (
+				<>
+					<Table />
+					<div className="lampe"></div>
+					<Carte etat={etat} finInstant={finInstant} />
+				</>
+			)}
+		/>
 	);
 }

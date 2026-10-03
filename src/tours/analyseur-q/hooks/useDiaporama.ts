@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SLIDES } from '../content/slides.ts';
 import { applyMove, clampIndex, type Move } from '../logic/deck.ts';
-import { t, type Lang } from '../logic/i18n.ts';
+import { t, type Lang } from '../../../logic/i18n.ts';
 import type { Slide } from '../logic/slides.ts';
 
 export const NOMBRE_DE_SLIDES = SLIDES.length;

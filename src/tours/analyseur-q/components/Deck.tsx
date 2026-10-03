@@ -7,9 +7,11 @@
  * coûtent ainsi que le prix de trois slides.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useReajustement } from '../../../hooks/useReajustement.ts';
+import { useSansAnimation } from '../../../hooks/useSansAnimation.ts';
 import { SLIDES } from '../content/slides.ts';
-import type { Lang } from '../logic/i18n.ts';
+import type { Lang } from '../../../logic/i18n.ts';
 import type { Transition } from '../logic/settings.ts';
 import type { Lancement, VueSlide } from '../hooks/useDiaporama.ts';
 import { Slide } from './Slide.tsx';
@@ -35,33 +37,10 @@ export function Deck({ index, vues, lancement, langue, transition, enPause, onBo
 	 * (components/Slide.tsx). Une fois par image au plus pendant une rotation.
 	 */
 	const [taille, setTaille] = useState(0);
-	useEffect(() => {
-		let image = 0;
-		let actif = true;
-		const reajuster = (): void => {
-			if (actif) setTaille((n) => n + 1);
-		};
-		const surRedimensionnement = (): void => {
-			cancelAnimationFrame(image);
-			image = requestAnimationFrame(reajuster);
-		};
-		window.addEventListener('resize', surRedimensionnement);
-		void document.fonts?.ready.then(reajuster);
-		return () => {
-			actif = false;
-			window.removeEventListener('resize', surRedimensionnement);
-			cancelAnimationFrame(image);
-		};
-	}, []);
+	useReajustement(useCallback(() => setTaille((n) => n + 1), []));
 
 	// Sans transition à l'ouverture : la première slide apparaît directement.
-	const [sansAnimation, setSansAnimation] = useState(true);
-	useEffect(() => {
-		let image = requestAnimationFrame(() => {
-			image = requestAnimationFrame(() => setSansAnimation(false));
-		});
-		return () => cancelAnimationFrame(image);
-	}, []);
+	const sansAnimation = useSansAnimation();
 
 	return (
 		<div id="deck" data-transition={transition} className={sansAnimation ? 'no-anim' : undefined}>
