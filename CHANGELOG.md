@@ -31,6 +31,10 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ---
 
+## [Non publié]
+
+- `.claude/launch.json`, la configuration locale du serveur de développement de l'app Claude, sort du dépôt (il y était entré par erreur avec la 1.0.0, ouvert au réseau local par `--host`) et est ignoré par git. Rien ne change pour l'app publiée : ce fichier ne servait qu'à lancer `npm run dev`.
+
 ## [1.0.0] — 2026-10-03
 
 27 commits
