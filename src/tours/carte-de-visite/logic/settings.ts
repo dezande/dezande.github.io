@@ -1,22 +1,22 @@
 /*
  * Réglages : forme, valeurs par défaut et validation.
- * Fonctions pures, sans DOM ni localStorage : testées sous Node (tests/logic/settings.test.ts).
- * Les réglages lus sur l'appareil peuvent venir d'une ancienne version de l'app ou être abîmés :
- * tout passe par sanitizeSettings() avant d'être utilisé.
+ * Fonctions pures, sans DOM ni localStorage : testées sous Node (tests/tours/carte-de-visite/settings.test.ts).
+ * Les réglages lus sur l'appareil peuvent être abîmés : tout passe par sanitizeSettings() avant
+ * d'être utilisé.
  */
 
 /**
- * La routine des 3 boulettes : l'écran est coupé en 3 bandes horizontales, une prédiction par bande,
- * de haut en bas. Elle est fixée ici : il n'y a plus de routine à choisir (Arcane Système est devenu
- * son propre tour, la carte d'hôtel).
+ * La routine Arcane Système : l'écran est coupé en 4 coins, un numéro par coin (écrit au verso de la
+ * carte), dans le sens de lecture (haut gauche, haut droite, bas gauche, bas droite).
+ * Elle est fixée ici : il n'y a rien à choisir.
  */
-export const ZONES = 3;
-export const PREDICTIONS: readonly string[] = Object.freeze(['6', '16', '26']);
+export const ZONES = 4;
+export const NUMEROS: readonly string[] = Object.freeze(['17', '19', '21', '23']);
 
 export interface Settings {
-	/** Délai entre le toucher et l'apparition du nombre, en secondes. */
+	/** Délai entre le toucher et le retournement de la carte, en secondes. */
 	delay: number;
-	/** Durée du fondu d'apparition et de disparition, en secondes. */
+	/** Durée du retournement de la carte (dans un sens comme dans l'autre), en secondes. */
 	fade: number;
 	/** Luminosité de la scène, en pourcentage. */
 	brightness: number;
@@ -26,7 +26,7 @@ export interface Settings {
 
 export const DEFAULTS: Readonly<Settings> = Object.freeze({
 	delay: 3,
-	fade: 1.5,
+	fade: 1.2,
 	brightness: 100,
 	showHoldRing: true,
 });
@@ -44,8 +44,6 @@ const bool = (v: unknown, fallback: boolean): boolean => (typeof v === 'boolean'
  */
 export function sanitizeSettings(raw: unknown): Settings {
 	const src: Partial<Record<keyof Settings, unknown>> = raw && typeof raw === 'object' ? raw : {};
-	// Les anciennes versions enregistraient une routine, un nombre de zones et des valeurs : ils sont
-	// ignorés.
 	return {
 		delay: Math.round(num(src.delay, DEFAULTS.delay, 0, 10) * 2) / 2,
 		fade: Math.round(num(src.fade, DEFAULTS.fade, 0.5, 6) * 10) / 10,

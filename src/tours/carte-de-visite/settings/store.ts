@@ -1,14 +1,14 @@
 /* Réglages en cours et enregistrement sur l'appareil (localStorage). Validation : logic/settings.ts. */
 
-import { PREDICTIONS, sanitizeSettings, ZONES, type Settings } from '../logic/settings.ts';
+import { NUMEROS, sanitizeSettings, ZONES, type Settings } from '../logic/settings.ts';
 
 export type { Settings };
-export { PREDICTIONS, ZONES };
+export { NUMEROS, ZONES };
 
-const STORAGE_KEY = 'voyante:settings:v1';
+const STORAGE_KEY = 'carte-de-visite:settings:v1';
 
-/** Nom de chaque bande, de haut en bas (voir logic/zone-logic.ts). */
-export const ZONE_NAMES: readonly string[] = ['Haut', 'Milieu', 'Bas'];
+/** Nom de chaque coin, dans l'ordre des zones (voir logic/zone-logic.ts). */
+export const ZONE_NAMES: readonly string[] = ['Haut gauche', 'Haut droite', 'Bas gauche', 'Bas droite'];
 
 function loadSettings(): Settings {
 	try {

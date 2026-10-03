@@ -52,6 +52,47 @@ def boule():
                 t[y][x]=ramp(v,ors,x,y)
     return contour(t,'#0d0a1c')
 
+# ---------- Carte de visite : la carte du Théâtre Robert-Houdin, retournée sur son numéro, et une clef ----------
+PETITS={'1':["010","110","010","010","111"],'7':["111","001","010","010","010"]}
+def carte_de_visite():
+    t=toile()
+    cremes=['#b9a98a','#d9c69c','#efe3c6','#fbf6ea']
+    sepia_clair='#7a5638'; encre='#1d2846'
+    x0,y0,w,h=1,6,29,19
+    for y in range(y0,y0+h):
+        for x in range(x0,x0+w):
+            if (x in (x0,x0+w-1)) and (y in (y0,y0+h-1)): continue
+            # le bristol, éclairé en haut à gauche, jauni vers le bas à droite
+            v=0.95-0.5*((x-x0)/w*0.5+(y-y0)/h*0.5)
+            t[y][x]=ramp(v,cremes,x,y)
+    # le filet imprimé, à deux pixels du bord
+    for x in range(x0+2,x0+w-2):
+        t[y0+2][x]=sepia_clair; t[y0+h-3][x]=sepia_clair
+    for y in range(y0+2,y0+h-2):
+        t[y][x0+2]=sepia_clair; t[y][x0+w-3]=sepia_clair
+    # au verso : le numéro seul, en grand, à l'encre bleue : 17 (chiffres agrandis deux fois)
+    for i,ch in enumerate('17'):
+        for yy,ligne in enumerate(PETITS[ch]):
+            for xx,b in enumerate(ligne):
+                if b=='1':
+                    for sy in range(2):
+                        for sx in range(2): t[y0+4+yy*2+sy][x0+7+i*8+xx*2+sx]=encre
+    t=contour(t,'#2a1606')
+    # la clef en laiton, posée en travers du coin bas droit : l'anneau, la tige, le panneton
+    ors=['#5a3410','#8f5a1c','#c98c2e','#f2c55c','#fff0b0']
+    for y in range(N):
+        for x in range(N):
+            dx=x+.5-26.5; dy=y+.5-24.5; d=math.hypot(dx,dy)
+            if 1.4<=d<=3.2: t[y][x]=ramp(0.7-0.25*(dx+dy)/3.2,ors,x,y)
+    for k in range(9):
+        X=24-k; Y=27+k//3
+        if 0<=X<N and 0<=Y<N:
+            t[Y][X]=ors[3]
+            if Y+1<N: t[Y+1][X]=ors[1]
+    for (X,Y) in ((16,31),(17,31),(15,30)):
+        t[Y][X]=ors[2]
+    return contour(t,'#2a1606')
+
 # ---------- Pile ou face : la pièce de 20 centimes ----------
 CHIFFRES={'2':["0110","1001","0001","0010","0100","1000","1111"],'0':["0110","1001","1001","1001","1001","1001","0110"]}
 def piece():
@@ -191,7 +232,7 @@ def en_grille(t):
         lignes.append(l)
     return lignes
 
-icones={'boule-de-cristal':boule(),'pile-ou-face':piece(),'six-predictions':eventail(),'analyseur-q':analyseur()}
+icones={'boule-de-cristal':boule(),'carte-de-visite':carte_de_visite(),'pile-ou-face':piece(),'six-predictions':eventail(),'analyseur-q':analyseur()}
 gear=ecrou()
 # palette commune
 couleurs=[]
@@ -215,6 +256,6 @@ def svg(grille,pal,ox,oy,s):
 corps=''
 for i,(k,v) in enumerate(out['icones'].items()):
     corps+=svg(v,out['palette'],20+i*180,20,5)
-corps+=svg(out['ecrou'],out['palette'],760,40,5)
-open(__import__('os').path.join(__import__('os').path.dirname(__file__) or '.', 'apercu.svg'),'w').write(f'<svg xmlns="http://www.w3.org/2000/svg" width="900" height="200" shape-rendering="crispEdges"><rect width="900" height="200" fill="#20306a"/>{corps}</svg>')
+corps+=svg(out['ecrou'],out['palette'],940,40,5)
+open(__import__('os').path.join(__import__('os').path.dirname(__file__) or '.', 'apercu.svg'),'w').write(f'<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="200" shape-rendering="crispEdges"><rect width="1080" height="200" fill="#20306a"/>{corps}</svg>')
 print(len(couleurs),'couleurs')

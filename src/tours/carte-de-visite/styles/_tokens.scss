@@ -1,0 +1,23 @@
+// Couleurs et typographies, figées à la compilation.
+// Les valeurs modifiées à l'exécution (--fade, --dim) restent des propriétés CSS personnalisées :
+// voir _base.scss et settings/panel.ts.
+
+// La table : un vieux chêne ciré, dans la pénombre.
+$bg: #140b05;
+// Le laiton des réglages (et de la jauge, des étiquettes du test des zones).
+$gold: #ecd6a4;
+$gold-bright: #f6e6bf;
+$gold-soft: rgba(236, 214, 164, .25);
+$ink: #1a0e05;
+
+// La carte : un bristol crème jauni, imprimé en sépia.
+$papier: #efe3c6;
+$papier-sombre: #d9c69c;
+$sepia: #4a2e1a;
+$sepia-clair: #7a5638;
+// L'encre de la plume : un bleu-noir de bureau d'accueil.
+$encre: #1d2846;
+
+$serif: "Didot", "Bodoni 72", "Bodoni MT", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif Display", "Noto Serif", Georgia, serif;
+$sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+$plume: "Caveat", "Segoe Script", "Bradley Hand", cursive;

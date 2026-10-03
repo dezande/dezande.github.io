@@ -29,6 +29,14 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ---
 
+## [Non publié]
+
+- **Les deux routines de la boule de cristal sont séparées.**
+  - **Boule de cristal** : plus de choix de routine dans ses réglages, elle ne joue plus que les 3 boulettes (3 bandes : 6 en haut, 16 au milieu, 26 en bas), rappelées dans les réglages. Une routine Arcane Système enregistrée par une ancienne version est oubliée ; le délai, le fondu, la luminosité et la jauge sont gardés.
+  - **Carte de visite**, un nouveau tour pour la routine Arcane Système, **joué téléphone tenu en largeur** (la scène et le test des zones pivotent en paysage, par un verrou propre au tour à la place du verrou portrait du kit ; les réglages restent en portrait) : sur une vieille table de trois planches de chêne dans la longueur (aboutements, clous, nœud, rayures), la carte de visite du **Théâtre Robert-Houdin**, le vrai théâtre de magie de Jean-Eugène Robert-Houdin, ouvert en 1845, repris par Georges Méliès en 1888, au 8, boulevard des Italiens, démoli en 1924 ; au recto, ses « Soirées fantastiques ». Les gestes de la boule : toucher un des 4 coins (17, 19, 21, 23 dans le sens de la lecture) ; après le délai, la carte se retourne et montre au dos le numéro seul, en grand, écrit à la plume ; le double toucher la remet sur son recto, prête pour un nouveau tour ; l'appui de 3 s ramène au menu. Réglages : délai, durée du retournement, luminosité, jauge et test des zones.
+- Le menu a cinq tuiles ; l'icône en pixels de la carte de visite (la carte et une clef en laiton) est engendrée par `outils/icones-16-bits.py`. L'icône de l'app garde ses quatre icônes.
+- Tests : réglages et verrou paysage de la carte de visite, et dans Chrome ses quatre coins jusqu'au retour au menu, et la boule sans choix de routine.
+
 ## [0.9.0] — 2026-10-03
 
 20 commits

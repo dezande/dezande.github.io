@@ -4,7 +4,7 @@
 // Lancer : npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULTS, ROUTINE_IDS, ROUTINES, routineValues, sanitizeSettings, zoneCount } from '../../../src/tours/boule-de-cristal/logic/settings.ts';
+import { DEFAULTS, PREDICTIONS, ZONES, sanitizeSettings } from '../../../src/tours/boule-de-cristal/logic/settings.ts';
 
 const defaults = { ...DEFAULTS };
 
@@ -17,19 +17,25 @@ test('rien d’enregistré, ou pas un objet : réglages par défaut', () => {
 });
 
 test('réglages valides conservés tels quels', () => {
-	const valid = { routine: 'arcane-systeme', delay: 2.5, fade: 0.8, brightness: 45, showHoldRing: false };
+	const valid = { delay: 2.5, fade: 0.8, brightness: 45, showHoldRing: false };
 	assert.deepEqual(sanitizeSettings(valid), valid);
 });
 
 test('ancienne version sans l’option d’affichage : la jauge est visible par défaut', () => {
-	const old = sanitizeSettings({ routine: 'arcane-systeme', delay: 1, fade: 2, brightness: 80 });
-	assert.equal(old.routine, 'arcane-systeme');
+	const old = sanitizeSettings({ delay: 1, fade: 2, brightness: 80 });
 	assert.equal(old.showHoldRing, true);
 });
 
-test('ancienne version avec nombre de zones et valeurs : ignorés, routine par défaut, autres réglages conservés', () => {
+test('ancienne version avec nombre de zones et valeurs : ignorés, autres réglages conservés', () => {
 	const old = sanitizeSettings({ zones: 4, values: ['1', '1', '1', '1'], delay: 1, fade: 2, brightness: 80, showHoldRing: false });
-	assert.deepEqual(old, { routine: DEFAULTS.routine, delay: 1, fade: 2, brightness: 80, showHoldRing: false });
+	assert.deepEqual(old, { delay: 1, fade: 2, brightness: 80, showHoldRing: false });
+});
+
+test('ancienne version avec une routine choisie (même Arcane Système) : ignorée, autres réglages conservés', () => {
+	for (const routine of ['trois-boulettes', 'arcane-systeme']) {
+		const old = sanitizeSettings({ routine, delay: 2, fade: 1, brightness: 70, showHoldRing: true });
+		assert.deepEqual(old, { delay: 2, fade: 1, brightness: 70, showHoldRing: true }, routine);
+	}
 });
 
 test('options supprimées d’une ancienne version : ignorées', () => {
@@ -38,29 +44,12 @@ test('options supprimées d’une ancienne version : ignorées', () => {
 	assert.equal(old.showHoldRing, true);
 });
 
-/* ---------- Routines ---------- */
+/* ---------- Les 3 boulettes ---------- */
 
-test('routines : 3 boulettes en 3 bandes (6, 16, 26), Arcane Système en 4 coins (17, 19, 21, 23)', () => {
-	const boulettes = sanitizeSettings({ routine: 'trois-boulettes' });
-	assert.equal(zoneCount(boulettes), 3);
-	assert.deepEqual(routineValues(boulettes), ['6', '16', '26']);
-	const arcane = sanitizeSettings({ routine: 'arcane-systeme' });
-	assert.equal(zoneCount(arcane), 4);
-	assert.deepEqual(routineValues(arcane), ['17', '19', '21', '23']);
-});
-
-test('chaque routine a exactement une valeur par zone', () => {
-	for (const id of ROUTINE_IDS) assert.equal(ROUTINES[id].values.length, ROUTINES[id].zones, id);
-});
-
-test('routine par défaut : 3 boulettes', () => {
-	assert.equal(DEFAULTS.routine, 'trois-boulettes');
-});
-
-test('routine inconnue ou d’un mauvais type : routine par défaut', () => {
-	for (const routine of ['', 'arcane', 'toString', '__proto__', 3, null, {}]) {
-		assert.equal(sanitizeSettings({ routine }).routine, DEFAULTS.routine, String(routine));
-	}
+test('une seule routine : 3 bandes, 6 en haut, 16 au milieu, 26 en bas', () => {
+	assert.equal(ZONES, 3);
+	assert.deepEqual(PREDICTIONS, ['6', '16', '26']);
+	assert.ok(Object.isFrozen(PREDICTIONS));
 });
 
 /* ---------- Curseurs ---------- */
@@ -97,7 +86,7 @@ test('jauge de l’appui long : seulement de vrais booléens', () => {
 /* ---------- Propriétés générales ---------- */
 
 test('valider deux fois ne change rien', () => {
-	for (const raw of [null, { routine: 'x', delay: 3.3, fade: 'x', brightness: 12 }, { routine: 'arcane-systeme', delay: 11 }]) {
+	for (const raw of [null, { routine: 'x', delay: 3.3, fade: 'x', brightness: 12 }, { delay: 11 }]) {
 		const once = sanitizeSettings(raw);
 		assert.deepEqual(sanitizeSettings(once), once);
 	}
@@ -105,9 +94,8 @@ test('valider deux fois ne change rien', () => {
 
 test('les réglages renvoyés sont une copie : les modifier ne touche pas aux valeurs par défaut', () => {
 	const s = sanitizeSettings(null);
-	s.routine = 'arcane-systeme';
 	s.delay = 9;
-	assert.equal(DEFAULTS.routine, 'trois-boulettes');
+	assert.equal(DEFAULTS.delay, 3);
 	assert.deepEqual(sanitizeSettings(null), defaults);
 });
 

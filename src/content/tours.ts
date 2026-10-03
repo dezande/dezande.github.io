@@ -28,6 +28,13 @@ export const TOURS: readonly Tour[] = [
 		description: { fr: 'Un nombre apparaît dans la boule', en: 'A number appears in the ball' },
 	},
 	{
+		// La routine Arcane Système, qui était jouée dans la boule de cristal : la carte de visite d'une
+		// carte du Théâtre Robert-Houdin, avec le numéro au dos.
+		dossier: 'carte-de-visite',
+		nom: { fr: 'Carte de visite', en: 'Business card' },
+		description: { fr: 'Elle se retourne : le numéro est au dos', en: 'It turns over: the number is on the back' },
+	},
+	{
 		dossier: 'pile-ou-face',
 		nom: { fr: 'Pile ou face', en: 'Heads or tails' },
 		description: { fr: '0,20 euro, pile en haut, face en bas', en: '20 cents: tails at the top, heads at the bottom' },

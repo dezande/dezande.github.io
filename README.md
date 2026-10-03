@@ -4,7 +4,8 @@ Tous mes accessoires de scène dans **une seule application** : https://dezande.
 
 | Tour | Fin de la routine (le tour se remet en place, on y reste) | Copie de |
 | --- | --- | --- |
-| Boule de cristal | double toucher après le nombre : il s'efface, la boule est prête pour un nouveau nombre | [boule-de-cristal](https://github.com/dezande/boule-de-cristal) |
+| Boule de cristal (3 boulettes : 6, 16, 26) | double toucher après le nombre : il s'efface, la boule est prête pour un nouveau nombre | [boule-de-cristal](https://github.com/dezande/boule-de-cristal) |
+| Carte de visite (Arcane Système : 17, 19, 21, 23 aux 4 coins) | double toucher sur la carte retournée : elle revient sur son recto, prête pour un nouveau numéro | — (créé ici, d'après l'ancienne routine Arcane Système de la boule) |
 | Pile ou face | double toucher après la carte retournée : elle revient face cachée | [pile-ou-face](https://github.com/dezande/pile-ou-face) |
 | Les six prédictions | double toucher sur la table vide : le paquet revient, faces en bas | [six-predictions](https://github.com/dezande/six-predictions) |
 | Analyseur Q | « suivante » après la dernière slide : rien, on reste sur la dernière slide | [analyseur-q](https://github.com/dezande/analyseur-q) |
@@ -21,9 +22,9 @@ Tous mes accessoires de scène dans **une seule application** : https://dezande.
 | **Geste retour** d'Android | Retour au menu |
 | Touche **R** (télécommande) | Remise en place du tour ; **Échap** ou **M** : retour au menu |
 
-**Les réglages des quatre tours ont la même structure**, chacun dans ses couleurs : une barre d'en-tête qui reste en haut quand on fait défiler — « Réglages » et, dessous, le nom du tour, avec la croix qui ferme —, puis les réglages propres au tour, les aides à la répétition (le test des zones de la boule y est), et « Rétablir les réglages par défaut ». Plus de version, d'état de l'écran, d'aide des gestes ni d'informations techniques : la version de l'app est en bas du menu principal.
+**Les réglages des cinq tours ont la même structure**, chacun dans ses couleurs : une barre d'en-tête qui reste en haut quand on fait défiler — « Réglages » et, dessous, le nom du tour, avec la croix qui ferme —, puis les réglages propres au tour, les aides à la répétition (le test des zones de la boule et de la carte de visite y est), et « Rétablir les réglages par défaut ». Plus de version, d'état de l'écran, d'aide des gestes ni d'informations techniques : la version de l'app est en bas du menu principal.
 
-**La langue se choisit une fois, dans le menu principal** : les tours n'ont plus de choix de langue à eux (ni dans leurs réglages, ni sur la première slide de l'analyseur). En anglais, Pile ou face écrit « 0.20 euro / tails » et « heads ». La boule de cristal n'a qu'une interface en français ; ce qu'elle montre au public, un nombre, n'a pas de langue. À la toute première ouverture, l'app suit la langue du téléphone.
+**La langue se choisit une fois, dans le menu principal** : les tours n'ont plus de choix de langue à eux (ni dans leurs réglages, ni sur la première slide de l'analyseur). En anglais, Pile ou face écrit « 0.20 euro / tails » et « heads ». La boule de cristal et la carte de visite n'ont qu'une interface en français ; ce qu'elles montrent au public, un nombre dans une boule ou au dos de la carte du Théâtre Robert-Houdin, n'a pas à changer de langue. À la toute première ouverture, l'app suit la langue du téléphone.
 
 Les réglages de chaque tour (dos des cartes, délai, routine de la boule…) sont gardés d'une ouverture à l'autre ; le menu du tour ne s'ouvre plus pendant la routine, seulement par l'écrou ⚙. Le doigt de l'appui de 3 s, relevé sur le menu, ne relance pas la tuile placée dessous ; après la croix ou l'appui de 3 s, le menu répond au premier toucher.
 
@@ -63,7 +64,7 @@ Les mêmes règles que les autres apps, énoncées une fois dans le [kit](https:
 git submodule update --init   # après un clone : récupère le kit
 npm install
 npm run serve       # build puis serveur local sur http://localhost:8000
-npm test            # tests unitaires (l'app et les quatre tours)
+npm test            # tests unitaires (l'app et les cinq tours)
 npm run test:e2e    # tests dans Chrome (après npm run build)
 npm run typecheck
 npm run check:changelog
@@ -77,7 +78,7 @@ Les icônes des tours (32 × 32), l'écrou ⚙ (24 × 24) et la main sont des **
 
 ### Icônes et captures
 
-L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes des quatre tours, chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus **pixel pour pixel** par [`outils/icones-png.py`](outils/icones-png.py) : le dessin de 80 × 80 agrandi un nombre entier de fois (× 6 pour 512, × 2 pour 192), sans lissage, en palette exacte — nets et légers (2 et 3 ko).
+L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes des quatre premiers tours (la carte de visite n'y est pas), chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus **pixel pour pixel** par [`outils/icones-png.py`](outils/icones-png.py) : le dessin de 80 × 80 agrandi un nombre entier de fois (× 6 pour 512, × 2 pour 192), sans lissage, en palette exacte — nets et légers (2 et 3 ko).
 
 Les captures de la fiche d'installation (`public/captures/`, citées par `manifest.json`) sont prises dans Chrome sans interface par [`outils/captures.ts`](outils/captures.ts), après un build.
 

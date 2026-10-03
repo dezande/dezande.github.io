@@ -1,0 +1,209 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+/*
+ * La carte de visite du Théâtre Robert-Houdin (1845-1924, 8, boulevard des Italiens) : un bristol
+ * crème, jauni et piqué par le temps, imprimé en sépia, posé de travers sur la table. Le recto est
+ * imprimé ; au verso, seulement le numéro, en grand, écrit à la plume.
+ * Toutes les tailles sont en cqw, des centièmes de la largeur de la carte : elle garde le même
+ * dessin sur tous les écrans.
+ */
+
+// Le grain du papier : un bruit fin, brun, à peine visible.
+$grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .27 0 0 0 0 .12 -.7 0 0 0 .42'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+// Le format d'une carte de visite, 85 × 55 mm, en largeur.
+.carte {
+	position: relative;
+	z-index: 1;
+	// En paysage : la carte prend sa taille de la hauteur de la scène.
+	width: min(calc(var(--app-w) * .78), calc(var(--app-h) * 1.1), 640px);
+	aspect-ratio: 85 / 55;
+	container-type: inline-size;
+	perspective: 260cqw;
+	transform: rotate(-3deg);
+}
+
+// Les deux faces, dos à dos : la carte se retourne autour de son axe vertical.
+.faces {
+	position: absolute;
+	inset: 0;
+	transform-style: preserve-3d;
+	transition: transform var(--fade) cubic-bezier(.45, .05, .3, 1);
+
+	.retournee & {
+		transform: rotateY(180deg);
+	}
+
+	.instant & {
+		transition: none;
+	}
+}
+
+.face {
+	position: absolute;
+	inset: 0;
+	border-radius: 1.2cqw;
+	color: $sepia;
+	text-align: center;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+	background:
+		$grain,
+		// Les rousseurs : quelques taches brunes, laissées par l'humidité.
+		radial-gradient(circle at 86% 18%, rgba(150, 95, 40, .15), transparent 4%),
+		radial-gradient(circle at 10% 72%, rgba(150, 95, 40, .12), transparent 3%),
+		radial-gradient(circle at 64% 90%, rgba(140, 85, 35, .12), transparent 5%),
+		// Le jaunissement : plus fort vers les bords, qui ont pris la lumière et les doigts.
+		radial-gradient(ellipse 72% 68% at 46% 42%, rgba(255, 250, 235, .35), transparent 70%),
+		linear-gradient(160deg, $papier 30%, $papier-sombre);
+	box-shadow:
+		inset 0 0 2.4cqw rgba(120, 78, 30, .35),
+		inset 0 0 .4cqw rgba(110, 70, 25, .4),
+		0 .3cqw .6cqw rgba(0, 0, 0, .45),
+		0 4cqw 8cqw rgba(0, 0, 0, .5),
+		1.5cqw 6cqw 12cqw rgba(0, 0, 0, .3);
+
+	// Le filet imprimé : un trait double, à quelques millimètres du bord.
+	&::before {
+		content: "";
+		position: absolute;
+		inset: 3.6cqw;
+		pointer-events: none;
+		box-shadow:
+			inset 0 0 0 .4cqw rgba($sepia, .8),
+			inset 0 0 0 1.1cqw transparent,
+			inset 0 0 0 1.35cqw rgba($sepia, .5);
+	}
+}
+
+// Un fleuron dans chaque coin du filet.
+.coin {
+	position: absolute;
+	width: 7cqw;
+	height: 7cqw;
+	fill: none;
+	stroke: rgba($sepia, .7);
+	stroke-width: 1.8;
+	stroke-linecap: round;
+
+	&.hg { top: 5.4cqw; left: 5.4cqw; }
+	&.hd { top: 5.4cqw; right: 5.4cqw; transform: scaleX(-1); }
+	&.bg { bottom: 5.4cqw; left: 5.4cqw; transform: scaleY(-1); }
+	&.bd { bottom: 5.4cqw; right: 5.4cqw; transform: scale(-1); }
+}
+
+/* ---------- Le recto : imprimé ---------- */
+
+.recto {
+	display: grid;
+	grid-template-columns: 21cqw 1fr;
+	grid-template-rows: 1fr auto;
+	align-items: center;
+	column-gap: 3cqw;
+	padding: 8cqw 9cqw 7.4cqw;
+}
+
+// Le chiffre du théâtre : R et H entrelacés dans une couronne de laurier.
+.chiffre {
+	width: 100%;
+	overflow: visible;
+
+	.laurier path {
+		fill: none;
+		stroke: rgba($sepia-clair, .9);
+		stroke-width: 1.8;
+		stroke-linecap: round;
+	}
+
+	.feuilles path {
+		fill: rgba($sepia-clair, .82);
+		stroke: none;
+	}
+
+	.lettre {
+		font: italic 400 50px/1 $serif;
+		text-anchor: middle;
+		fill: $sepia;
+	}
+
+	.h {
+		fill: rgba($sepia, .78);
+	}
+}
+
+.titre {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.fondee {
+	margin: 0 0 1.8cqw;
+	font: italic 400 2.5cqw/1 $serif;
+	letter-spacing: .12em;
+	color: $sepia-clair;
+}
+
+.nom {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 0;
+	font-weight: 400;
+	line-height: 1;
+}
+
+.nom-petit {
+	font: italic 400 5.2cqw/1 $serif;
+	color: $sepia-clair;
+}
+
+.nom-grand {
+	margin-top: 1cqw;
+	font: 400 5.4cqw/1 $serif;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+	// « Robert-Houdin » sur une seule ligne.
+	white-space: nowrap;
+	// Les lettres sont espacées : la dernière garde son espace à droite, que l'on compense.
+	margin-right: -.07em;
+}
+
+.adresse {
+	margin: 2cqw 0 0;
+	font: italic 400 2.7cqw/1.2 $serif;
+	color: $sepia-clair;
+}
+
+.confort {
+	grid-column: 1 / -1;
+	justify-self: center;
+	// Entre les fleurons des coins du bas.
+	width: 70%;
+	margin: 0;
+	padding-top: 1.8cqw;
+	border-top: .25cqw solid rgba($sepia, .4);
+	font: 400 2.1cqw/1 $serif;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: $sepia-clair;
+}
+
+/* ---------- Le verso : le numéro seul, en grand, à la plume ---------- */
+
+.verso {
+	display: grid;
+	place-items: center;
+	transform: rotateY(180deg);
+}
+
+.numero {
+	font: 600 46cqw/1 $plume;
+	color: $encre;
+	white-space: nowrap;
+	text-shadow: 0 0 .5cqw rgba($encre, .35);
+	mix-blend-mode: multiply;
+	opacity: .94;
+	transform: rotate(-6deg);
+}

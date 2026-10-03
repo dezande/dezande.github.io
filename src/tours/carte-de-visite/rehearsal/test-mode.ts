@@ -4,8 +4,8 @@
  */
 
 import { zoneRects } from '../logic/zone-logic.ts';
-import { PREDICTIONS, ZONE_NAMES, ZONES } from '../settings/store.ts';
-import { onPhaseChange, type Phase } from '../stage/ball.ts';
+import { NUMEROS, ZONE_NAMES, ZONES } from '../settings/store.ts';
+import { onPhaseChange, type Phase } from '../stage/carte.ts';
 import { $, stage } from '../system/dom.ts';
 
 const zonesEl = $('#zones');
@@ -19,8 +19,8 @@ export const isTestMode = (): boolean => testMode;
 const PHASE_LABELS: Record<Phase, string> = {
 	idle: 'Prêt',
 	pending: 'Armé · verrouillé',
-	shown: 'Affiché · verrouillé',
-	clearing: 'Réarmement…',
+	shown: 'Retournée · verrouillé',
+	clearing: 'Retour au recto…',
 };
 
 export function setTestMode(on: boolean): void {
@@ -48,11 +48,13 @@ function renderZones(): void {
 	for (const r of zoneRects(stage.clientWidth, stage.clientHeight, ZONES)) {
 		const zone = document.createElement('div');
 		zone.className = 'zone';
+		// Colonne de droite : trait vertical et étiquette à droite.
+		zone.classList.toggle('right', r.left > 0);
 		zone.style.left = `${r.left}px`;
 		zone.style.top = `${r.top}px`;
 		zone.style.width = `${r.right - r.left}px`;
 		zone.style.height = `${r.bottom - r.top}px`;
-		zone.append(tag(`${ZONE_NAMES[r.index]} →`, PREDICTIONS[r.index]));
+		zone.append(tag(`${ZONE_NAMES[r.index]} →`, NUMEROS[r.index]));
 		zonesEl.append(zone);
 	}
 }

@@ -2,10 +2,10 @@
  * Gestes sur la scène (doigt, ou souris pour répéter sur ordinateur).
  * Les décisions (armer, effacer, ouvrir les réglages, annuler) sont prises par GestureTracker
  * (logic/gestures.ts, testé sous Node) ; ce module relaie les événements du navigateur
- * et applique les effets : boule, jauge de l'appui long, réglages.
+ * et applique les effets : carte, jauge de l'appui long, réglages.
  */
 
-import { appPoint } from '../../../kit/web/orientation.ts';
+import { appPoint } from '../system/paysage.ts';
 import { keepScreenAwake } from '../../../kit/web/wake-lock.ts';
 import { GestureTracker, HOLD, isMouseAfterTouch, type PointerId } from '../logic/gestures.ts';
 import { zoneIndexForPoint } from '../logic/zone-logic.ts';
@@ -14,7 +14,7 @@ import { flashZone } from '../rehearsal/test-mode.ts';
 import { quitter } from '../../pont.ts';
 import { ZONES } from '../settings/store.ts';
 import { stage } from '../system/dom.ts';
-import { arm, fadeOut, isArmed, isLocked } from './ball.ts';
+import { arm, fadeOut, isArmed, isLocked } from './carte.ts';
 
 const gestures = new GestureTracker();
 /** Minuterie de l'appui long du contact en cours ; 0 si aucune. */
@@ -49,7 +49,7 @@ function press(id: PointerId, clientX: number, clientY: number, fingers: number)
 		return;
 	}
 
-	// Coordonnées dans le repère de la scène, qui peut être pivotée (kit/web/orientation.ts),
+	// Coordonnées dans le repère de la scène, qui peut être pivotée (system/paysage.ts),
 	// comme attendu par logic/zone-logic.ts : « haut » reste le haut du téléphone.
 	const point = appPoint(clientX, clientY);
 
@@ -60,8 +60,8 @@ function press(id: PointerId, clientX: number, clientY: number, fingers: number)
 	showHoldRing(point.x, point.y, HOLD.settingsMs);
 
 	if (action === 'reset') {
-		// Le nombre s'estompe et la boule se réarme, pour un nouveau tour. On ne quitte la boule que
-		// par l'appui de 3 s.
+		// La carte revient sur son recto, pour un nouveau tour. On ne quitte le tour
+		// que par l'appui de 3 s.
 		fadeOut();
 	} else if (action === 'arm') {
 		const index = zoneIndexForPoint(point.x, point.y, stage.clientWidth, stage.clientHeight, ZONES);

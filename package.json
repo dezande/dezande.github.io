@@ -12,6 +12,9 @@
 			"tours/boule-de-cristal/index.html",
 			"tours/boule-de-cristal/app.js",
 			"tours/boule-de-cristal/style.css",
+			"tours/carte-de-visite/index.html",
+			"tours/carte-de-visite/app.js",
+			"tours/carte-de-visite/style.css",
 			"tours/analyseur-q/index.html",
 			"tours/analyseur-q/app.js",
 			"tours/analyseur-q/style.css",
@@ -28,7 +31,7 @@
 	},
 	"scripts": {
 		"clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
-		"build": "npm run clean && node -e \"require('node:fs').cpSync('public', 'dist', { recursive: true })\" && sass --no-source-map --style=compressed src/styles/main.scss:dist/style.css src/tours/boule-de-cristal/styles/main.scss:dist/tours/boule-de-cristal/style.css src/tours/analyseur-q/styles/main.scss:dist/tours/analyseur-q/style.css src/tours/six-predictions/styles/main.scss:dist/tours/six-predictions/style.css src/tours/pile-ou-face/styles/main.scss:dist/tours/pile-ou-face/style.css && node outils/regrouper.ts && tsc -p src/sw && node src/kit/node/check-dist.ts && node src/kit/node/stamp-build.ts",
+		"build": "npm run clean && node -e \"require('node:fs').cpSync('public', 'dist', { recursive: true })\" && sass --no-source-map --style=compressed src/styles/main.scss:dist/style.css src/tours/boule-de-cristal/styles/main.scss:dist/tours/boule-de-cristal/style.css src/tours/carte-de-visite/styles/main.scss:dist/tours/carte-de-visite/style.css src/tours/analyseur-q/styles/main.scss:dist/tours/analyseur-q/style.css src/tours/six-predictions/styles/main.scss:dist/tours/six-predictions/style.css src/tours/pile-ou-face/styles/main.scss:dist/tours/pile-ou-face/style.css && node outils/regrouper.ts && tsc -p src/sw && node src/kit/node/check-dist.ts && node src/kit/node/stamp-build.ts",
 		"typecheck": "tsc -p src --noEmit && tsc -p src/sw --noEmit && tsc",
 		"test": "node --test \"tests/logic/**/*.test.ts\" \"tests/tours/**/*.test.ts\"",
 		"check:changelog": "node src/kit/node/check-changelog.ts",
