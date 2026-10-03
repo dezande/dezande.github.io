@@ -481,6 +481,27 @@ test('les six dos de cartes sont symétriques, de haut en bas et de gauche à dr
 	});
 });
 
+test('le dessin des dos a la même marge en haut, en bas et sur les côtés, sur les vignettes comme en scène', TIMEOUT, async () => {
+	// Le dessin prenait sa hauteur de sa largeur : il s'arrêtait avant le bas de la carte (4 px de
+	// marge en haut, 7 en bas sur une vignette).
+	const marges = `[...document.querySelectorAll('.vignette, .carte .dos')].map((carte) => {
+		const c = carte.getBoundingClientRect(); const d = carte.querySelector('svg.dos-motif').getBoundingClientRect();
+		return [d.top - c.top, c.bottom - d.bottom, d.left - c.left, c.right - d.right].map((v) => Math.round(v * 10) / 10);
+	}).filter((m) => m.some((v) => Math.abs(v - m[0]) > .6))`;
+	await withApp(async (page) => {
+		await ouvrir(page, 'six-predictions', `document.querySelectorAll('#motif-choix .vignette svg').length > 6`, true);
+		assert.deepEqual(await page.evaluate(dansLeTour(marges)), [], 'des vignettes ont des marges inégales');
+		await page.evaluate(`history.back()`);
+		await attendreLeMenu(page);
+		for (const [dossier, pret] of [['six-predictions', `document.querySelectorAll('#paquet .carte').length === 6`], ['pile-ou-face', `Boolean(document.querySelector('#table .carte'))`]] as const) {
+			await ouvrir(page, dossier, pret);
+			assert.deepEqual(await page.evaluate(dansLeTour(marges)), [], `${dossier} : des cartes ont des marges inégales`);
+			await page.evaluate(`history.back()`);
+			await attendreLeMenu(page);
+		}
+	});
+});
+
 /* ================= Le bouton FR / EN ================= */
 
 test('FR / EN : le menu change de langue, et s’en souvient', TIMEOUT, async () => {
