@@ -2,7 +2,7 @@
 	"name": "mes-tours",
 	"private": true,
 	"type": "module",
-	"homepage": "https://dezande.github.io/",
+	"homepage": "https://dezande.github.io/mes-tours/",
 	"kit": {
 		"name": "Mes tours",
 		"cachePrefix": "mes-tours",

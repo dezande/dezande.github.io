@@ -2,7 +2,7 @@
 
 Toutes les versions de Mes tours, de la plus récente à la plus ancienne.
 
-Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. Chaque version correspond à un tag git et à une [Release GitHub](https://github.com/dezande/dezande.github.io/releases).
+Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. Chaque version correspond à un tag git et à une [Release GitHub](https://github.com/dezande/mes-tours/releases).
 
 **Chaque changement s'écrit ici**, sous « Non publié », dans le même commit que le changement lui-même : la vérification du kit (`npm run check:changelog`) contrôle la forme du journal et refuse un changement qui ne s'explique pas, en pull request comme sur `main`. Publier une version, c'est renommer « Non publié » en numéro de version et poser le tag.
 
@@ -24,6 +24,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 - Un seul service worker met toute l'application en cache, tours compris : tout fonctionne hors-ligne dès la première ouverture avec du réseau. Une nouvelle version ne s'affiche jamais en plein tour.
 - Tests : les tests unitaires des quatre tours sont repris (178 en tout), et 12 tests dans Chrome jouent chaque routine en entier jusqu'au retour au menu, l'écrou ⚙, la sortie de secours, le geste retour et le hors-ligne.
 - **L'écrou ⚙ redessiné** : sa roue dentée, tracée à la main, n'était pas symétrique, et le trou ne tombait pas au milieu. Ses huit dents sont maintenant calculées autour du même centre que le trou.
+- **Le dépôt s'appelle désormais `mes-tours`, et l'app a une nouvelle adresse : https://dezande.github.io/mes-tours/.** Elle était à la racine du site pour couvrir les dossiers des autres tours ; maintenant qu'elle contient sa propre copie de chacun, elle n'en a plus besoin. Son identifiant devient `/mes-tours/`, son périmètre son propre dossier. La racine `https://dezande.github.io/` ne montre plus rien : l'app installée depuis l'ancienne adresse est à désinstaller, puis à réinstaller depuis la nouvelle. Les réglages des tours sont gardés (même site).
 
 ## [0.1.0] — 2026-10-02
 
@@ -60,4 +61,4 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
-[0.1.0]: https://github.com/dezande/dezande.github.io/releases/tag/v0.1.0
+[0.1.0]: https://github.com/dezande/mes-tours/releases/tag/v0.1.0

@@ -1,6 +1,6 @@
 # Mes tours
 
-Tous mes accessoires de scène dans **une seule application** : https://dezande.github.io/
+Tous mes accessoires de scène dans **une seule application** : https://dezande.github.io/mes-tours/
 
 | Tour | Fin de la routine (retour au menu) | Copie de |
 | --- | --- | --- |
@@ -24,10 +24,12 @@ Les réglages de chaque tour (dos des cartes, délai, routine de la boule, langu
 
 ### Installer sur le téléphone
 
-1. Ouvrir https://dezande.github.io/ dans Chrome, puis ⋮ → *Installer et créer un raccourci* → **Installer**. Sur iPhone : Safari → Partager → *Sur l'écran d'accueil*.
+1. Ouvrir https://dezande.github.io/mes-tours/ dans Chrome, puis ⋮ → *Installer et créer un raccourci* → **Installer**. Sur iPhone : Safari → Partager → *Sur l'écran d'accueil*.
 2. L'ouvrir une fois avec du réseau : **toute l'app, tours compris**, est alors en cache, et fonctionne ensuite sans réseau.
 
-Une seule app installée : Chrome sur Android ne gère bien qu'une app installée par site, et c'est pour cela que tous les tours sont dedans.
+Une seule app installée : Chrome sur Android ne gère bien qu'une app installée par site (`dezande.github.io`), et c'est pour cela que tous les tours sont dedans. N'installer aucun tour seul à côté.
+
+Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.github.io/`, dépôt `dezande.github.io`). Elle a été déplacée dans son dossier, dépôt `mes-tours`, quand elle a contenu ses propres copies des tours : une app installée depuis l'ancienne adresse est à désinstaller, puis à réinstaller depuis la nouvelle.
 
 ## Comment c'est fait
 
@@ -48,7 +50,7 @@ Une seule app installée : Chrome sur Android ne gère bien qu'une app installé
 
 Les mêmes règles que les autres apps, énoncées une fois dans le [kit](https://github.com/dezande/kit-scene#règles-de-la-branche-main) : `main` protégée, pull request, fusion en rebase, CI verte (« Types, tests, build et tests dans Chrome »), une ligne dans le [journal des versions](CHANGELOG.md) pour chaque changement. Chaque fusion sur `main` publie le site.
 
-**Le service worker** est celui du kit, à partir de la v1.3.1 : à la racine du site, il contrôle aussi les anciennes adresses des tours, et ne doit renvoyer sa propre page que pour sa propre adresse — un test dans Chrome le vérifie.
+**Le service worker** est celui du kit, à partir de la v1.3.1 : il ne renvoie la page de l'app que pour sa propre adresse, jamais pour une autre page du site — un test dans Chrome le vérifie.
 
 ```sh
 git submodule update --init   # après un clone : récupère le kit
