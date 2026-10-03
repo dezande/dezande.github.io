@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.10.0] | 22 | 2026-10-03 | La carte de visite, nouveau tour en largeur ; dans le navigateur, le menu dit que c'est une app |
 | [0.9.0] | 20 | 2026-10-03 | À la fin de la routine, on reste dans le tour ; l'appui de 3 s ramène au menu |
 | [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
 | [0.8.1] | 18 | 2026-10-03 | Les dos de cartes symétriques, de haut en bas et de gauche à droite |
@@ -29,13 +30,17 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ---
 
-## [Non publié]
+## [0.10.0] — 2026-10-03
+
+22 commits
 
 - **Les deux routines de la boule de cristal sont séparées.**
   - **Boule de cristal** : plus de choix de routine dans ses réglages, elle ne joue plus que les 3 boulettes (3 bandes : 6 en haut, 16 au milieu, 26 en bas), rappelées dans les réglages. Une routine Arcane Système enregistrée par une ancienne version est oubliée ; le délai, le fondu, la luminosité et la jauge sont gardés.
   - **Carte de visite**, un nouveau tour pour la routine Arcane Système, **joué téléphone tenu en largeur** (la scène et le test des zones pivotent en paysage, par un verrou propre au tour à la place du verrou portrait du kit ; les réglages restent en portrait) : sur une vieille table de trois planches de chêne dans la longueur (aboutements, clous, nœud, rayures), la carte de visite du **Théâtre Robert-Houdin**, le vrai théâtre de magie de Jean-Eugène Robert-Houdin, ouvert en 1845, repris par Georges Méliès en 1888, au 8, boulevard des Italiens, démoli en 1924 ; au recto, ses « Soirées fantastiques ». Les gestes de la boule : toucher un des 4 coins (17, 19, 21, 23 dans le sens de la lecture) ; après le délai, la carte se retourne et montre au dos le numéro seul, en grand, écrit à la plume ; le double toucher la remet sur son recto, prête pour un nouveau tour ; l'appui de 3 s ramène au menu. Réglages : délai, durée du retournement, luminosité, jauge et test des zones.
 - Le menu a cinq tuiles ; l'icône en pixels de la carte de visite (la carte et une clef en laiton) est engendrée par `outils/icones-16-bits.py`. L'icône de l'app garde ses quatre icônes.
 - Tests : réglages et verrou paysage de la carte de visite, et dans Chrome ses quatre coins jusqu'au retour au menu, et la boule sans choix de routine.
+- **Ouverte dans le navigateur, l'app dit qu'elle est une app.** En bas du menu, un bandeau « Mes tours est une app » explique comment l'installer pour l'avoir en plein écran, même hors-ligne : Partager → *Sur l'écran d'accueil* sur iPhone, menu ⋮ → *Installer l'application* ailleurs. Quand Chrome propose lui-même l'installation, un bouton **Installer** l'ouvre directement. Installée, l'app n'affiche pas le bandeau.
+- Test dans Chrome : le bandeau s'affiche dans le navigateur, en français comme en anglais, sous les tuiles, et disparaît une fois l'app installée.
 
 ## [0.9.0] — 2026-10-03
 
@@ -230,6 +235,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.10.0]: https://github.com/dezande/mes-tours/releases/tag/v0.10.0
 [0.9.0]: https://github.com/dezande/mes-tours/releases/tag/v0.9.0
 [0.8.2]: https://github.com/dezande/mes-tours/releases/tag/v0.8.2
 [0.8.1]: https://github.com/dezande/mes-tours/releases/tag/v0.8.1

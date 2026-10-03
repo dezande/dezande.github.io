@@ -29,6 +29,12 @@
 			<p class="invite" aria-hidden="true"></p>
 			<!-- Une tuile par tour, construites par src/menu.ts depuis src/content/tours.ts. -->
 			<nav id="tours"></nav>
+			<!-- Ouverte dans le navigateur, et non installée : dire que c'est une app (src/installation.ts). -->
+			<aside id="installation" hidden>
+				<p class="installation-titre"></p>
+				<p class="installation-comment"></p>
+				<button type="button" class="installation-bouton" hidden></button>
+			</aside>
 			<p id="version"></p>
 		</main>
 	</div>

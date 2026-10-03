@@ -19,4 +19,20 @@ export const TEXTES = {
 	// « Réglages : Pile ou face » — le français met une espace avant les deux-points, pas l'anglais.
 	reglagesDe: { fr: 'Réglages : ', en: 'Settings: ' },
 	version: { fr: 'Version', en: 'Version' },
+	// Le bandeau d'installation, quand l'app est ouverte dans le navigateur (src/installation.ts).
+	installationTitre: { fr: 'Mes tours est une app', en: 'Mes tours is an app' },
+	installationIphone: {
+		fr: 'Installe-la pour l’avoir en plein écran, même hors-ligne : Partager → Sur l’écran d’accueil.',
+		en: 'Install it to get it full screen, even offline: Share → Add to Home Screen.',
+	},
+	installationAutres: {
+		fr: 'Installe-la pour l’avoir en plein écran, même hors-ligne : menu ⋮ → Installer l’application.',
+		en: 'Install it to get it full screen, even offline: menu ⋮ → Install app.',
+	},
+	// Quand le navigateur propose lui-même l'installation : le bouton suffit.
+	installationDirecte: {
+		fr: 'Installe-la pour l’avoir en plein écran, même hors-ligne.',
+		en: 'Install it to get it full screen, even offline.',
+	},
+	installer: { fr: 'Installer', en: 'Install' },
 } as const satisfies Record<string, Texte>;
