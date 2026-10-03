@@ -1,4 +1,4 @@
-// La liste des tours (src/content/tours.ts) : bien formée, et chaque tour a son icône.
+// La liste des tours (src/content/tours.ts) : bien formée, et chaque tour a sa copie dans l'app.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
@@ -16,6 +16,9 @@ test('chaque tour a un dossier valide, un nom et une description', () => {
 	}
 });
 
-test('chaque tour a son icône dans public/tours/', () => {
-	for (const tour of TOURS) assert.ok(existsSync(`public/tours/${tour.dossier}.png`), `public/tours/${tour.dossier}.png manquant`);
+test('chaque tour a sa copie dans l’app : sa page et son code', () => {
+	for (const tour of TOURS) {
+		assert.ok(existsSync(`public/tours/${tour.dossier}/index.html`), `public/tours/${tour.dossier}/index.html manquant`);
+		assert.ok(existsSync(`src/tours/${tour.dossier}/app.ts`), `src/tours/${tour.dossier}/app.ts manquant`);
+	}
 });

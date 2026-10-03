@@ -10,10 +10,25 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.3.0] | 7 | 2026-10-03 | Le menu principal en pixel art, façon console 8 bits |
 | [0.2.0] | 6 | 2026-10-03 | Tous les tours dans une seule application, un écrou ⚙ par tour, à sa nouvelle adresse |
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.3.0] — 2026-10-03
+
+7 commits
+
+Le menu principal passe en pixel art, façon console 8 bits. Les tours eux-mêmes ne changent pas : ce que voit le public reste identique.
+
+- **Une palette réduite** de console (« Sweetie 16 ») sur un ciel de nuit à étoiles carrées, avec de légères lignes de balayage.
+- **Une police pixel, Press Start 2P**, embarquée avec l'app comme Caveat : 5 ko, lettres accentuées comprises, sous licence SIL OFL 1.1 ; elle fonctionne hors-ligne.
+- **Des cadres aux coins crénelés** et des ombres sans flou ; un bouton touché s'enfonce d'un pixel et passe en bleu et or.
+- **« Choisis un tour » clignote** sous le titre, comme l'écran titre d'un jeu (immobile si le téléphone demande de réduire les animations).
+- **Les icônes des tours redessinées en pixels** : la boule sur son pied doré, la carte et sa pièce de 20 centimes, l'éventail de cartes, le pique de l'analyseur dans son orbite. Chacune est une grille de 16 × 16 dans `src/content/pixels.ts` ; les copies PNG des icônes des tours disparaissent.
+- **L'écrou ⚙ en pixels**, calculé et non dessiné à la main : symétrique dans tous les sens, son trou de 4 × 4 pixels au centre exact — les tests le vérifient.
+- **L'icône de l'app** reprend les quatre icônes en pixels, chacune dans son cadre.
 
 ## [0.2.0] — 2026-10-03
 
@@ -64,5 +79,6 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.3.0]: https://github.com/dezande/mes-tours/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dezande/mes-tours/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dezande/mes-tours/releases/tag/v0.1.0
