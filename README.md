@@ -39,7 +39,7 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 ## Comment c'est fait
 
-**Une app React classique**, construite par [Vite](https://vite.dev/) : TypeScript, React 19, React Router, Sass. Une seule page (`index.html`) ; chaque tour a son adresse après le « # » :
+**Une app à composants classique**, construite par [Vite](https://vite.dev/) : TypeScript, [Preact](https://preactjs.com/) (l'API de React — composants, hooks, JSX — en 4 ko), Sass, et un routeur maison ([`src/routeur.ts`](src/routeur.ts), quelques dizaines de lignes). Une seule page (`index.html`) ; chaque tour a son adresse après le « # » :
 
 | Adresse | Page |
 | --- | --- |
@@ -49,14 +49,15 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 L'adresse après le « # » ne change pas la page demandée au serveur : le service worker n'a qu'une page à servir, et chaque tour s'ouvre hors-ligne.
 
-**Les adresses sont strictes** : une route exacte par tour publié, sensible à la casse, et `?reglages` comme seul paramètre. Toute autre adresse (un nom inventé, une majuscule, un « / » final, un paramètre inconnu) ramène au menu ; `tests/composants/Adresses.test.tsx` en essaie une douzaine. Le site étant public, tout ce qui est publié peut être lu : **un tour en préparation reste hors du registre** (`src/tours/registre.ts`), et son code n'est alors pas compilé du tout. Le registre et la liste des tours doivent nommer les mêmes tours (un test le vérifie).
+**Les adresses sont strictes** : une route exacte par tour publié, sensible à la casse, et `?reglages` comme seul paramètre. Toute autre adresse (un nom inventé, une majuscule, un « / » final, un paramètre inconnu) ramène au menu : l'adresse est comparée telle quelle, caractère pour caractère, sans rien décoder ([`src/logic/adresses.ts`](src/logic/adresses.ts)) ; `tests/logic/adresses.test.ts` et `tests/composants/Adresses.test.tsx` en essaient une vingtaine. Le site étant public, tout ce qui est publié peut être lu : **un tour en préparation reste hors du registre** (`src/tours/registre.ts`), et son code n'est alors pas compilé du tout. Le registre et la liste des tours doivent nommer les mêmes tours (un test le vérifie).
 
 ```
-index.html              la page de l'app (React s'y monte dans #app)
+index.html              la page de l'app (Preact s'y monte dans #app)
 vite.config.ts          le build
 src/
   main.tsx              démarrage : verrou portrait, écran allumé, mises à jour, rendu de <App />
-  App.tsx               les adresses (React Router)
+  App.tsx               le menu, ou le tour demandé par l'adresse
+  routeur.ts            le routeur maison : suit l'adresse, navigue dans l'historique
   pages/                Menu.tsx (le menu 16 bits), PageTour.tsx (la page qui accueille un tour)
   components/           les briques des tours (voir « Ajouter un tour ») : PanneauReglages,
                         JaugeAppui, BoutonTactile, PixelArt ; cartes/ (tours à cartes),
@@ -76,11 +77,11 @@ src/
   kit/                  code commun des accessoires de scène (sous-module kit-scene)
   sw/                   compilation du service worker du kit
 public/                 copié tel quel : manifeste, icônes, captures, licences des polices
-tests/                  Jest : logic/ (logique partagée) et tours/ (unitaires), composants/ (React),
+tests/                  Jest : logic/ (logique partagée) et tours/ (unitaires), composants/ (Preact),
                         e2e/ (Chrome)
 ```
 
-- **Chaque tour vient de son app d'origine** ([boule-de-cristal](https://github.com/dezande/boule-de-cristal), [pile-ou-face](https://github.com/dezande/pile-ou-face), [six-predictions](https://github.com/dezande/six-predictions), [analyseur-q](https://github.com/dezande/analyseur-q) ; la carte de visite est née ici, de l'ancienne routine Arcane Système de la boule) : sa logique (`logic/`) et ses textes (`content/`) sont repris tels quels, avec leurs tests ; son affichage est réécrit en composants React. Les dépôts d'origine ne sont pas touchés.
+- **Chaque tour vient de son app d'origine** ([boule-de-cristal](https://github.com/dezande/boule-de-cristal), [pile-ou-face](https://github.com/dezande/pile-ou-face), [six-predictions](https://github.com/dezande/six-predictions), [analyseur-q](https://github.com/dezande/analyseur-q) ; la carte de visite est née ici, de l'ancienne routine Arcane Système de la boule) : sa logique (`logic/`) et ses textes (`content/`) sont repris tels quels, avec leurs tests ; son affichage est réécrit en composants Preact. Les dépôts d'origine ne sont pas touchés.
 - **Les styles de chaque tour sont rangés sous sa classe** (`.scene-<dossier>`, posée par `PageTour`, avec `meta.load-css` dans `src/styles/tours/<dossier>/_index.scss`) : tous chargés ensemble dans une seule feuille, ils ne se marchent jamais dessus. Les `@keyframes`, qui valent pour toute la page, sont préfixés par tour (`boule-`, `cdv-`, `pof-`, `six-`, `aq-`). Le fond derrière l'app et la couleur de la barre du téléphone suivent le tour ouvert (`html[data-tour]`).
 - **Le pont** ([`src/tours/pont.tsx`](src/tours/pont.tsx)) : à l'appui de 3 s, à Échap / M, ou quand ses réglages se ferment, le tour revient au menu (`quitter()`), par l'historique — le menu réapparaît, et l'historique ne grandit pas. La fin de la routine, elle, remet le tour en place sans le quitter. Ouvert par l'écrou, le tour n'affiche que son panneau de réglages (`enReglages`), dans la langue du menu.
 - **Les boutons agissent au lever du doigt**, appui bref ou long (`useSurToucher` pour le menu, `useBoutonsTactiles` pour les réglages) : sur Android, un doigt qui reste posé sur un bouton devient un appui long, et le navigateur n'envoie pas de clic.
@@ -145,9 +146,9 @@ Un tour à cartes ajoute `cartes.tapis`, `cartes.cartes(…)` et `cartes.vignett
 
 Les mêmes règles que les autres apps, énoncées une fois dans le [kit](https://github.com/dezande/kit-scene#règles-de-la-branche-main) : `main` protégée, pull request, fusion en rebase, CI verte (« Types, tests, build et tests dans Chrome »), une ligne dans le [journal des versions](CHANGELOG.md) pour chaque changement. Chaque fusion sur `main` publie le site.
 
-**Le build** (Vite) compile React et Sass en `dist/app.js` et `dist/style.css`, chaque tour dans son propre fichier (chargé à sa première ouverture), polices et images dans `dist/assets/`. La fin du build est celle du kit : le service worker, la vérification de `dist/` et le numéro de version (`dist/kit/web/build.js`, que Vite garde à part pour le kit). La Content-Security-Policy n'est ajoutée qu'au build : le serveur de développement de Vite injecte ses styles en ligne.
+**Le build** (Vite) compile Preact et Sass en `dist/app.js` et `dist/style.css`, chaque tour dans son propre fichier (chargé à sa première ouverture), polices et images dans `dist/assets/`. La fin du build est celle du kit : le service worker, la vérification de `dist/` et le numéro de version (`dist/kit/web/build.js`, que Vite garde à part pour le kit). La Content-Security-Policy n'est ajoutée qu'au build : le serveur de développement de Vite injecte ses styles en ligne.
 
-**Les tests, tous avec [Jest](https://jestjs.io/)** (compilés par SWC, configuration dans [`jest.config.js`](jest.config.js)) : la logique pure sous Node, les composants React dans jsdom avec [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), et l'app compilée dans un vrai Chrome sans interface. `expect(valeur, 'message')` dit ce qui a échoué ([jest-expect-message](https://github.com/mattphillips/jest-expect-message)).
+**Les tests, tous avec [Jest](https://jestjs.io/)** (compilés par SWC, configuration dans [`jest.config.js`](jest.config.js)) : la logique pure sous Node, les composants dans jsdom avec [Preact Testing Library](https://testing-library.com/docs/preact-testing-library/intro/), et l'app compilée dans un vrai Chrome sans interface. `expect(valeur, 'message')` dit ce qui a échoué ([jest-expect-message](https://github.com/mattphillips/jest-expect-message)).
 
 **Le service worker** est celui du kit, à partir de la v1.3.1 : il ne renvoie la page de l'app que pour sa propre adresse, jamais pour une autre page du site — un test dans Chrome le vérifie.
 

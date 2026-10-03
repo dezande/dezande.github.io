@@ -12,7 +12,7 @@
  *   enregistrer(null);                         // réglages par défaut
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from 'preact/hooks';
 import { readStored, writeStored } from '../kit/web/storage.ts';
 
 export function useReglagesEnregistres<T>(cle: string, valider: (brut: unknown) => T, ...anciennesCles: string[]): [T, (suivants: T | null) => void] {

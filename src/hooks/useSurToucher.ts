@@ -14,7 +14,8 @@
  * touchend doit être « non passif » pour annuler le clic qui suivrait.
  */
 
-import { useEffect, useRef, type RefObject } from 'react';
+import type { RefObject } from 'preact';
+import { useEffect, useRef } from 'preact/hooks';
 
 /** Distance au-delà de laquelle le doigt a glissé : ce n'est plus un appui sur le bouton. */
 const GLISSEMENT_PX = 24;

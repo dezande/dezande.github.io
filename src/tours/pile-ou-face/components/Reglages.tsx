@@ -31,7 +31,7 @@ export function Reglages({ reglages, langue, enregistrer }: Props) {
 				<label className="row-label slider-label" htmlFor="delai">
 					<span>{ui('menu.delai', langue)}</span> <output id="delai-valeur" htmlFor="delai">{delai}</output>
 				</label>
-				<input id="delai" type="range" min="0" max={DELAI_MAX} step="0.5" value={reglages.delai} onChange={(event) => changer({ delai: Number(event.target.value) })} />
+				<input id="delai" type="range" min="0" max={DELAI_MAX} step="0.5" value={reglages.delai} onInput={(event) => changer({ delai: Number(event.currentTarget.value) })} />
 				<p className="hint slider-hint">{ui('menu.delaiAide', langue)}</p>
 			</div>
 

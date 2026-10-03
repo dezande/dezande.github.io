@@ -13,7 +13,8 @@
  * place et ajusté quand la carte se retourne, sans le moindre calcul sous les yeux du public.
  */
 
-import { Fragment, useCallback, useLayoutEffect, useRef } from 'react';
+import { Fragment } from 'preact';
+import { useCallback, useLayoutEffect, useRef } from 'preact/hooks';
 import { DosDeCarte } from '../../../components/cartes/DosDeCarte.tsx';
 import { Soulignement } from '../../../components/cartes/Soulignement.tsx';
 import { useReajustement } from '../../../hooks/useReajustement.ts';

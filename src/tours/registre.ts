@@ -11,34 +11,34 @@
  * tours (tests/logic/tours.test.ts).
  */
 
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
+import type { ComponentType } from 'preact';
 
 export interface EntreeDuRegistre {
-	/** Le tour lui-même : sa scène, et ses réglages quand il est ouvert par l'écrou ⚙. */
-	Composant: LazyExoticComponent<ComponentType>;
+	/** Charge le tour lui-même (sa scène, et ses réglages quand il est ouvert par l'écrou ⚙). */
+	charger: () => Promise<{ default: ComponentType }>;
 	/** La couleur de la barre du téléphone (meta theme-color), celle du fond du tour. */
 	couleurTheme: string;
 }
 
 export const REGISTRE: Readonly<Record<string, EntreeDuRegistre>> = {
 	'boule-de-cristal': {
-		Composant: lazy(() => import('./boule-de-cristal/index.tsx')),
+		charger: () => import('./boule-de-cristal/index.tsx'),
 		couleurTheme: '#05020b',
 	},
 	'carte-de-visite': {
-		Composant: lazy(() => import('./carte-de-visite/index.tsx')),
+		charger: () => import('./carte-de-visite/index.tsx'),
 		couleurTheme: '#140b05',
 	},
 	'pile-ou-face': {
-		Composant: lazy(() => import('./pile-ou-face/index.tsx')),
+		charger: () => import('./pile-ou-face/index.tsx'),
 		couleurTheme: '#071a0f',
 	},
 	'six-predictions': {
-		Composant: lazy(() => import('./six-predictions/index.tsx')),
+		charger: () => import('./six-predictions/index.tsx'),
 		couleurTheme: '#071a0f',
 	},
 	'analyseur-q': {
-		Composant: lazy(() => import('./analyseur-q/index.tsx')),
+		charger: () => import('./analyseur-q/index.tsx'),
 		couleurTheme: '#0b0b0d',
 	},
 };
@@ -48,9 +48,6 @@ export const REGISTRE: Readonly<Record<string, EntreeDuRegistre>> = {
  * inventé, ni un nom hérité de tout objet JavaScript (« constructor », « __proto__ »…).
  */
 export const entreeDuRegistre = (dossier: string): EntreeDuRegistre | null => (Object.hasOwn(REGISTRE, dossier) ? REGISTRE[dossier]! : null);
-
-/** L'adresse d'un tour dans l'app ; `reglages` : seulement ses réglages (écrou ⚙). */
-export const adresseDuTour = (dossier: string, reglages = false): string => `/tours/${dossier}${reglages ? '?reglages' : ''}`;
 
 /** Un tour est-il ouvert ? (Une nouvelle version ne s'installe jamais pendant un tour.) */
 export const estDansUnTour = (): boolean => location.hash.startsWith('#/tours/');

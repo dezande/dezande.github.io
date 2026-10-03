@@ -1,13 +1,14 @@
 /*
  * Mes tours : point d'entrée de l'app.
  *
- * Tous les accessoires de scène dans une seule app React, publiée sur https://dezande.github.io/mes-tours/.
+ * Tous les accessoires de scène dans une seule app Preact (l'API de React, en 4 ko), publiée sur https://dezande.github.io/mes-tours/.
  * Le menu principal lance chaque tour en plein écran ; l'écrou ⚙ de sa tuile ouvre ses réglages ;
  * l'appui de 3 s pendant un tour ramène au menu.
  *
  * Organisation de src/ :
  *   main.tsx     ce fichier : démarrage, écran allumé, mises à jour automatiques
  *   App.tsx      les pages : le menu (#/) et chaque tour (#/tours/<dossier>)
+ *   routeur.ts   le routeur maison : suit l'adresse, navigue dans l'historique
  *   pages/       le menu principal, et la page qui accueille un tour
  *   components/  composants partagés : boutons tactiles, panneau de réglages, jauge, dos de cartes…
  *   hooks/       hooks partagés (toucher au lever du doigt)
@@ -24,8 +25,7 @@
 
 // Rotation calculée avant tout le reste : l'app reste en portrait, et #app doit déjà exister.
 import './kit/web/orientation.ts';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { render } from 'preact';
 import { App } from './App.tsx';
 import { requestPersistentStorage } from './kit/web/storage.ts';
 import { setupUpdates } from './kit/web/updates.ts';
@@ -41,8 +41,4 @@ void requestPersistentStorage();
 // attend l'ouverture suivante. Le service worker n'existe qu'après le build : pas en développement.
 if (import.meta.env.PROD) setupUpdates({ canReload: () => !estDansUnTour() });
 
-createRoot(document.getElementById('app')!).render(
-	<StrictMode>
-		<App />
-	</StrictMode>,
-);
+render(<App />, document.getElementById('app')!);

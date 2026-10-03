@@ -6,7 +6,7 @@
  *   useQuandLAppSeCache(() => gestes.reset());
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'preact/hooks';
 
 export function useQuandLAppSeCache(action: () => void): void {
 	// Toujours la dernière action, sans rebrancher l'écouteur à chaque rendu.

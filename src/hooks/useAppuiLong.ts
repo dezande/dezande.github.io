@@ -15,7 +15,7 @@
  * L'appui s'arrête aussi quand l'app passe en arrière-plan, et quand le tour se ferme.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'preact/hooks';
 import { useJaugeAppui } from '../components/JaugeAppui.tsx';
 import { useQuandLAppSeCache } from './useQuandLAppSeCache.ts';
 

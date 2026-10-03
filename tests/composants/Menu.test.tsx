@@ -1,5 +1,5 @@
 // Le menu principal (src/pages/Menu.tsx) : une tuile par tour, son écrou ⚙, la langue FR / EN.
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/preact';
 import { App } from '../../src/App.tsx';
 import { TOURS } from '../../src/content/tours.ts';
 import { APP_VERSION } from '../../src/version.ts';
@@ -52,7 +52,9 @@ test('un appui long sur une tuile agit au lever du doigt, sans attendre de clic'
 
 test('l’écrou ⚙ ouvre seulement les réglages du tour', async () => {
 	render(<App />);
-	await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Réglages : Pile ou face' })));
+	await act(async () => {
+		fireEvent.click(screen.getByRole('button', { name: 'Réglages : Pile ou face' }));
+	});
 	expect(window.location.hash).toBe('#/tours/pile-ou-face?reglages');
 });
 

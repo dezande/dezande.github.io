@@ -10,7 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
-| [1.0.0] | 25 | 2026-10-03 | L'app réécrite en React, styles et images regroupés, tests avec Jest |
+| [1.0.0] | 26 | 2026-10-03 | L'app réécrite en composants (Preact), styles et images regroupés, tests avec Jest |
 | [0.10.0] | 22 | 2026-10-03 | La carte de visite, nouveau tour en largeur ; dans le navigateur, le menu dit que c'est une app |
 | [0.9.0] | 20 | 2026-10-03 | À la fin de la routine, on reste dans le tour ; l'appui de 3 s ramène au menu |
 | [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
@@ -33,14 +33,14 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ## [1.0.0] — 2026-10-03
 
-25 commits
+26 commits
 
-- **L'app est réécrite en React**, construite par Vite, comme une app classique, avant d'y ajouter d'autres tours ; la carte de visite et le bandeau d'installation de la 0.10.0 compris. Pour l'artiste, rien ne change : les mêmes tours, les mêmes gestes, les mêmes réglages (gardés sur le téléphone).
-  - Une seule page : le menu et chaque tour sont des pages React (`#/`, `#/tours/<dossier>`), un tour chargé à sa première ouverture. Le menu, le panneau de réglages, la jauge de l'appui long, les boutons qui agissent au lever du doigt et les dos de cartes sont des composants partagés.
+- **L'app est réécrite en composants, avec [Preact](https://preactjs.com/)** (l'API de React en 4 ko), construite par Vite, comme une app classique, avant d'y ajouter d'autres tours ; la carte de visite et le bandeau d'installation de la 0.10.0 compris. Pour l'artiste, rien ne change : les mêmes tours, les mêmes gestes, les mêmes réglages (gardés sur le téléphone).
+  - Une seule page : le menu et chaque tour sont des pages (`#/`, `#/tours/<dossier>`), suivies par un routeur maison, un tour chargé à sa première ouverture. **Le code chargé à l'ouverture de l'app pèse 34 ko (13 ko compressé)** : avec React et React Router, il en pesait 276 (88 compressé). Le menu, le panneau de réglages, la jauge de l'appui long, les boutons qui agissent au lever du doigt et les dos de cartes sont des composants partagés.
   - **Tous les styles Sass sont réunis dans `src/styles/`**, un dossier par tour, rangés sous la classe du tour pour qu'ils ne se marchent pas dessus ; **les polices et les images dans `src/assets/`**.
   - La logique de chaque tour et ses tests sont repris tels quels ; le code qui ne servait qu'aux tours ouverts seuls (aide, version, choix de langue, état de l'écran) est retiré.
   - La Boule de cristal répond aussi au clavier : R efface le nombre, Échap ou M ramène au menu.
-- **Les tests passent à Jest** : les tests unitaires, de nouveaux tests des composants React (React Testing Library) et les tests dans Chrome.
+- **Les tests passent à Jest** : les tests unitaires, de nouveaux tests des composants (Preact Testing Library) et les tests dans Chrome.
 - **Les doublons d'un tour à l'autre sont mis en commun**, et chaque brique est documentée pour les prochains tours (README, « Les briques communes ») :
   - la logique pure partagée dans `src/logic/` : langues, gestes à double toucher, gestes et découpage des tours à zones, verrou paysage, réglages des tours à zones, ajustement du texte — avec leurs tests, une seule fois chacun ;
   - des hooks pour ce que tous les tours refaisaient : l'appui de 3 s et sa jauge, le clavier, l'arrière-plan, l'ouverture sans transition, le réajustement du texte, les gestes à double toucher ;

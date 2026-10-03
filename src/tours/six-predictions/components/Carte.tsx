@@ -13,7 +13,8 @@
  * se retourne sans le moindre calcul de mise en page au moment où le doigt la touche.
  */
 
-import { Fragment, useCallback, useLayoutEffect, useRef, type CSSProperties } from 'react';
+import { Fragment } from 'preact';
+import { useCallback, useLayoutEffect, useRef } from 'preact/hooks';
 import { DosDeCarte } from '../../../components/cartes/DosDeCarte.tsx';
 import { Soulignement } from '../../../components/cartes/Soulignement.tsx';
 import { useReajustement } from '../../../hooks/useReajustement.ts';
@@ -86,7 +87,7 @@ export function Carte({ index, place, retournee, lisible, cran, langue, dessin, 
 	 * Le bloc est mesuré sans sa rotation (`offsetWidth`, que les transformations ne changent pas),
 	 * et son encombrement une fois penché est calculé : la mesure ne dépend donc ni de l'inclinaison
 	 * de la carte dans le paquet, ni de sa réduction au fond de la pile. --fit et --angle sont posés
-	 * directement sur la carte : React ne les connaît pas, et ne les efface donc jamais.
+	 * directement sur la carte : Preact ne les connaît pas, et ne les efface donc jamais.
 	 */
 	const fit = useCallback(() => {
 		const el = carteRef.current;
@@ -140,7 +141,7 @@ export function Carte({ index, place, retournee, lisible, cran, langue, dessin, 
 		'--dx': String(cran.dx),
 		'--rot': String(cran.rot),
 		'--rang': String(index),
-	} as CSSProperties;
+	};
 
 	return (
 		<article

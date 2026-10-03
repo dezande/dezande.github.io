@@ -8,7 +8,7 @@
  * graine fixe, dans un ordre fixe. Il est tracé une fois, au chargement du tour : la table est un décor.
  */
 
-import { Fragment, type ReactElement } from 'react';
+import { Fragment, type VNode } from 'preact';
 
 const PLANCHES = 3;
 /** Largeur d'une planche, en pourcentage de la hauteur de la scène. */
@@ -27,7 +27,7 @@ function generateur(graine: number): () => number {
 }
 
 /** Le filtre du bois d'une planche : veines, teinte de la planche, pores. */
-function filtreBois(id: string, i: number, hasard: () => number): ReactElement {
+function filtreBois(id: string, i: number, hasard: () => number): VNode {
 	// Le fil : un bruit très étiré dans la longueur de la planche (horizontale).
 	const frequence = `0.0016 ${(0.018 + hasard() * 0.01).toFixed(4)}`;
 	// Ses courbes de niveau : une table en dents de scie fait des veines serrées et nettes, comme sur
@@ -37,7 +37,7 @@ function filtreBois(id: string, i: number, hasard: () => number): ReactElement {
 	const t = 0.8 + hasard() * 0.35;
 	const r = (v: number): string => (v * t).toFixed(3);
 	return (
-		<filter key={id} id={id} x={0} y={0} width={1} height={1} colorInterpolationFilters="sRGB">
+		<filter key={id} id={id} x={0} y={0} width={1} height={1} color-interpolation-filters="sRGB">
 			<feTurbulence type="fractalNoise" baseFrequency={frequence} numOctaves={5} seed={7 + i * 13} result="fil" />
 			<feComponentTransfer in="fil" result="veines">
 				<feFuncR type="table" tableValues={veines.join(' ')} />
@@ -52,10 +52,10 @@ function filtreBois(id: string, i: number, hasard: () => number): ReactElement {
 }
 
 /** Le dessin de la table : les tirages se font dans le même ordre que les éléments. */
-function dessiner(): ReactElement {
+function dessiner(): VNode {
 	const hasard = generateur(1845);
-	const filtres: ReactElement[] = [];
-	const planches: ReactElement[] = [];
+	const filtres: VNode[] = [];
+	const planches: VNode[] = [];
 
 	for (let i = 0; i < PLANCHES; i++) {
 		const y = i * LARGEUR;
@@ -65,7 +65,7 @@ function dessiner(): ReactElement {
 		// Un aboutement : la planche est faite de deux longueurs, jointes à un endroit différent pour
 		// chaque planche, avec deux clous de part et d'autre.
 		const x = 12 + hasard() * 76;
-		const clous: ReactElement[] = [];
+		const clous: VNode[] = [];
 		for (const dx of [-1, 1]) {
 			for (const dy of [0.22, 0.78]) {
 				clous.push(
@@ -79,27 +79,27 @@ function dessiner(): ReactElement {
 		planches.push(
 			<Fragment key={id}>
 				<rect x={0} y={`${y}%`} width="100%" height={`${LARGEUR}%`} filter={`url(#${id})`} />
-				<line x1={`${x}%`} x2={`${x}%`} y1={`${y}%`} y2={`${y + LARGEUR}%`} stroke="#0d0602" strokeWidth={2.5} strokeOpacity={0.85} />
-				<line x1={`${x}%`} x2={`${x}%`} y1={`${y}%`} y2={`${y + LARGEUR}%`} stroke="#c79a64" strokeWidth={1} strokeOpacity={0.12} transform="translate(2 0)" />
+				<line x1={`${x}%`} x2={`${x}%`} y1={`${y}%`} y2={`${y + LARGEUR}%`} stroke="#0d0602" stroke-width={2.5} stroke-opacity={0.85} />
+				<line x1={`${x}%`} x2={`${x}%`} y1={`${y}%`} y2={`${y + LARGEUR}%`} stroke="#c79a64" stroke-width={1} stroke-opacity={0.12} transform="translate(2 0)" />
 				{clous}
 			</Fragment>,
 		);
 	}
 
 	// Les joints entre planches : un creux sombre, et le chant de la planche voisine qui accroche la lumière.
-	const joints: ReactElement[] = [];
+	const joints: VNode[] = [];
 	for (let i = 1; i < PLANCHES; i++) {
 		const y = `${i * LARGEUR}%`;
 		joints.push(
 			<Fragment key={i}>
-				<line x1={0} x2="100%" y1={y} y2={y} stroke="#0a0402" strokeWidth={4} />
-				<line x1={0} x2="100%" y1={y} y2={y} stroke="#d1a46c" strokeWidth={1} strokeOpacity={0.16} transform="translate(0 2.5)" />
+				<line x1={0} x2="100%" y1={y} y2={y} stroke="#0a0402" stroke-width={4} />
+				<line x1={0} x2="100%" y1={y} y2={y} stroke="#d1a46c" stroke-width={1} stroke-opacity={0.16} transform="translate(0 2.5)" />
 			</Fragment>,
 		);
 	}
 
 	// Les rayures d'un siècle de service : de fins traits clairs, presque invisibles.
-	const rayures: ReactElement[] = [];
+	const rayures: VNode[] = [];
 	for (let k = 0; k < 26; k++) {
 		const x1 = hasard() * 100;
 		const y1 = hasard() * 100;
@@ -115,9 +115,9 @@ function dessiner(): ReactElement {
 				x2={`${(x1 + Math.cos(angle) * longueur * 0.55).toFixed(2)}%`}
 				y2={`${(y1 + Math.sin(angle) * longueur).toFixed(2)}%`}
 				stroke="#e8c89a"
-				strokeWidth={largeur}
-				strokeOpacity={opacite}
-				strokeLinecap="round"
+				stroke-width={largeur}
+				stroke-opacity={opacite}
+				stroke-linecap="round"
 			/>,
 		);
 	}
@@ -127,10 +127,10 @@ function dessiner(): ReactElement {
 			<defs>
 				{/* Le nœud : un œil sombre, étiré dans le sens du fil. */}
 				<radialGradient id="noeud">
-					<stop offset={0} stopColor="#1a0c05" stopOpacity={0.95} />
-					<stop offset={0.35} stopColor="#3a1d0b" stopOpacity={0.75} />
-					<stop offset={0.6} stopColor="#2a1407" stopOpacity={0.35} />
-					<stop offset={1} stopColor="#2a1407" stopOpacity={0} />
+					<stop offset={0} stop-color="#1a0c05" stop-opacity={0.95} />
+					<stop offset={0.35} stop-color="#3a1d0b" stop-opacity={0.75} />
+					<stop offset={0.6} stop-color="#2a1407" stop-opacity={0.35} />
+					<stop offset={1} stop-color="#2a1407" stop-opacity={0} />
 				</radialGradient>
 				{filtres}
 			</defs>

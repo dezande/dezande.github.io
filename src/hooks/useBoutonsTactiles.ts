@@ -13,7 +13,8 @@
  * Un doigt qui glisse — pour faire défiler les réglages — n'appuie sur rien.
  */
 
-import { useEffect, useRef, type RefObject } from 'react';
+import type { RefObject } from 'preact';
+import { useEffect, useRef } from 'preact/hooks';
 
 /** Ce qui se touche comme un bouton dans un panneau de réglages. */
 const TOUCHABLE = 'button, label, a, [role="radio"], input[type="checkbox"], summary';

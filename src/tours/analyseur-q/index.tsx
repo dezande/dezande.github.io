@@ -24,7 +24,8 @@
  * Les styles sont dans src/styles/tours/analyseur-q/.
  */
 
-import { useCallback, useRef, useState, type PointerEvent } from 'react';
+import type { TargetedPointerEvent } from 'preact';
+import { useCallback, useRef, useState } from 'preact/hooks';
 import { JaugeAppui } from '../../components/JaugeAppui.tsx';
 import { useAppuiLong } from '../../hooks/useAppuiLong.ts';
 import { useClavier } from '../../hooks/useClavier.ts';
@@ -68,7 +69,7 @@ export default function AnalyseurQ() {
 	const appui = useAppuiLong({ dureeMs: GESTURE.holdMs, delaiJaugeMs: GESTURE.tapMaxMs, jaugeVisible: reglages.showHoldRing });
 
 	// Coordonnées dans le repère de l'app, qui peut être pivotée (kit/web/orientation.ts).
-	const surAppui = (event: PointerEvent<HTMLElement>): void => {
+	const surAppui = (event: TargetedPointerEvent<HTMLElement>): void => {
 		if (event.pointerType === 'mouse' && event.button !== 0) return;
 		void keepScreenAwake();
 		doigtsPoses.current += 1;
@@ -93,12 +94,12 @@ export default function AnalyseurQ() {
 		});
 	};
 
-	const surDeplacement = (event: PointerEvent<HTMLElement>): void => {
+	const surDeplacement = (event: TargetedPointerEvent<HTMLElement>): void => {
 		const { x, y } = appPoint(event.clientX, event.clientY);
 		if (gestures.move(event.pointerId, x, y)) appui.arreter();
 	};
 
-	const surRelachement = (event: PointerEvent<HTMLElement>): void => {
+	const surRelachement = (event: TargetedPointerEvent<HTMLElement>): void => {
 		doigtsPoses.current = Math.max(0, doigtsPoses.current - 1);
 		appui.arreter();
 		const { x, y } = appPoint(event.clientX, event.clientY);
@@ -106,7 +107,7 @@ export default function AnalyseurQ() {
 		if (tap !== 'none') move(tap);
 	};
 
-	const surAnnulation = (event: PointerEvent<HTMLElement>): void => {
+	const surAnnulation = (event: TargetedPointerEvent<HTMLElement>): void => {
 		doigtsPoses.current = Math.max(0, doigtsPoses.current - 1);
 		appui.arreter();
 		gestures.cancel(event.pointerId);

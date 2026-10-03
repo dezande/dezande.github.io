@@ -3,7 +3,7 @@
  * même couleur regroupés en une seule bande pour alléger le dessin. Net à toutes les tailles.
  */
 
-import { useMemo } from 'react';
+import { useMemo } from 'preact/hooks';
 import { PALETTE } from '../content/pixels.ts';
 
 interface Bande {
@@ -34,7 +34,7 @@ export function PixelArt({ grille, className }: { grille: readonly string[]; cla
 	const rects = useMemo(() => bandes(grille), [grille]);
 	return (
 		// Pas d'anticrénelage : chaque pixel garde ses bords francs.
-		<svg viewBox={`0 0 ${largeur} ${grille.length}`} className={className} aria-hidden="true" shapeRendering="crispEdges">
+		<svg viewBox={`0 0 ${largeur} ${grille.length}`} className={className} aria-hidden="true" shape-rendering="crispEdges">
 			{rects.map(({ x, y, largeur: l, couleur }) => (
 				<rect key={`${x}-${y}`} x={x} y={y} width={l} height={1} fill={couleur} />
 			))}

@@ -1,6 +1,6 @@
 // Les adresses de l'app (src/App.tsx, src/pages/PageTour.tsx) : strictes. Seules les adresses
 // exactes des tours publiés ouvrent quelque chose ; toute autre ramène au menu.
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/preact';
 import { App } from '../../src/App.tsx';
 import { TOURS } from '../../src/content/tours.ts';
 

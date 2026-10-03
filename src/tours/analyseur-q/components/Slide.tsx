@@ -3,7 +3,8 @@
  * seulement si la slide en a un (content/slides.ts), et le texte ajusté à l'écran.
  */
 
-import { Fragment, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment } from 'preact';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { plusGrandeEchelle } from '../../../logic/ajustement.ts';
 import { t, type Lang } from '../../../logic/i18n.ts';
 import { counterLabel } from '../logic/deck.ts';

@@ -21,7 +21,7 @@
  *   </PanneauReglages>
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentChildren } from 'preact';
 import { useBoutonsTactiles } from '../hooks/useBoutonsTactiles.ts';
 import { usePont } from '../tours/pont.tsx';
 
@@ -35,11 +35,11 @@ interface Props {
 	/** La case de la jauge de l'appui long (#show-hold-ring), présente dans tous les tours. */
 	jauge: { libelle: string; visible: boolean; changer: (visible: boolean) => void };
 	/** Les aides à la répétition propres au tour, après la jauge. */
-	autresAides?: ReactNode;
+	autresAides?: ComponentChildren;
 	/** « Rétablir les réglages par défaut ». */
 	defauts: { libelle: string; retablir: () => void };
 	/** Les réglages propres au tour, chacun dans un bloc .card. */
-	children: ReactNode;
+	children: ComponentChildren;
 }
 
 export function PanneauReglages({ id = 'menu', classeNom = 'menu-version', aide, jauge, autresAides, defauts, children }: Props) {
@@ -77,7 +77,7 @@ export function PanneauReglages({ id = 'menu', classeNom = 'menu-version', aide,
 export function Interrupteur({ id, libelle, coche, changer }: { id: string; libelle: string; coche: boolean; changer: (coche: boolean) => void }) {
 	return (
 		<label className="toggle-row" htmlFor={id}>
-			<span>{libelle}</span> <input id={id} type="checkbox" checked={coche} onChange={(event) => changer(event.target.checked)} />
+			<span>{libelle}</span> <input id={id} type="checkbox" checked={coche} onChange={(event) => changer(event.currentTarget.checked)} />
 		</label>
 	);
 }

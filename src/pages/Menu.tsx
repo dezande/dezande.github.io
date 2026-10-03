@@ -7,7 +7,6 @@
  * Le bouton FR / EN choisit la langue du menu et de tous les tours (langue/LangueContext.tsx).
  */
 
-import { useNavigate } from 'react-router';
 import { BoutonTactile } from '../components/BoutonTactile.tsx';
 import { PixelArt } from '../components/PixelArt.tsx';
 import { ECROU, ICONES, MAIN } from '../content/pixels.ts';
@@ -16,7 +15,8 @@ import { LANGS } from '../logic/i18n.ts';
 import { TOURS } from '../content/tours.ts';
 import { BUILD } from '../kit/web/build.ts';
 import { useLangue } from '../langue/LangueContext.tsx';
-import { adresseDuTour } from '../tours/registre.ts';
+import { adresseDuTour } from '../logic/adresses.ts';
+import { naviguer } from '../routeur.ts';
 import { Installation } from './Installation.tsx';
 import { APP_VERSION } from '../version.ts';
 
@@ -25,7 +25,6 @@ const DETAIL_DU_BUILD = BUILD.version.startsWith('__') ? 'développement' : `bui
 
 export function Menu() {
 	const { langue, setLangue } = useLangue();
-	const navigate = useNavigate();
 
 	return (
 		<main id="menu-principal">
@@ -48,7 +47,7 @@ export function Menu() {
 					const nom = tour.nom[langue];
 					return (
 						<div key={tour.dossier} className="tour" data-dossier={tour.dossier}>
-							<BoutonTactile className="tour-lancer" onAction={() => navigate(adresseDuTour(tour.dossier))}>
+							<BoutonTactile className="tour-lancer" onAction={() => naviguer(adresseDuTour(tour.dossier))}>
 								{/* La main qui montre la tuile, le temps du toucher ; puis l'icône du tour. */}
 								<PixelArt grille={MAIN} className="main" />
 								<PixelArt grille={ICONES[tour.dossier]!} className="tour-icone" />
@@ -57,7 +56,7 @@ export function Menu() {
 									<span className="tour-description">{tour.description[langue]}</span>
 								</span>
 							</BoutonTactile>
-							<BoutonTactile className="tour-reglages" aria-label={`${TEXTES.reglagesDe[langue]}${nom}`} onAction={() => navigate(adresseDuTour(tour.dossier, true))}>
+							<BoutonTactile className="tour-reglages" aria-label={`${TEXTES.reglagesDe[langue]}${nom}`} onAction={() => naviguer(adresseDuTour(tour.dossier, true))}>
 								<PixelArt grille={ECROU} className="ecrou" />
 							</BoutonTactile>
 						</div>

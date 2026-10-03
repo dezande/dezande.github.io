@@ -14,7 +14,8 @@
  * le remet en place pour une nouvelle routine.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext } from 'preact';
+import { useContext } from 'preact/hooks';
 import type { Lang } from '../logic/i18n.ts';
 
 export interface Pont {

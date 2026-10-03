@@ -16,7 +16,8 @@
  * Les réglages sont lus par une référence : les minuteries voient toujours les derniers.
  */
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import type { RefObject } from 'preact';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ReglagesZones } from '../logic/reglages-zones.ts';
 
 export type Phase = 'idle' | 'pending' | 'shown' | 'clearing';
