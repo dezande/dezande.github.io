@@ -23,6 +23,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 - Chaque ouverture d'un tour commence une nouvelle routine (l'analyseur reprend à la première slide). Les réglages de chaque tour sont gardés d'une ouverture à l'autre.
 - Un seul service worker met toute l'application en cache, tours compris : tout fonctionne hors-ligne dès la première ouverture avec du réseau. Une nouvelle version ne s'affiche jamais en plein tour.
 - Tests : les tests unitaires des quatre tours sont repris (178 en tout), et 12 tests dans Chrome jouent chaque routine en entier jusqu'au retour au menu, l'écrou ⚙, la sortie de secours, le geste retour et le hors-ligne.
+- **L'écrou ⚙ redessiné** : sa roue dentée, tracée à la main, n'était pas symétrique, et le trou ne tombait pas au milieu. Ses huit dents sont maintenant calculées autour du même centre que le trou.
 
 ## [0.1.0] — 2026-10-02
 

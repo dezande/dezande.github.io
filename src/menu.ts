@@ -22,11 +22,13 @@ function ecrou(): SVGSVGElement {
 	roue.setAttribute('stroke', 'currentColor');
 	roue.setAttribute('stroke-width', '1.8');
 	roue.setAttribute('stroke-linejoin', 'round');
-	roue.setAttribute('d', 'M10.3 2.6h3.4l.5 2.6 1.6.9 2.5-.9 1.7 2.9-2 1.7v1.9l2 1.7-1.7 2.9-2.5-.9-1.6.9-.5 2.6h-3.4l-.5-2.6-1.6-.9-2.5.9-1.7-2.9 2-1.7v-1.9l-2-1.7 1.7-2.9 2.5.9 1.6-.9z');
+	// Huit dents régulières autour du centre (12, 12) du repère, le même que celui du trou :
+	// calculées, et non tracées à la main, pour que le trou tombe exactement au milieu.
+	roue.setAttribute('d', 'M19.42 10.34L21.92 10.70L21.92 13.30L19.42 13.66L18.42 16.07L19.93 18.09L18.09 19.93L16.07 18.42L13.66 19.42L13.30 21.92L10.70 21.92L10.34 19.42L7.93 18.42L5.91 19.93L4.07 18.09L5.58 16.07L4.58 13.66L2.08 13.30L2.08 10.70L4.58 10.34L5.58 7.93L4.07 5.91L5.91 4.07L7.93 5.58L10.34 4.58L10.70 2.08L13.30 2.08L13.66 4.58L16.07 5.58L18.09 4.07L19.93 5.91L18.42 7.93Z');
 	const centre = svg.appendChild(document.createElementNS(SVG_NS, 'circle'));
 	centre.setAttribute('cx', '12');
 	centre.setAttribute('cy', '12');
-	centre.setAttribute('r', '3');
+	centre.setAttribute('r', '3.2');
 	centre.setAttribute('fill', 'none');
 	centre.setAttribute('stroke', 'currentColor');
 	centre.setAttribute('stroke-width', '1.8');
