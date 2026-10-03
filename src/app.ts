@@ -9,6 +9,7 @@
  *   app.ts       ce fichier : démarrage et mises à jour automatiques
  *   menu.ts      le menu principal : une tuile par tour, avec son écrou ⚙
  *   scene.ts     ouvrir un tour : sa page, à la place du menu
+ *   installation.ts  le bandeau « c'est une app », quand elle est ouverte dans le navigateur
  *   content/     LA LISTE DES TOURS : tours.ts
  *   tours/       les tours eux-mêmes, copies de leurs apps, un dossier chacun ;
  *                pont.ts : ce qu'un tour dit à l'app (« fin », « quitter »)
@@ -25,6 +26,7 @@ import './kit/web/orientation.ts';
 import { setupUpdates } from './kit/web/updates.ts';
 import { keepScreenAwake } from './kit/web/wake-lock.ts';
 import './menu.ts';
+import './installation.ts';
 
 void keepScreenAwake();
 

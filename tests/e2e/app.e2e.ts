@@ -126,6 +126,27 @@ test('le menu 16 bits montre les cinq tours, chacun avec son icône et son écro
 	});
 });
 
+test('ouverte dans le navigateur, le menu dit que c’est une app ; installée, il ne le dit plus', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		const bandeau = `(() => { const b = document.querySelector('#installation'); const r = b.getBoundingClientRect(); return { visible: !b.hidden && r.height > 0, titre: b.querySelector('.installation-titre').textContent, haut: r.top, basDesTuiles: document.querySelector('#tours').getBoundingClientRect().bottom }; })()`;
+		const ouvert = await page.evaluate<{ visible: boolean; titre: string; haut: number; basDesTuiles: number }>(bandeau);
+		assert.equal(ouvert.visible, true, 'bandeau absent dans le navigateur');
+		assert.equal(ouvert.titre, 'Mes tours est une app');
+		assert.ok(ouvert.haut >= ouvert.basDesTuiles, 'le bandeau recouvre les tuiles');
+
+		// En anglais aussi.
+		await page.evaluate(`document.querySelector('#langues [data-langue="en"]').click()`);
+		assert.equal((await page.evaluate<{ titre: string }>(bandeau)).titre, 'Mes tours is an app');
+
+		// Installée, comme sur l'écran d'accueil d'un iPhone (Chrome ne sait pas simuler le
+		// « display-mode: standalone » d'Android).
+		await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `Object.defineProperty(navigator, 'standalone', { value: true })` });
+		await page.reload();
+		await page.waitFor(PRET, 'menu construit');
+		assert.equal(await page.evaluate<boolean>(`document.querySelector('#installation').hidden`), true, 'bandeau affiché dans l’app installée');
+	});
+});
+
 /* ================= Chaque routine, jusqu'au retour au menu ================= */
 
 test('Pile ou face : le double toucher de fin remet la carte face cachée, on reste dans le tour ; l’appui de 3 s ramène au menu', TIMEOUT, async () => {
