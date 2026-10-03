@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+	<!-- La Content-Security-Policy est ajoutée au build (vite.config.ts) : le serveur de
+	     développement de Vite injecte ses styles en ligne, qu'elle interdirait. -->
+	<meta name="theme-color" content="#0b0b2b">
+	<meta name="color-scheme" content="dark">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Mes tours">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="description" content="Tous mes accessoires de scène dans une seule app : boule de cristal, pile ou face, les six prédictions, Analyseur Q. Un menu, un écrou de réglages par tour. 100 % hors-ligne.">
+	<title>Mes tours</title>
+	<link rel="manifest" href="manifest.json">
+	<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+	<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+	<!-- Toute l'app, rendue par React (src/main.tsx). Pivote en paysage pour rester en portrait
+	     (src/kit/web/orientation.ts) : elle doit exister avant que le code ne démarre. -->
+	<div id="app"></div>
+	<script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

@@ -39,32 +39,70 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 ## Comment c'est fait
 
-- **Chaque tour est une copie de son app** : son code dans `src/tours/<dossier>/`, sa page et ses images dans `public/tours/<dossier>/`, compilés dans `dist/tours/<dossier>/`. Les dépôts d'origine ne sont pas touchés, et leurs adresses (`dezande.github.io/<dossier>/`) continuent de fonctionner seules. Une correction faite dans un dépôt d'origine est à recopier ici.
-- **Chaque tour s'ouvre dans sa propre page**, à la place du menu, dans la même app installée ([`src/scene.ts`](src/scene.ts)) : ses styles, ses identifiants et ses gestes restent les siens, et il reçoit les vraies marges de l'écran (rien sous la caméra frontale). Il revient au menu par l'historique, si bien que le menu réapparaît tel qu'on l'a laissé et que l'historique ne grandit pas. Les tours s'affichaient d'abord dans un cadre (iframe) : sur Android, le fermer privait ensuite le menu et le tour rouvert des événements « pointer » du doigt (ils ne répondaient plus), et dans un cadre les marges de l'écran valent 0.
-- **Le pont** ([`src/tours/pont.ts`](src/tours/pont.ts)) : à l'appui de 3 s ou quand ses réglages se ferment, le tour revient au menu (`quitter()`) ; la fin de la routine, elle, remet le tour en place sans passer par le pont. Ouvert par l'écrou, il reçoit `?reglages` et n'affiche que son panneau de réglages ; il reçoit toujours `?lang=fr` ou `?lang=en`, la langue du menu, qui remplace la sienne.
-- Ce qui a changé dans les copies : l'appui de 3 s passe par le pont ; le menu du tour n'a plus que ses réglages (plus d'« aller à », de « remettre », de version, ni de bouton « Mes tours »), avec l'en-tête commun que remplit le pont (`remplirEntete()`, d'après `?nom=`) ; ce qui ne sert qu'au tour ouvert seul reste dans un bloc caché, pour son code ; le tour n'enregistre plus de service worker ni de manifeste à lui ; l'analyseur commence toujours à la première slide.
-- **Un seul service worker** (celui du kit, v1.3.1 ou plus) met tout en cache, tours compris. Une nouvelle version ne s'affiche jamais pendant un tour.
+**Une app React classique**, construite par [Vite](https://vite.dev/) : TypeScript, React 19, React Router, Sass. Une seule page (`index.html`) ; chaque tour a son adresse après le « # » :
+
+| Adresse | Page |
+| --- | --- |
+| `#/` | le menu principal |
+| `#/tours/<dossier>` | le tour, prêt pour une nouvelle routine |
+| `#/tours/<dossier>?reglages` | seulement ses réglages (écrou ⚙) |
+
+L'adresse après le « # » ne change pas la page demandée au serveur : le service worker n'a qu'une page à servir, et chaque tour s'ouvre hors-ligne.
+
+```
+index.html              la page de l'app (React s'y monte dans #app)
+vite.config.ts          le build
+src/
+  main.tsx              démarrage : verrou portrait, écran allumé, mises à jour, rendu de <App />
+  App.tsx               les adresses (React Router)
+  pages/                Menu.tsx (le menu 16 bits), PageTour.tsx (la page qui accueille un tour)
+  components/           partagés : BoutonTactile, PanneauReglages, JaugeAppui, PixelArt,
+                        cartes/ (dos de cartes et soulignement, partagés par deux tours)
+  hooks/                useSurToucher, useBoutonsTactiles, useReglagesEnregistres
+  langue/               la langue FR / EN, pour le menu et tous les tours (LangueContext)
+  content/              LA LISTE DES TOURS (tours.ts), le texte du menu, les dessins en pixels
+  tours/
+    registre.ts         chaque tour : son composant (chargé à sa première ouverture), sa couleur
+    pont.tsx            ce qu'un tour reçoit de l'app : langue, nom, réglages seuls, quitter()
+    <dossier>/          un tour : index.tsx, components/, hooks/, content/ (textes),
+                        logic/ (logique pure, sans DOM, testée sous Node)
+  styles/               TOUT le Sass : main.scss, _base.scss, menu/, tours/<dossier>/
+  assets/               polices (fonts/), images (images/<dossier>/), icône de l'app (icons/)
+  kit/                  code commun des accessoires de scène (sous-module kit-scene)
+  sw/                   compilation du service worker du kit
+public/                 copié tel quel : manifeste, icônes, captures, licences des polices
+tests/                  Jest : logic/ et tours/ (unitaires), composants/ (React), e2e/ (Chrome)
+```
+
+- **Chaque tour vient de son app d'origine** ([boule-de-cristal](https://github.com/dezande/boule-de-cristal), [pile-ou-face](https://github.com/dezande/pile-ou-face), [six-predictions](https://github.com/dezande/six-predictions), [analyseur-q](https://github.com/dezande/analyseur-q) ; la carte de visite est née ici, de l'ancienne routine Arcane Système de la boule) : sa logique (`logic/`) et ses textes (`content/`) sont repris tels quels, avec leurs tests ; son affichage est réécrit en composants React. Les dépôts d'origine ne sont pas touchés.
+- **Les styles de chaque tour sont rangés sous sa classe** (`.scene-<dossier>`, posée par `PageTour`, avec `meta.load-css` dans `src/styles/tours/<dossier>/_index.scss`) : tous chargés ensemble dans une seule feuille, ils ne se marchent jamais dessus. Les `@keyframes`, qui valent pour toute la page, sont préfixés par tour (`boule-`, `cdv-`, `pof-`, `six-`, `aq-`). Le fond derrière l'app et la couleur de la barre du téléphone suivent le tour ouvert (`html[data-tour]`).
+- **Le pont** ([`src/tours/pont.tsx`](src/tours/pont.tsx)) : à l'appui de 3 s, à Échap / M, ou quand ses réglages se ferment, le tour revient au menu (`quitter()`), par l'historique — le menu réapparaît, et l'historique ne grandit pas. La fin de la routine, elle, remet le tour en place sans le quitter. Ouvert par l'écrou, le tour n'affiche que son panneau de réglages (`enReglages`), dans la langue du menu.
+- **Les boutons agissent au lever du doigt**, appui bref ou long (`useSurToucher` pour le menu, `useBoutonsTactiles` pour les réglages) : sur Android, un doigt qui reste posé sur un bouton devient un appui long, et le navigateur n'envoie pas de clic.
+- **Un seul service worker** (celui du kit, v1.3.1 ou plus) met tout en cache, tours compris. Une nouvelle version ne s'installe jamais pendant un tour.
 
 ## Ajouter un tour
 
-1. Copier son `src/` (sans `kit`, `sw`, `icon`) dans `src/tours/<dossier>/` et son `public/` (sans manifeste, icônes ni polices) dans `public/tours/<dossier>/` ; faire pointer ses imports du kit vers `src/kit`.
-2. Brancher le pont : `quitter()` à l'appui de 3 s (le geste de fin garde sa remise en place) et à la fermeture des réglages, `enReglages` pour n'ouvrir que les réglages.
-3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), son icône en pixels (32 × 32, ajoutée à `outils/icones-16-bits.py`) dans [`src/content/pixels.ts`](src/content/pixels.ts), sa feuille de style dans le script `build` de `package.json`.
-4. Ses tests unitaires dans `tests/tours/<dossier>/`, et sa routine dans les tests dans Chrome.
+1. Son code dans `src/tours/<dossier>/` : un `index.tsx` dont l'export par défaut est le tour (voir Pile ou face, le plus simple), la logique pure dans `logic/`. Il lit `usePont()` : `quitter()` à l'appui de 3 s, `enReglages` pour n'afficher que ses réglages (`<PanneauReglages>`), `langue`.
+2. Ses styles dans `src/styles/tours/<dossier>/`, rangés sous `.scene-<dossier>` par son `_index.scss`, et une ligne `@use` dans `src/styles/main.scss` ; ses images dans `src/assets/images/<dossier>/`, importées par le code.
+3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), une dans [`src/tours/registre.ts`](src/tours/registre.ts), son icône en pixels (32 × 32, ajoutée à `outils/icones-16-bits.py`) dans [`src/content/pixels.ts`](src/content/pixels.ts).
+4. Ses tests unitaires dans `tests/tours/<dossier>/`, ses composants dans `tests/composants/`, et sa routine dans les tests dans Chrome.
 
 ## Publication et développement
 
 Les mêmes règles que les autres apps, énoncées une fois dans le [kit](https://github.com/dezande/kit-scene#règles-de-la-branche-main) : `main` protégée, pull request, fusion en rebase, CI verte (« Types, tests, build et tests dans Chrome »), une ligne dans le [journal des versions](CHANGELOG.md) pour chaque changement. Chaque fusion sur `main` publie le site.
 
-**Le build regroupe le code de chaque page** en un seul fichier JavaScript minifié ([`outils/regrouper.ts`](outils/regrouper.ts), avec esbuild, outil de build seulement : l'app publiée n'a aucune dépendance), et les styles sont compressés. Une page charge ainsi un fichier au lieu d'une vingtaine. Seul le numéro de version du kit reste à part (`kit/web/build.js`), là où le kit l'inscrit au build.
+**Le build** (Vite) compile React et Sass en `dist/app.js` et `dist/style.css`, chaque tour dans son propre fichier (chargé à sa première ouverture), polices et images dans `dist/assets/`. La fin du build est celle du kit : le service worker, la vérification de `dist/` et le numéro de version (`dist/kit/web/build.js`, que Vite garde à part pour le kit). La Content-Security-Policy n'est ajoutée qu'au build : le serveur de développement de Vite injecte ses styles en ligne.
+
+**Les tests, tous avec [Jest](https://jestjs.io/)** (compilés par SWC, configuration dans [`jest.config.js`](jest.config.js)) : la logique pure sous Node, les composants React dans jsdom avec [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), et l'app compilée dans un vrai Chrome sans interface. `expect(valeur, 'message')` dit ce qui a échoué ([jest-expect-message](https://github.com/mattphillips/jest-expect-message)).
 
 **Le service worker** est celui du kit, à partir de la v1.3.1 : il ne renvoie la page de l'app que pour sa propre adresse, jamais pour une autre page du site — un test dans Chrome le vérifie.
 
 ```sh
 git submodule update --init   # après un clone : récupère le kit
 npm install
+npm run dev         # serveur de développement (Vite), rechargement à chaud
 npm run serve       # build puis serveur local sur http://localhost:8000
-npm test            # tests unitaires (l'app et les cinq tours)
+npm test            # tests unitaires et des composants (Jest), l'app et les cinq tours
 npm run test:e2e    # tests dans Chrome (après npm run build)
 npm run typecheck
 npm run check:changelog
@@ -72,13 +110,13 @@ npm run check:changelog
 
 ### Le menu, façon console 16 bits
 
-Le menu principal a l'allure des menus de jeux de rôle des consoles 16 bits : fenêtres bleues en dégradé bordées de blanc, la main qui montre la tuile touchée, un ciel de nuit, la police pixel **[Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans)** embarquée avec l'app (`public/fonts/`, 12 ko, licence [SIL OFL 1.1](public/fonts/OFL-pixelify-sans.txt)). Deux de ses glyphes sont retouchés par [`outils/pixelify-mes-tours.py`](outils/pixelify-mes-tours.py) : le « 5 », qui ressemblait à un « S », et le « î », dont l'accent ne se voyait pas (il faut fontTools : `pip install fonttools brotli`). Les tours eux-mêmes gardent leur allure : ce que voit le public ne change pas.
+Le menu principal a l'allure des menus de jeux de rôle des consoles 16 bits : fenêtres bleues en dégradé bordées de blanc, la main qui montre la tuile touchée, un ciel de nuit, la police pixel **[Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans)** embarquée avec l'app (`src/assets/fonts/`, 12 ko, licence [SIL OFL 1.1](public/fonts/OFL-pixelify-sans.txt)). Deux de ses glyphes sont retouchés par [`outils/pixelify-mes-tours.py`](outils/pixelify-mes-tours.py) : le « 5 », qui ressemblait à un « S », et le « î », dont l'accent ne se voyait pas (il faut fontTools : `pip install fonttools brotli`). Les tours eux-mêmes gardent leur allure : ce que voit le public ne change pas.
 
-Les icônes des tours (32 × 32), l'écrou ⚙ (24 × 24) et la main sont des **grilles de caractères**, un par pixel, dans [`src/content/pixels.ts`](src/content/pixels.ts) ; [`src/pixel.ts`](src/pixel.ts) en fait des SVG nets à toutes les tailles. Les icônes et l'écrou sont **engendrés** par [`outils/icones-16-bits.py`](outils/icones-16-bits.py) — éclairage des volumes, tramage des ombres — : pour en changer un, modifier le script, le lancer (`python3 outils/icones-16-bits.py` écrit `icones.json` et un aperçu `apercu.svg`), puis recopier les grilles et la palette dans `src/content/pixels.ts`. Les tests vérifient que l'écrou est symétrique dans tous les sens, son trou au centre exact.
+Les icônes des tours (32 × 32), l'écrou ⚙ (24 × 24) et la main sont des **grilles de caractères**, un par pixel, dans [`src/content/pixels.ts`](src/content/pixels.ts) ; le composant [`PixelArt`](src/components/PixelArt.tsx) en fait des SVG nets à toutes les tailles. Les icônes et l'écrou sont **engendrés** par [`outils/icones-16-bits.py`](outils/icones-16-bits.py) — éclairage des volumes, tramage des ombres — : pour en changer un, modifier le script, le lancer (`python3 outils/icones-16-bits.py` écrit `icones.json` et un aperçu `apercu.svg`), puis recopier les grilles et la palette dans `src/content/pixels.ts`. Les tests vérifient que l'écrou est symétrique dans tous les sens, son trou au centre exact.
 
 ### Icônes et captures
 
-L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes des quatre premiers tours (la carte de visite n'y est pas), chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus **pixel pour pixel** par [`outils/icones-png.py`](outils/icones-png.py) : le dessin de 80 × 80 agrandi un nombre entier de fois (× 6 pour 512, × 2 pour 192), sans lissage, en palette exacte — nets et légers (2 et 3 ko).
+L'icône de l'app ([`src/assets/icons/icon.svg`](src/assets/icons/icon.svg)) réunit les icônes des quatre premiers tours (la carte de visite n'y est pas), chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus **pixel pour pixel** par [`outils/icones-png.py`](outils/icones-png.py) : le dessin de 80 × 80 agrandi un nombre entier de fois (× 6 pour 512, × 2 pour 192), sans lissage, en palette exacte — nets et légers (2 et 3 ko).
 
 Les captures de la fiche d'installation (`public/captures/`, citées par `manifest.json`) sont prises dans Chrome sans interface par [`outils/captures.ts`](outils/captures.ts), après un build.
 

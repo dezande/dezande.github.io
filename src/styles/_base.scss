@@ -1,0 +1,54 @@
+// Ce qui vaut pour toute l'app : le menu comme chaque tour.
+@use "abstracts/mixins" as *;
+
+// Hygiène tactile : ni surbrillance, ni callout, ni sélection.
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+	@include user-select(none);
+}
+
+// Le fond derrière #app (visible quand elle pivote) : celui du menu, ou du tour ouvert
+// (html[data-tour], posé par src/pages/PageTour.tsx, peint par chaque tour dans styles/tours/).
+html,
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: #0b0b2b;
+	color: #fff;
+}
+
+body {
+	position: fixed;
+	inset: 0;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+// Lu par les lecteurs d'écran, invisible à l'œil (l'écran doit rester nu devant le public).
+.sr-only {
+	position: fixed;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+// Chaque tour remplit #app : ses styles sont tous rangés sous sa classe (.scene-<dossier>).
+.scene {
+	position: absolute;
+	inset: 0;
+}

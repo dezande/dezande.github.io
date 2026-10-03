@@ -96,7 +96,7 @@ interface Contact {
 
 /**
  * Suit les contacts sur la scène et décide de l'effet de chacun. Un seul doigt est suivi à la fois.
- * Sans DOM ni minuterie : les instants (`now`) sont fournis par l'appelant (stage/touch.ts),
+ * Sans DOM ni minuterie : les instants (`now`) sont fournis par l'appelant (index.tsx),
  * qui applique les effets et programme l'appui long.
  */
 export class GestureTracker {

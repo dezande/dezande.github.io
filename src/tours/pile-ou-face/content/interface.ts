@@ -2,11 +2,8 @@
  * LE TEXTE DE L'INTERFACE (menu, aide, états) dans les deux langues.
  * Le texte des prédictions, lui, est dans predictions.ts.
  *
- * Chaque entrée donne le texte en français et en anglais. Les clés se retrouvent dans
- * public/index.html, sur les attributs `data-texte` (contenu de l'élément) et
- * `data-texte-label` (aria-label) : settings/langue.ts les remplit à l'ouverture de l'app
- * et à chaque changement de langue. Les textes calculés (version, état de l'écran…) sont
- * lus depuis settings/panel.ts.
+ * Chaque entrée donne le texte en français et en anglais ; les composants du tour le lisent avec
+ * ui(clé, langue), dans la langue du menu principal.
  */
 
 import type { Lang, Texte } from '../logic/i18n.ts';

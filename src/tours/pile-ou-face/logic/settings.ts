@@ -7,7 +7,7 @@
 
 import { isLang, type Lang } from './i18n.ts';
 
-/** Les dessins de dos, tels qu'ils sont tracés (stage/dos.ts), repris des six prédictions. */
+/** Les dessins de dos, tels qu'ils sont tracés (src/components/cartes/dos.ts), repris des six prédictions. */
 export const DESSINS = ['deco', 'nouveau', 'pixel', 'minimal', 'pop', 'futuriste'] as const;
 export type Dessin = (typeof DESSINS)[number];
 

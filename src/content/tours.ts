@@ -1,9 +1,10 @@
 /*
  * LES TOURS de l'app « Mes tours » : un par accessoire de scène.
  *
- * Chaque tour est une copie de son app, dans src/tours/<dossier>/ (code) et public/tours/<dossier>/
- * (page et fichiers) ; ses dépôts d'origine ne sont pas touchés. Il s'ouvre en plein écran depuis
- * sa tuile, ses réglages depuis l'écrou ⚙, et revient ici à la fin de sa routine (src/scene.ts).
+ * Chaque tour a son code dans src/tours/<dossier>/ (branché par src/tours/registre.ts) et ses styles
+ * dans src/styles/tours/<dossier>/ ; ses dépôts d'origine ne sont pas touchés. Il s'ouvre en plein
+ * écran depuis sa tuile, ses réglages depuis l'écrou ⚙ (src/pages/PageTour.tsx), et revient ici par
+ * l'appui de 3 s.
  *
  *   dossier      le dossier du tour dans l'app (et le nom de son dépôt d'origine) ;
  *   nom          ce qui est écrit sur la tuile, en français et en anglais ;

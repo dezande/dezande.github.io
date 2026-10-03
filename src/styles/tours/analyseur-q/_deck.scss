@@ -1,0 +1,332 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+// La scène reçoit tous les gestes : le navigateur ne doit ni défiler ni zoomer.
+#stage {
+	@include cover;
+	position: fixed;
+	touch-action: none;
+	cursor: pointer;
+}
+
+#deck {
+	@include cover;
+	overflow: hidden;
+}
+
+$duration: .45s;
+
+// Toutes les slides sont posées les unes sur les autres ; seule .current est visible.
+// Les autres gardent leur mise en page (visibility plutôt que display) pour que l'ajustement
+// du texte puisse les mesurer.
+.slide {
+	--fit: 1;
+	@include cover;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding:
+		calc(var(--safe-t) + max(28px, 7vmin))
+		calc(var(--safe-r) + max(22px, 7vmin))
+		calc(var(--safe-b) + max(28px, 7vmin))
+		calc(var(--safe-l) + max(22px, 7vmin));
+	overflow: hidden;
+	opacity: 0;
+	visibility: hidden;
+	// Pendant le fondu, la slide qui s'en va est encore par-dessus : elle ne doit pas recevoir les
+	// touchers destinés à la nouvelle (son bouton intercepterait l'appui).
+	pointer-events: none;
+	transition: opacity $duration ease, transform $duration ease, visibility 0s linear $duration;
+
+	// Hors de la fenêtre d'affichage (components/Deck.tsx) : pas rendue du tout.
+	&.far {
+		display: none;
+	}
+
+	&.current {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+		transform: none;
+		transition-delay: 0s;
+	}
+}
+
+[data-transition="glisse"] {
+	.slide.before {
+		transform: translateX(-14%);
+	}
+
+	.slide.after {
+		transform: translateX(14%);
+	}
+}
+
+[data-transition="aucune"] .slide,
+.no-anim .slide {
+	transition: none;
+}
+
+.slide-body {
+	width: 100%;
+	max-width: 1100px;
+	text-align: center;
+	// Un mot trop long doit se voir (et faire rétrécir le texte), pas être coupé.
+	overflow-wrap: normal;
+	hyphens: manual;
+
+	> * + * {
+		margin-top: calc(var(--fit) * max(24px, 6vmin));
+	}
+
+	// L'étiquette est placée à part en haut : pas d'écart sous elle.
+	> .etiquette + * {
+		margin-top: 0;
+	}
+
+	// Bouton et barre de chargement : bien détachés du texte au-dessus.
+	> * + .bouton,
+	> * + .chargement {
+		margin-top: calc(var(--fit) * max(40px, 10vmin));
+	}
+}
+
+// Étiquette (champ `etiquette`) : petites capitales orange, façon rapport d'analyse.
+// Toujours au même endroit en haut de l'écran et à la même taille, quel que soit le contenu :
+// sortie du centrage, et place réservée au-dessus du contenu (padding de la slide).
+$etiquette-top: max(52px, 10vmin);
+$etiquette-place: max(100px, 19vmin);
+
+.slide:has(> .slide-body > .etiquette) {
+	padding-top: calc(var(--safe-t) + #{$etiquette-place});
+}
+
+.etiquette {
+	position: absolute;
+	top: calc(var(--safe-t) + #{$etiquette-top});
+	left: 50%;
+	transform: translateX(-50%);
+	margin: 0;
+	padding: 6px 14px;
+	border: 1px solid rgba(247, 147, 30, .45);
+	border-radius: 999px;
+	color: $accent;
+	white-space: nowrap;
+	font: 600 clamp(12px, 3.2vmin, 18px) / 1 $sans;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+}
+
+.titre {
+	margin: 0;
+	font: 400 calc(var(--fit) * clamp(32px, 11vmin, 120px)) / 1.12 $serif;
+	letter-spacing: .01em;
+	text-wrap: balance;
+
+	// Titre mis en valeur (**titre**) : en couleur, sans passer en gras.
+	strong {
+		font-weight: inherit;
+	}
+
+	// Titre seul sur sa slide : plus grand.
+	&:only-child {
+		font-size: calc(var(--fit) * clamp(46px, 17vmin, 180px));
+	}
+}
+
+.grand {
+	margin: 0;
+	font: 300 calc(var(--fit) * clamp(80px, 34vmin, 380px)) / 1 $serif;
+	font-variant-numeric: lining-nums;
+	letter-spacing: -.02em;
+	color: $accent;
+}
+
+.texte {
+	font-size: calc(var(--fit) * clamp(22px, 7vmin, 64px));
+	line-height: 1.38;
+	// Lignes de longueurs équilibrées : pas de mot isolé sur la dernière ligne.
+	text-wrap: balance;
+
+	p {
+		margin: 0;
+	}
+
+	p + p {
+		margin-top: .8em;
+	}
+
+	// Ni titre ni grand nombre sur la slide : le texte est le message, il est affiché plus grand.
+	.slide-body:not(:has(> .titre, > .grand)) > & {
+		font-size: calc(var(--fit) * clamp(26px, 9vmin, 76px));
+		line-height: 1.28;
+	}
+}
+
+strong {
+	font-weight: 600;
+	color: $accent;
+}
+
+.image {
+	display: block;
+	max-width: 100%;
+	max-height: calc(var(--fit) * var(--app-h) * .6);
+	margin-inline: auto;
+	object-fit: contain;
+
+	// Avec du texte sur la slide, l'image lui laisse la place.
+	.slide-body:has(> :not(.image)) & {
+		max-height: calc(var(--fit) * var(--app-h) * .36);
+	}
+}
+
+// Fausse barre de chargement (champ `chargement`).
+.chargement {
+	width: min(100%, 560px);
+	margin-inline: auto;
+	text-align: center;
+}
+
+/*
+ * Cadran de chargement (components/Chargement.tsx) : un camembert qui se remplit derrière un
+ * anneau de progression, le pourcentage au centre. La part remplie est posée par
+ * components/Chargement.tsx, en pour-cent : --part pour le camembert, stroke-dasharray pour l'anneau.
+ */
+.chargement-cadran {
+	--part: 0%;
+	position: relative;
+	width: calc(var(--fit) * clamp(150px, 46vmin, 280px));
+	aspect-ratio: 1;
+	margin-inline: auto;
+
+	// Camembert : le secteur rempli, très doux, sous l'anneau.
+	&::before {
+		content: "";
+		position: absolute;
+		inset: 8%;
+		border-radius: 50%;
+		background: conic-gradient(rgba(247, 147, 30, .22) var(--part), rgba(247, 147, 30, .04) 0);
+	}
+
+	svg {
+		position: relative;
+		display: block;
+		width: 100%;
+		height: 100%;
+		// Le remplissage part du haut et tourne dans le sens des aiguilles d'une montre.
+		transform: rotate(-90deg);
+	}
+}
+
+.chargement-piste,
+.chargement-arc {
+	fill: none;
+	stroke-width: 5;
+}
+
+.chargement-piste {
+	stroke: $ink-faint;
+}
+
+.chargement-arc {
+	stroke: $accent;
+	stroke-linecap: round;
+	stroke-dasharray: 0 100;
+	filter: drop-shadow(0 0 calc(var(--fit) * 10px) rgba(247, 147, 30, .45));
+}
+
+// Étape annoncée sous le cadran (champ `etapes`), remplacée au fil de la progression.
+.chargement-etape {
+	margin: calc(var(--fit) * max(18px, 4vmin)) 0 0;
+	min-height: 1.3em;
+	color: $ink-soft;
+	font: 500 calc(var(--fit) * clamp(15px, 4vmin, 26px)) / 1.3 $sans;
+	letter-spacing: .04em;
+	text-wrap: balance;
+
+	&.apparait {
+		animation: aq-etape-apparition .45s ease-out both;
+	}
+}
+
+@keyframes aq-etape-apparition {
+	from {
+		opacity: 0;
+		transform: translateY(calc(var(--fit) * 6px));
+	}
+}
+
+// Message à 100 % (champ `termine`), qui apparaît en fondu.
+.chargement-termine {
+	margin: calc(var(--fit) * max(28px, 7vmin)) 0 0;
+	font: 600 calc(var(--fit) * clamp(22px, 6.5vmin, 48px)) / 1.25 $sans;
+	color: $accent;
+	text-wrap: balance;
+	animation: aq-termine-apparition .6s ease-out both;
+}
+
+@keyframes aq-termine-apparition {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+}
+
+.chargement-pourcent {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	font: 600 calc(var(--fit) * clamp(30px, 11vmin, 64px)) / 1 $sans;
+	font-variant-numeric: tabular-nums;
+	color: $ink;
+}
+
+// Bouton d'une slide (champ `bouton`) : grand, avec une zone de toucher qui déborde autour,
+// pour un doigt imprécis.
+.bouton {
+	position: relative;
+	// Jamais plus large que la slide : sur un appareil aux polices plus larges, le texte passe
+	// à la ligne dans le bouton au lieu de déborder.
+	max-width: 100%;
+	min-height: max(56px, calc(var(--fit) * 72px));
+	padding: calc(var(--fit) * .6em) calc(var(--fit) * 1.6em);
+	border: 2px solid $accent;
+	border-radius: 999px;
+	background: rgba(247, 147, 30, .12);
+	color: $accent;
+	font: 600 calc(var(--fit) * clamp(20px, 6vmin, 36px)) / 1.1 $sans;
+	letter-spacing: .02em;
+	cursor: pointer;
+	touch-action: manipulation;
+	box-shadow: 0 0 calc(var(--fit) * 28px) rgba(247, 147, 30, .25);
+	// Apparition pendant le délai d'activation (hooks/useDiaporama.ts), puis pulsation.
+	// Fondu seulement : une mise à l'échelle fausserait la mesure de l'ajustement du texte.
+	animation: aq-bouton-apparition .7s ease-out both, aq-bouton-pulse 2.4s ease-in-out .7s infinite;
+
+	// Zone de toucher agrandie de 24 px tout autour.
+	&::before {
+		content: "";
+		position: absolute;
+		inset: -24px;
+	}
+
+	&:active {
+		background: rgba(247, 147, 30, .3);
+		transform: scale(.97);
+	}
+}
+
+@keyframes aq-bouton-apparition {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes aq-bouton-pulse {
+	50% {
+		box-shadow: 0 0 calc(var(--fit) * 44px) rgba(247, 147, 30, .45);
+	}
+}

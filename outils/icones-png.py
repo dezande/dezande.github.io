@@ -1,5 +1,5 @@
 """
-Les icônes PNG de l'app (public/icons/), rendues pixel pour pixel depuis src/icon/icon.svg.
+Les icônes PNG de l'app (public/icons/), rendues pixel pour pixel depuis src/assets/icons/icon.svg.
 
 Le dessin fait 80 × 80 pixels d'art. Il est agrandi un nombre entier de fois — × 6 pour l'icône de
 512, × 2 pour celle de 192 —, sans lissage : chaque pixel reste un carré net. Une marge de la
@@ -14,7 +14,7 @@ Usage (il faut Pillow : pip install pillow) : python3 outils/icones-png.py
 import re
 from PIL import Image, ImageDraw
 
-svg = open('src/icon/icon.svg', encoding='utf-8').read()
+svg = open('src/assets/icons/icon.svg', encoding='utf-8').read()
 taille = int(re.search(r'viewBox="0 0 (\d+) \d+"', svg).group(1))
 art = Image.new('RGB', (taille, taille))
 dessin = ImageDraw.Draw(art)

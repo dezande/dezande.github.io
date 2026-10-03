@@ -12,7 +12,7 @@
  *   grand  un mot ou un nombre en très grand
  *   texte  texte courant ; retour à la ligne conservé, ligne vide = nouveau paragraphe,
  *          **mots** entre doubles astérisques = mis en valeur ; plus grand sans titre ni grand
- *   image  fichier placé dans public/images/, ex. 'images/carte.png' ; une image par langue
+ *   image  fichier placé dans src/assets/images/analyseur-q/ (et déclaré dans images.ts), ex. 'images/carte.png' ; une image par langue
  *          si elle porte du texte (les figures : R D V en français, K Q J en anglais)
  *   chargement  faux chargement de cette durée en secondes (1 à 120), affiché en cadran ;
  *          à 100 %, passe seule à la slide suivante (sauf avec un message termine)

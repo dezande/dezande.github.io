@@ -24,7 +24,7 @@ export interface Slide {
 	 * **mots** entre doubles astérisques : mis en valeur.
 	 */
 	texte?: Texte;
-	/** Image du dossier public/images/, ex. 'images/carte.png' (une par langue si elle porte du texte). */
+	/** Image du dossier src/assets/images/analyseur-q/, ex. 'images/carte.png' (une par langue si elle porte du texte). */
 	image?: Texte;
 	/**
 	 * Fausse barre de chargement de cette durée, en secondes. À 100 %, passe seule à la slide suivante,
@@ -188,7 +188,7 @@ export function checkSlides(slides: readonly Slide[], imageExists: (path: string
 		if (image !== undefined) {
 			for (const { lang, text } of versions(image)) {
 				if (!text.startsWith('images/')) errors.push(`${place(lang)} : l'image doit être dans images/ (reçu « ${text} »)`);
-				else if (!imageExists(text)) errors.push(`${place(lang)} : image introuvable public/${text}`);
+				else if (!imageExists(text)) errors.push(`${place(lang)} : image introuvable src/assets/images/analyseur-q/${text.slice('images/'.length)}`);
 			}
 		}
 	});

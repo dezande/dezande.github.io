@@ -1,0 +1,280 @@
+// Le menu principal façon console 16 bits, dans l'esprit des menus de jeux de rôle : fenêtres
+// bleues en dégradé bordées de blanc, police pixel, icônes ombrées, et la main qui montre la tuile
+// touchée. Tout est rangé sous #menu-principal (src/pages/Menu.tsx) : rien ne déborde sur les tours.
+@use "../abstracts/mixins" as *;
+
+$nuit: #0b0b2b;
+$crepuscule: #2a1f5a;
+$fenetre-haut: #3a5ad0;
+$fenetre-bas: #142272;
+$fenetre-active-haut: #5878f0;
+$fenetre-active-bas: #2338a0;
+$bordure: #f4f4f4;
+$ombre: #05061a;
+$gris: #b8c4e0;
+$blanc: #ffffff;
+$or: #ffd86b;
+$or-sombre: #c98c2e;
+$pixel: "Pixelify Sans", ui-monospace, monospace;
+
+// Un ciel de nuit qui s'éclaircit vers l'horizon, semé d'étoiles carrées.
+#menu-principal {
+	background:
+		radial-gradient(circle at 12% 14%, $blanc 0 1.5px, transparent 2px),
+		radial-gradient(circle at 84% 8%, $or 0 2px, transparent 2.5px),
+		radial-gradient(circle at 70% 27%, $gris 0 1px, transparent 1.5px),
+		radial-gradient(circle at 33% 6%, $gris 0 1px, transparent 1.5px),
+		radial-gradient(circle at 23% 92%, $gris 0 1.5px, transparent 2px),
+		radial-gradient(circle at 91% 78%, $blanc 0 1px, transparent 1.5px),
+		linear-gradient(180deg, $nuit 0%, $crepuscule 100%);
+	position: absolute;
+	inset: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	touch-action: manipulation;
+	padding: calc(var(--safe-t) + 28px) calc(var(--safe-r) + 18px) calc(var(--safe-b) + 22px) calc(var(--safe-l) + 18px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	font-family: $pixel;
+}
+
+// Le titre, en lettres d'or sur un contour sombre, comme l'écran titre d'un jeu.
+#menu-principal h1 {
+	margin: 0;
+	font: 700 44px/1 $pixel;
+	letter-spacing: 1px;
+	color: $or;
+	text-shadow:
+		0 3px 0 $or-sombre,
+		3px 3px 0 $ombre,
+		-2px 0 0 $ombre,
+		2px 0 0 $ombre,
+		0 -2px 0 $ombre,
+		0 6px 0 $ombre;
+}
+
+/*
+ * Une fenêtre de jeu de rôle 16 bits : dégradé bleu, bordure blanche aux coins arrondis, un liseré
+ * sombre à l'intérieur et une ombre portée sans flou.
+ */
+@mixin fenetre($haut: $fenetre-haut, $bas: $fenetre-bas) {
+	border: 3px solid $bordure;
+	border-radius: 8px;
+	background: linear-gradient(180deg, $haut 0%, $bas 100%);
+	box-shadow:
+		inset 0 0 0 2px $ombre,
+		inset 0 3px 0 2px rgba(255, 255, 255, .18),
+		0 4px 0 $ombre;
+}
+
+// Le bouton FR / EN : deux petites fenêtres, la langue choisie en or.
+#menu-principal #langues {
+	display: flex;
+	gap: 12px;
+	margin-top: 22px;
+
+	button {
+		min-width: 58px;
+		padding: 6px 12px 8px;
+		color: $gris;
+		font: 600 16px/1 $pixel;
+		cursor: pointer;
+		@include fenetre(#2b3a7a, #141c48);
+
+		&[aria-checked="true"] {
+			color: $or;
+			@include fenetre;
+		}
+
+		&:active {
+			transform: translateY(2px);
+		}
+	}
+}
+
+// « Choisis un tour » clignote, en tout ou rien, comme l'écran titre d'un jeu.
+#menu-principal .invite {
+	margin: 16px 0 22px;
+	font-size: 16px;
+	letter-spacing: 1px;
+	color: $blanc;
+	text-shadow: 2px 2px 0 $ombre;
+	animation: menu-clignote 1.2s steps(1, end) infinite;
+}
+
+@keyframes menu-clignote {
+	50% {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#menu-principal .invite {
+		animation: none;
+	}
+}
+
+#menu-principal #tours {
+	width: 100%;
+	max-width: 520px;
+	display: grid;
+	gap: 14px;
+	// La place de la main, qui déborde à gauche des tuiles.
+	padding-left: 14px;
+	// L'écart minimal avec le bandeau d'installation, quand le menu défile.
+	margin-bottom: 24px;
+}
+
+#menu-principal .tour {
+	display: flex;
+	align-items: stretch;
+	gap: 10px;
+}
+
+#menu-principal .tour-lancer,
+#menu-principal .tour-reglages {
+	position: relative;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+	@include fenetre;
+
+	// Touchée : la fenêtre s'illumine et s'enfonce.
+	&:active {
+		transform: translateY(2px);
+		@include fenetre($fenetre-active-haut, $fenetre-active-bas);
+	}
+
+	&:focus-visible {
+		outline: 2px solid $or;
+		outline-offset: 2px;
+	}
+}
+
+#menu-principal .tour-lancer {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-height: 96px;
+	padding: 10px 12px;
+	text-align: left;
+}
+
+// La main des jeux de rôle : elle apparaît à gauche de la tuile touchée (ou choisie au clavier).
+#menu-principal .main {
+	position: absolute;
+	left: -22px;
+	top: 50%;
+	width: 32px;
+	height: 24px;
+	margin-top: -12px;
+	visibility: hidden;
+	filter: drop-shadow(2px 2px 0 $ombre);
+
+}
+
+#menu-principal .tour-lancer:active .main,
+#menu-principal .tour-lancer:focus-visible .main {
+	visibility: visible;
+}
+
+#menu-principal .tour-icone {
+	flex: none;
+	width: 64px;
+	height: 64px;
+	filter: drop-shadow(2px 3px 0 rgba(5, 6, 26, .7));
+}
+
+#menu-principal .tour-texte {
+	display: grid;
+	gap: 6px;
+	min-width: 0;
+}
+
+#menu-principal .tour-nom {
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1.1;
+	color: $blanc;
+	text-shadow: 2px 2px 0 $ombre;
+}
+
+#menu-principal .tour-description {
+	font-size: 14px;
+	line-height: 1.25;
+	color: $gris;
+	text-shadow: 1px 1px 0 $ombre;
+}
+
+// L'écrou ⚙ : les réglages du tour, sans le lancer.
+#menu-principal .tour-reglages {
+	flex: none;
+	width: 62px;
+	display: grid;
+	place-items: center;
+	padding: 0;
+}
+
+#menu-principal .ecrou {
+	width: 36px;
+	height: 36px;
+	filter: drop-shadow(2px 2px 0 $ombre);
+}
+
+// « Mes tours est une app » : une fenêtre bordée d'or, en bas du menu, tant qu'elle n'est pas installée.
+#menu-principal #installation {
+	width: 100%;
+	max-width: 520px;
+	margin: auto 0 0;
+	padding: 10px 14px 12px;
+	text-align: center;
+	@include fenetre(#2b3a7a, #141c48);
+	border-color: $or;
+
+	// Le bandeau est poussé en bas : la version reste juste dessous.
+	&:not([hidden]) + #version {
+		margin-top: 0;
+	}
+}
+
+#menu-principal .installation-titre {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: $or;
+	text-shadow: 2px 2px 0 $ombre;
+}
+
+#menu-principal .installation-comment {
+	margin: 6px 0 0;
+	font-size: 13px;
+	line-height: 1.3;
+	text-wrap: balance;
+	color: $gris;
+	text-shadow: 1px 1px 0 $ombre;
+}
+
+#menu-principal .installation-bouton {
+	margin-top: 10px;
+	padding: 6px 16px 8px;
+	color: $or;
+	font: 600 15px/1 $pixel;
+	cursor: pointer;
+	@include fenetre;
+
+	&:active {
+		transform: translateY(2px);
+		@include fenetre($fenetre-active-haut, $fenetre-active-bas);
+	}
+}
+
+#menu-principal #version {
+	margin: auto 0 0;
+	padding-top: 24px;
+	font-size: 12px;
+	color: rgba($gris, .6);
+	text-align: center;
+}
