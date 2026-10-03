@@ -10,10 +10,10 @@ import { keepScreenAwake } from '../../../kit/web/wake-lock.ts';
 import { GESTURE, GestureTracker } from '../logic/gestures.ts';
 import { keyAction } from '../logic/keys.ts';
 import { estVide } from '../logic/paquet.ts';
-import { finDeRoutine, quitter } from '../../pont.ts';
+import { quitter } from '../../pont.ts';
 import { closeMenu, holdReleased, isMenuOpen } from '../settings/panel.ts';
 import { settings } from '../settings/store.ts';
-import { carteCount, etatCourant, toucher } from './paquet.ts';
+import { carteCount, etatCourant, remettrePaquet, toucher } from './paquet.ts';
 
 const stage = $('#stage');
 const ring = $('#hold-ring');
@@ -38,8 +38,9 @@ export function forgetTouches(): void {
  *                 deux touchers vifs en pleine routine ne doivent rien avoir d'exceptionnel.
  */
 function applyGesture(geste: 'tap' | 'double'): void {
-	// Deux touchers sur la table vide : la routine est finie, retour au menu principal.
-	if (geste === 'double' && estVide(etatCourant(), carteCount)) finDeRoutine();
+	// Deux touchers sur la table vide : le paquet revient, pour une nouvelle routine. On ne quitte
+	// le tour que par l'appui de 3 s.
+	if (geste === 'double' && estVide(etatCourant(), carteCount)) remettrePaquet();
 	else toucher();
 }
 
@@ -135,7 +136,7 @@ document.addEventListener('keydown', (event) => {
 	touchedSinceShown = true;
 	void keepScreenAwake();
 	if (action === 'menu') quitter();
-	else if (action === 'remettre') finDeRoutine();
+	else if (action === 'remettre') remettrePaquet();
 	else toucher();
 });
 

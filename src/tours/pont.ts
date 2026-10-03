@@ -2,8 +2,10 @@
  * Le pont entre un tour et l'app « Mes tours », qui ouvre sa page à la place du menu
  * (src/scene.ts). Chaque tour s'en sert pour rendre la main au menu principal :
  *
- *   finDeRoutine()  la routine est finie (le geste de remise à zéro du tour) : retour au menu ;
- *   quitter()       sortie de secours (appui de 3 s pendant le tour), ou fermeture des réglages.
+ *   quitter()  l'appui de 3 s pendant le tour (ou Échap, M), ou la fermeture de ses réglages.
+ *
+ * La fin d'une routine ne fait pas quitter le tour : son geste de remise à zéro (double toucher)
+ * le remet en place pour une nouvelle routine, comme dans l'app d'origine.
  *
  * `enReglages` dit si le tour a été ouvert par l'écrou ⚙ du menu principal : il ne montre alors
  * que son panneau de réglages, et le fermer ramène au menu.
@@ -18,7 +20,7 @@
  */
 
 /** Ce qu'un tour peut dire à l'app. */
-export type MessageTour = 'fin' | 'quitter';
+export type MessageTour = 'quitter';
 
 const parametres = new URLSearchParams(location.search);
 
@@ -40,10 +42,8 @@ function envoyer(_message: MessageTour): void {
 	else location.replace(menu.href);
 }
 
-/** La routine est finie : retour au menu principal. */
-export const finDeRoutine = (): void => envoyer('fin');
 
-/** Quitter le tour (sortie de secours, ou réglages fermés) : retour au menu principal. */
+/** Quitter le tour (appui de 3 s, Échap, M, ou réglages fermés) : retour au menu principal. */
 export const quitter = (): void => envoyer('quitter');
 
 /** Le nom du tour, dans la langue du menu, tel que le menu principal l'affiche (`?nom=`). */

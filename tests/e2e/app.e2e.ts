@@ -128,7 +128,7 @@ test('le menu 16 bits montre les quatre tours, chacun avec son icône et son éc
 
 /* ================= Chaque routine, jusqu'au retour au menu ================= */
 
-test('Pile ou face : toucher le haut, puis le double toucher de fin ramène au menu', TIMEOUT, async () => {
+test('Pile ou face : le double toucher de fin remet la carte face cachée, on reste dans le tour ; l’appui de 3 s ramène au menu', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
 		await page.tap(HAUT);
@@ -136,11 +136,19 @@ test('Pile ou face : toucher le haut, puis le double toucher de fin ramène au m
 		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#table .carte').dataset.cote`)), 'pile');
 		await sleep(600);
 		await page.doubleTap(CENTRE);
+		await attendre(page, dansLeTour(`!document.querySelector('#table .carte').classList.contains('retournee')`), 'carte face cachée', 3000);
+		await sleep(800);
+		assert.ok(await page.evaluate<boolean>(`location.pathname.includes('/tours/pile-ou-face/')`), 'le double toucher a quitté le tour');
+		// Une nouvelle routine, sur place.
+		await page.tap(HAUT);
+		await attendre(page, dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'nouvelle routine', 3000);
+		await sleep(600);
+		await appuiLong(page);
 		await attendreLeMenu(page);
 	});
 });
 
-test('Les six prédictions : les six cartes jouées, le double toucher sur la table vide ramène au menu', TIMEOUT, async () => {
+test('Les six prédictions : le double toucher sur la table vide remet le paquet, on reste dans le tour', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await ouvrir(page, 'six-predictions', `document.querySelectorAll('#paquet .carte').length === 6`);
 		for (let i = 0; i < 12; i++) {
@@ -149,29 +157,43 @@ test('Les six prédictions : les six cartes jouées, le double toucher sur la ta
 		}
 		await attendre(page, dansLeTour(`document.querySelector('#paquet').classList.contains('vide')`), 'paquet vide', 3000);
 		await page.doubleTap(CENTRE);
+		await attendre(page, dansLeTour(`!document.querySelector('#paquet').classList.contains('vide') && document.querySelectorAll('#paquet .carte.sortie').length === 0`), 'paquet remis', 3000);
+		assert.ok(await page.evaluate<boolean>(`location.pathname.includes('/tours/six-predictions/')`), 'le double toucher a quitté le tour');
+		await appuiLong(page);
 		await attendreLeMenu(page);
 	});
 });
 
-test('Boule de cristal : un nombre apparaît, le double toucher l’efface et ramène au menu', TIMEOUT, async () => {
+test('Boule de cristal : le double toucher efface le nombre, la boule se réarme sur place', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await ouvrir(page, 'boule-de-cristal', `Boolean(document.querySelector('#number'))`);
 		await page.tap(HAUT);
 		await attendre(page, dansLeTour(`document.querySelector('#number').classList.contains('shown')`), 'nombre affiché', 8000);
 		await sleep(500);
 		await page.doubleTap(CENTRE);
-		// Le nombre s'estompe d'abord (fondu), puis l'app revient au menu.
-		await attendreLeMenu(page, 6000);
+		await attendre(page, dansLeTour(`!document.querySelector('#number').classList.contains('shown')`), 'nombre effacé', 3000);
+		// Le fondu fini, on est toujours dans la boule, prête pour un nouveau tour.
+		await sleep(2500);
+		assert.ok(await page.evaluate<boolean>(`location.pathname.includes('/tours/boule-de-cristal/')`), 'le double toucher a quitté la boule');
+		await page.tap(HAUT);
+		await attendre(page, dansLeTour(`document.querySelector('#number').classList.contains('shown')`), 'nouveau nombre', 8000);
+		await appuiLong(page);
+		await attendreLeMenu(page);
 	});
 });
 
-test('Analyseur Q : après la dernière slide, « suivante » ramène au menu', TIMEOUT, async () => {
+test('Analyseur Q : « suivante » sur la dernière slide ne quitte pas le tour', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await ouvrir(page, 'analyseur-q', `document.querySelector('.slide.current')?.dataset.index === '0'`);
 		await pressKey(page, 'End');
-		await attendre(page, dansLeTour(`document.querySelector('.slide.current')?.dataset.index === String(document.querySelectorAll('.slide').length - 1)`), 'dernière slide', 3000);
+		const derniere = `String(document.querySelectorAll('.slide').length - 1)`;
+		await attendre(page, dansLeTour(`document.querySelector('.slide.current')?.dataset.index === ${derniere}`), 'dernière slide', 3000);
 		await sleep(600);
 		await pressKey(page, 'ArrowRight');
+		await sleep(800);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('.slide.current')?.dataset.index === ${derniere}`)), true, 'on n’est plus sur la dernière slide');
+		// Échap (ou M) d'une télécommande quitte le tour, comme l'appui de 3 s.
+		await pressKey(page, 'Escape');
 		await attendreLeMenu(page);
 	});
 });
@@ -181,7 +203,7 @@ test('rouvrir un tour commence une nouvelle routine', TIMEOUT, async () => {
 		await ouvrir(page, 'analyseur-q', `document.querySelector('.slide.current')?.dataset.index === '0'`);
 		await pressKey(page, 'End');
 		await sleep(600);
-		await pressKey(page, 'ArrowRight');
+		await pressKey(page, 'Escape');
 		await attendreLeMenu(page);
 		await ouvrir(page, 'analyseur-q', `Boolean(document.querySelector('.slide.current'))`);
 		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('.slide.current').dataset.index`)), '0', 'l’analyseur reprend à la première slide');
@@ -223,12 +245,12 @@ test('de retour au menu, une tuile répond au premier toucher, tout de suite', T
 		await page.tap(croix);
 		await autreTuileOuvre('la croix');
 
-		// La fin d'une routine (double toucher).
+		// L'appui de 3 s, au cours d'une routine.
 		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
 		await page.tap(HAUT);
 		await sleep(900);
-		await page.doubleTap(CENTRE);
-		await autreTuileOuvre('la fin de la routine');
+		await appuiLong(page);
+		await autreTuileOuvre('l’appui de 3 s');
 	});
 });
 
