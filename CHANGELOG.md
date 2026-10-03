@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.8.1] | 18 | 2026-10-03 | Les dos de cartes symétriques, de haut en bas et de gauche à droite |
 | [0.8.0] | 17 | 2026-10-03 | L'app allégée : code regroupé, icônes nettes, fiche d'installation |
 | [0.7.0] | 16 | 2026-10-03 | Chaque tour dans sa propre page : plus de toucher perdu, rien sous la caméra |
 | [0.6.5] | 15 | 2026-10-03 | Dans les réglages des tours, un appui long agit aussi |
@@ -25,6 +26,18 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.8.1] — 2026-10-03
+
+18 commits
+
+- **Les dos de cartes sont symétriques**, de haut en bas comme de gauche à droite, autour du centre de la carte : une carte retournée tête-bêche montre le même dos. Mesurés pixel par pixel, quatre des six dessins ne l'étaient pas :
+  - **Art déco** : la bande de chevrons du bas était plus près du bord que celle du haut, et le soleil, ses anneaux et le losange étaient centrés trop bas ;
+  - **Art nouveau** : la fleur était au-dessus du milieu, et les tiges ne montaient que du bas. La fleur est maintenant au centre, et les tiges montent du bas et descendent du haut, en bouquet symétrique ;
+  - **Pop art** : l'étoile d'explosion avait des pointes inégales tirées au hasard, et la trame de points une marge plus grande en haut qu'en bas. Les pointes alternent maintenant longue et courte, et la trame part du centre de la carte ;
+  - **Futuriste** : les arcs du cadran étaient coupés à des endroits différents ; ils sont maintenant face à face.
+  Pixel art et minimaliste l'étaient déjà. Les deux tours qui ont des dos de cartes (Pile ou face, Les six prédictions) partagent les mêmes dessins.
+- Test dans Chrome : chaque dos dessiné en grand est comparé à sa copie retournée, de haut en bas et de gauche à droite ; moins de 1 % du dessin peut ne pas se recouvrir. Il échoue avec les anciens dessins.
 
 ## [0.8.0] — 2026-10-03
 
@@ -188,6 +201,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.8.1]: https://github.com/dezande/mes-tours/releases/tag/v0.8.1
 [0.8.0]: https://github.com/dezande/mes-tours/releases/tag/v0.8.0
 [0.7.0]: https://github.com/dezande/mes-tours/releases/tag/v0.7.0
 [0.6.5]: https://github.com/dezande/mes-tours/releases/tag/v0.6.5

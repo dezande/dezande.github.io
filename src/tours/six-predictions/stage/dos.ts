@@ -19,13 +19,18 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 
 /**
  * Un élément du dessin : son chemin, puis comment il est peint — au trait de `w` d'épaisseur, ou
- * en aplat quand `w` est absent. `o` l'éclaircit, `miroir` le reprend de l'autre côté de la carte.
+ * en aplat quand `w` est absent. `o` l'éclaircit, `miroir` le reprend de l'autre côté de la carte
+ * (gauche-droite), `retourne` le renvoie de haut en bas.
+ *
+ * Tous les dos sont symétriques de gauche à droite ET de haut en bas, autour du centre de la carte
+ * (50, 70) : une carte retournée tête-bêche montre le même dos.
  */
 interface Trait {
 	d: string;
 	w?: number;
 	o?: number;
 	miroir?: true;
+	retourne?: true;
 }
 
 /** Le tour de la carte : deux filets, l'épais puis le fin. `r` arrondit les coins. */
@@ -69,18 +74,18 @@ const DECO: Trait[] = [
 	...cadre(0),
 	// Escaliers dans les quatre angles : le degré, signature de l'Art déco.
 	{ d: 'M12 30V22H20V14H28M88 30V22H80V14H72M12 110V118H20V126H28M88 110V118H80V126H72', w: 1 },
-	// Bandes de chevrons, en haut et en bas du médaillon.
+	// Bandes de chevrons, en haut et en bas du médaillon, à la même distance du bord.
 	{ d: chevrons(38, 5, 12), w: .7 },
-	{ d: chevrons(107, -5, 12), w: .7 },
-	// Le soleil levant : rayons serrés, puis deux anneaux.
-	{ d: rayons(50, 72, 9, 25, 10), w: .5 },
-	{ d: 'M50 45A27 27 0 1 1 50 99A27 27 0 1 1 50 45Z', w: 1.2 },
-	{ d: 'M50 51A21 21 0 1 1 50 93A21 21 0 1 1 50 51Z', w: .45 },
+	{ d: chevrons(102, -5, 12), w: .7 },
+	// Le soleil levant, au centre de la carte : rayons serrés, puis deux anneaux.
+	{ d: rayons(50, 70, 9, 25, 10), w: .5 },
+	{ d: 'M50 43A27 27 0 1 1 50 97A27 27 0 1 1 50 43Z', w: 1.2 },
+	{ d: 'M50 49A21 21 0 1 1 50 91A21 21 0 1 1 50 49Z', w: .45 },
 	// Losange central, à degrés lui aussi.
-	{ d: 'M50 62L60 72L50 82L40 72Z', w: 1 },
-	{ d: 'M50 67L55 72L50 77L45 72Z', w: .6 },
+	{ d: 'M50 60L60 70L50 80L40 70Z', w: 1 },
+	{ d: 'M50 65L55 70L50 75L45 70Z', w: .6 },
 	// Traits verticaux qui tendent le dessin vers le haut et le bas.
-	{ d: 'M50 14V38M50 107V126M44 18V38M56 18V38M44 107V122M56 107V122', w: .45 },
+	{ d: 'M50 14V38M50 102V126M44 18V38M56 18V38M44 102V122M56 102V122', w: .45 },
 ];
 
 /* ---------- Art nouveau : le coup de fouet ---------- */
@@ -95,18 +100,24 @@ const BRANCHE: Trait[] = [
 
 /** Les mêmes traits, renvoyés de l'autre côté de l'axe de la carte. */
 const miroir = (traits: Trait[]): Trait[] => traits.map((trait) => ({ ...trait, miroir: true as const }));
+/** Les mêmes traits, renvoyés de haut en bas. */
+const retourne = (traits: Trait[]): Trait[] => traits.map((trait) => ({ ...trait, retourne: true as const }));
+
+/** Les deux tiges du bas, en miroir l'une de l'autre. */
+const TIGES = [...BRANCHE, ...miroir(BRANCHE)];
 
 const NOUVEAU: Trait[] = [
 	...cadre(14),
-	...BRANCHE,
-	...miroir(BRANCHE),
-	// La corolle : quatre pétales posés autour d'un cœur, sans se croiser au centre, dans un halo.
-	{ d: 'M50 30C59 38 58 50 50 50C42 50 41 38 50 30Z', w: 1 },
-	{ d: 'M50 82C41 74 42 62 50 62C58 62 59 74 50 82Z', w: 1 },
-	{ d: 'M24 56C32 47 44 48 44 56C44 64 32 65 24 56Z', w: 1 },
-	{ d: 'M76 56C68 47 56 48 56 56C56 64 68 65 76 56Z', w: 1 },
-	{ d: 'M50 50.5A5.5 5.5 0 1 1 50 61.5A5.5 5.5 0 1 1 50 50.5Z', w: .8 },
-	{ d: 'M50 29A27 27 0 1 1 50 83A27 27 0 1 1 50 29Z', w: .45 },
+	// Les tiges montent du bas et descendent du haut : un bouquet symétrique autour de la fleur.
+	...TIGES,
+	...retourne(TIGES),
+	// La corolle, au centre de la carte : quatre pétales autour d'un cœur, dans un halo.
+	{ d: 'M50 51C57 57 56 66 50 66C44 66 43 57 50 51Z', w: 1 },
+	{ d: 'M50 89C43 83 44 74 50 74C56 74 57 83 50 89Z', w: 1 },
+	{ d: 'M31 70C37 63 46 64 46 70C46 76 37 77 31 70Z', w: 1 },
+	{ d: 'M69 70C63 63 54 64 54 70C54 76 63 77 69 70Z', w: 1 },
+	{ d: 'M50 66A4 4 0 1 1 50 74A4 4 0 1 1 50 66Z', w: .8 },
+	{ d: 'M50 49A21 21 0 1 1 50 91A21 21 0 1 1 50 49Z', w: .45 },
 ];
 
 /* ---------- Pixel art : le dessin posé case par case ---------- */
@@ -178,27 +189,40 @@ const MINIMAL: Trait[] = [
 
 /* ---------- Pop art : trame de points et étoile d'explosion ---------- */
 
-/** Une trame de points pleins : le tramé des bandes dessinées imprimées. */
+/**
+ * Une trame de points pleins : le tramé des bandes dessinées imprimées. Elle part du centre de la
+ * carte (50, 70) dans les deux sens, si bien qu'elle a la même marge en haut et en bas, à gauche et
+ * à droite.
+ */
 function trame(pas: number, rayon: number): string {
 	let d = '';
-	for (let y = pas; y < 140; y += pas) {
-		for (let x = pas; x < 100; x += pas) {
-			// Une ligne sur deux est décalée d'un demi-pas : la trame ne fait pas de colonnes.
-			const cx = x + ((Math.round(y / pas) % 2) * pas) / 2;
-			if (cx > 100 - pas / 2) continue;
-			d += `M${cx - rayon} ${y}a${rayon} ${rayon} 0 1 0 ${rayon * 2} 0a${rayon} ${rayon} 0 1 0 ${-rayon * 2} 0Z`;
+	const lignes = Math.floor((70 - pas / 2) / pas);
+	for (let k = -lignes; k <= lignes; k++) {
+		const y = 70 + k * pas;
+		// Une ligne sur deux est décalée d'un demi-pas : la trame ne fait pas de colonnes.
+		const decalage = Math.abs(k) % 2 === 1 ? pas / 2 : 0;
+		const colonnes = Math.floor((50 - pas / 2 - decalage) / pas);
+		for (let m = -colonnes; m <= colonnes; m++) {
+			for (const cx of decalage ? [50 + decalage + m * pas, 50 - decalage - m * pas] : [50 + m * pas]) {
+				if (decalage && m < 0) continue;
+				d += `M${cx - rayon} ${y}a${rayon} ${rayon} 0 1 0 ${rayon * 2} 0a${rayon} ${rayon} 0 1 0 ${-rayon * 2} 0Z`;
+			}
 		}
 	}
 	return d;
 }
 
-/** Une étoile d'explosion : des pointes inégales autour d'un centre, comme un « BOUM » dessiné. */
+/**
+ * Une étoile d'explosion autour d'un centre, comme un « BOUM » dessiné : une pointe longue, une
+ * courte, en alternance. L'alternance garde l'étoile symétrique de haut en bas et de gauche à
+ * droite (avec un nombre de pointes multiple de 4).
+ */
 function explosion(cx: number, cy: number, pointes: number, dedans: number, dehors: number): string {
 	let d = '';
 	for (let i = 0; i < pointes * 2; i++) {
 		const rayon = i % 2 === 0 ? dehors : dedans;
 		// Les pointes ne font pas toutes la même longueur : une explosion n'est pas une roue dentée.
-		const variation = i % 2 === 0 ? 1 - (i % 6) * .07 : 1;
+		const variation = i % 2 === 0 ? (i / 2) % 2 === 0 ? 1 : .82 : 1;
 		const angle = ((i / (pointes * 2)) * 2 - .5) * Math.PI;
 		const x = cx + Math.cos(angle) * rayon * variation;
 		const y = cy + Math.sin(angle) * rayon * variation;
@@ -242,11 +266,13 @@ const FUTURISTE: Trait[] = [
 	{ d: 'M22 10H78L90 22V118L78 130H22L10 118V22Z', w: .4 },
 	// Équerres de visée dans les quatre coins.
 	{ d: 'M14 30V20H24M86 30V20H76M14 110V120H24M86 110V120H76', w: 1 },
-	// Cadran : deux arcs ouverts, un anneau plein de graduations, un cœur.
-	{ d: arc(50, 70, 30, -160, 70), w: 1.4 },
-	{ d: arc(50, 70, 30, 100, 170), w: 1.4 },
+	// Cadran : deux arcs ouverts face à face (coupés là où passe la ligne de balayage), un anneau
+	// de graduations, et deux arcs intérieurs, eux aussi en vis-à-vis.
+	{ d: arc(50, 70, 30, -155, -25), w: 1.4 },
+	{ d: arc(50, 70, 30, 25, 155), w: 1.4 },
 	{ d: graduations(50, 70, 22, 26, 12), w: .5 },
-	{ d: arc(50, 70, 16, 20, 260), w: 2.4 },
+	{ d: arc(50, 70, 16, -150, -30), w: 2.4 },
+	{ d: arc(50, 70, 16, 30, 150), w: 2.4 },
 	{ d: 'M50 64A6 6 0 1 1 50 76A6 6 0 1 1 50 64Z' },
 	// Ligne de balayage et petits témoins, de part et d'autre du cadran.
 	{ d: 'M8 70H16M84 70H92', w: 1 },
@@ -289,7 +315,10 @@ export function buildDos(dessin: Dessin): SVGSVGElement {
 		if (trait.w === undefined) path.setAttribute('fill', 'currentColor');
 		else path.setAttribute('stroke-width', String(trait.w));
 		if (trait.o !== undefined) path.setAttribute('opacity', String(trait.o));
-		if (trait.miroir) path.setAttribute('transform', 'translate(100 0) scale(-1 1)');
+		// Miroir (gauche-droite) et retournement (haut-bas) autour du centre de la carte, 100 × 140.
+		if (trait.miroir && trait.retourne) path.setAttribute('transform', 'translate(100 140) scale(-1 -1)');
+		else if (trait.miroir) path.setAttribute('transform', 'translate(100 0) scale(-1 1)');
+		else if (trait.retourne) path.setAttribute('transform', 'translate(0 140) scale(1 -1)');
 	}
 	return svg;
 }

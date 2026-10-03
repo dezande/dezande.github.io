@@ -454,6 +454,33 @@ test('écrou ⚙ : en anglais, « Settings » et le nom anglais du tour', TIMEOU
 	});
 });
 
+test('les six dos de cartes sont symétriques, de haut en bas et de gauche à droite', TIMEOUT, async () => {
+	// Chaque dos dessiné en grand, comparé à sa copie retournée : les pixels qui ne se recouvrent pas
+	// sont comptés (en part des pixels dessinés).
+	await withApp(async (page) => {
+		await ouvrir(page, 'pile-ou-face', `document.querySelectorAll('#motif-choix .vignette svg').length === 6`, true);
+		const ecarts = await page.evaluate<{ nom: string; hautBas: number; gaucheDroite: number }[]>(dansLeTour(`(async () => {
+			const L = 200, H = 280, resultats = [];
+			for (const bouton of document.querySelectorAll('#motif-choix button')) {
+				const svg = bouton.querySelector('svg').cloneNode(true);
+				svg.setAttribute('width', L); svg.setAttribute('height', H); svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); svg.setAttribute('color', '#000');
+				const image = new Image(); image.src = 'data:image/svg+xml,' + encodeURIComponent(svg.outerHTML); await image.decode();
+				const pixels = (sx, sy) => { const c = document.createElement('canvas'); c.width = L; c.height = H; const g = c.getContext('2d'); g.translate(sx < 0 ? L : 0, sy < 0 ? H : 0); g.scale(sx, sy); g.drawImage(image, 0, 0); return g.getImageData(0, 0, L, H).data; };
+				const [a, v, m] = [pixels(1, 1), pixels(1, -1), pixels(-1, 1)];
+				let encre = 0, dv = 0, dm = 0;
+				for (let k = 3; k < a.length; k += 4) { const A = a[k] > 100; if (A) encre++; if (A !== (v[k] > 100)) dv++; if (A !== (m[k] > 100)) dm++; }
+				resultats.push({ nom: bouton.dataset.valeur, hautBas: dv / encre, gaucheDroite: dm / encre });
+			}
+			return resultats;
+		})()`));
+		assert.equal(ecarts.length, 6);
+		for (const { nom, hautBas, gaucheDroite } of ecarts) {
+			assert.ok(hautBas < .01, `${nom} : ${(hautBas * 100).toFixed(1)} % du dessin ne se retrouve pas de haut en bas`);
+			assert.ok(gaucheDroite < .01, `${nom} : ${(gaucheDroite * 100).toFixed(1)} % du dessin ne se retrouve pas de gauche à droite`);
+		}
+	});
+});
+
 /* ================= Le bouton FR / EN ================= */
 
 test('FR / EN : le menu change de langue, et s’en souvient', TIMEOUT, async () => {
