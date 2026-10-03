@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
 | [0.8.1] | 18 | 2026-10-03 | Les dos de cartes symétriques, de haut en bas et de gauche à droite |
 | [0.8.0] | 17 | 2026-10-03 | L'app allégée : code regroupé, icônes nettes, fiche d'installation |
 | [0.7.0] | 16 | 2026-10-03 | Chaque tour dans sa propre page : plus de toucher perdu, rien sous la caméra |
@@ -26,6 +27,13 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.8.2] — 2026-10-03
+
+19 commits
+
+- **Le dessin des dos a enfin la même marge en haut et en bas.** La 0.8.1 avait rendu les dessins eux-mêmes symétriques, mais le défaut visible venait de leur pose sur la carte : le dessin prenait sa hauteur de sa largeur et du rapport 100 × 140 d'une carte, alors que la place laissée à l'intérieur de la marge de papier n'a pas tout à fait ce rapport. Il s'arrêtait donc avant le bas de la carte — 4 px de marge en haut, 7 px en bas sur une vignette des réglages ; sur le pixel art, une bande sombre apparaissait en bas. Le dessin remplit maintenant exactement la place à l'intérieur de la marge, la même sur les quatre côtés, dans les réglages comme sur les cartes en scène (Pile ou face, Les six prédictions).
+- Test dans Chrome : sur chaque vignette et chaque carte en scène, le dessin a la même marge en haut, en bas et sur les côtés. Il échoue avec la version 0.8.1.
 
 ## [0.8.1] — 2026-10-03
 
@@ -201,6 +209,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.8.2]: https://github.com/dezande/mes-tours/releases/tag/v0.8.2
 [0.8.1]: https://github.com/dezande/mes-tours/releases/tag/v0.8.1
 [0.8.0]: https://github.com/dezande/mes-tours/releases/tag/v0.8.0
 [0.7.0]: https://github.com/dezande/mes-tours/releases/tag/v0.7.0

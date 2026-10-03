@@ -179,11 +179,22 @@
  * qu'il lui reste, quelle que soit la taille de la carte (le SVG s'étire avec elle).
  */
 .dos-motif {
+	// La marge de papier, et le filet sombre d'un pixel juste à l'intérieur.
+	--retrait: calc(var(--marge, 3px) + 1px);
 	position: absolute;
-	inset: calc(var(--marge, 3px) + 1px);
+	top: var(--retrait);
+	left: var(--retrait);
 	display: block;
-	width: auto;
-	height: auto;
+	/*
+	 * La largeur ET la hauteur sont données : le dessin remplit exactement la place à l'intérieur de
+	 * la marge, la même en haut, en bas et sur les côtés. Avec une hauteur « auto », un SVG prend sa
+	 * hauteur de sa largeur et du rapport 100 × 140 de son dessin ; or, la marge de papier ôtée, la
+	 * place restante n'a plus tout à fait ce rapport : le dessin s'arrêtait avant le bas de la carte
+	 * (4 px de marge en haut, 7 en bas sur une vignette du menu). Le dessin s'étire sans se déformer
+	 * visiblement (preserveAspectRatio « none », stage/dos.ts).
+	 */
+	width: calc(100% - 2 * var(--retrait));
+	height: calc(100% - 2 * var(--retrait));
 }
 
 /* ---------- L'avant : la prédiction ---------- */
