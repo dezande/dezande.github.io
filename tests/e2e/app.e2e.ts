@@ -23,16 +23,17 @@ const CENTRE: Point = { x: SCREEN.width / 2, y: SCREEN.height / 2 };
 let server: StaticServer;
 let browser: Browser;
 
+// Lancer et fermer Chrome prend plus que les 5 s de Jest par défaut sur les machines de la CI.
 beforeAll(async () => {
 	if (!existsSync('dist/index.html')) throw new Error('dist/ absent : lancez « npm run build » avant les tests dans Chrome.');
 	server = await startStaticServer('dist', 0);
 	browser = await Browser.launch();
-});
+}, TIMEOUT);
 
 afterAll(async () => {
 	await browser?.close();
 	await server?.close();
-});
+}, TIMEOUT);
 
 /** Ouvre l'app à `url`, attend le menu, lance `run` et vérifie qu'aucune erreur JavaScript n'a eu lieu. */
 async function withApp(run: (page: Page) => Promise<void>, url = server.url): Promise<void> {
