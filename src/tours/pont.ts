@@ -1,5 +1,5 @@
 /*
- * Le pont entre un tour et l'app « Mes tours », qui l'affiche en plein écran dans un cadre
+ * Le pont entre un tour et l'app « Mes tours », qui ouvre sa page à la place du menu
  * (src/scene.ts). Chaque tour s'en sert pour rendre la main au menu principal :
  *
  *   finDeRoutine()  la routine est finie (le geste de remise à zéro du tour) : retour au menu ;
@@ -14,7 +14,7 @@
  * `remplirEntete()` écrit l'en-tête commun des réglages de tous les tours : « Réglages » (ou
  * « Settings ») et, dessous, le nom du tour tel que le menu principal l'affiche.
  *
- * Un tour ouvert seul, hors du cadre (adresse tapée à la main), revient à la racine de l'app.
+ * Un tour ouvert seul (adresse tapée à la main) revient à la racine de l'app.
  */
 
 /** Ce qu'un tour peut dire à l'app. */
@@ -28,9 +28,16 @@ export const enReglages = parametres.has('reglages');
 /** La langue choisie dans le menu principal (bouton FR / EN), ou null si le tour est ouvert seul. */
 export const langueDemandee: 'fr' | 'en' | null = ((valeur) => (valeur === 'fr' || valeur === 'en' ? valeur : null))(parametres.get('lang'));
 
-function envoyer(message: MessageTour): void {
-	if (window.parent !== window) window.parent.postMessage({ mesTours: message }, location.origin);
-	else location.href = '../../';
+/**
+ * Revient au menu principal. Ouvert depuis le menu, le tour y revient par l'historique — la page du
+ * menu réapparaît telle qu'on l'a laissée, et l'historique ne grandit pas d'un tour à l'autre ;
+ * ouvert autrement (adresse tapée à la main), il charge le menu à sa place.
+ */
+function envoyer(_message: MessageTour): void {
+	const menu = new URL('../../', location.href);
+	const depuisLeMenu = history.length > 1 && document.referrer !== '' && new URL(document.referrer).pathname === menu.pathname;
+	if (depuisLeMenu) history.back();
+	else location.replace(menu.href);
 }
 
 /** La routine est finie : retour au menu principal. */
