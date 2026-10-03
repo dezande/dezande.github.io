@@ -4,10 +4,13 @@
  * Le fichier est servi par l'app elle-même (`public/fonts/`, donc `dist/fonts/`) : il part dans le
  * cache hors-ligne avec le reste, et la Content-Security-Policy l'autorise (`font-src 'self'`).
  * Police variable, sous-ensemble latin : 12 ko pour les graisses de 400 à 700, lettres accentuées
- * comprises.
+ * comprises (la source non retouchée est dans outils/).
  *
  * Pixelify Sans, par The Pixelify Sans Project Authors, sous licence SIL Open Font License 1.1 —
  * le texte de la licence accompagne le fichier, dans `public/fonts/OFL-pixelify-sans.txt`.
+ *
+ * Retouchée pour l'app par outils/pixelify-mes-tours.py : le « 5 », qui ressemblait à un « S », et
+ * le « î », dont l'accent ne se voyait pas, sont redessinés sur la grille de pixels de la police.
  *
  * (Caveat, l'écriture des prédictions, reste dans `public/fonts/` : les tours s'en servent.)
  */
@@ -18,5 +21,5 @@
 	// « block » et non « swap » : le menu ne change pas de police une fois affiché. Le fichier
 	// venant du cache, l'attente est de toute façon imperceptible.
 	font-display: block;
-	src: url("fonts/pixelify-sans-latin.woff2") format("woff2");
+	src: url("fonts/pixelify-sans-mes-tours.woff2") format("woff2");
 }
