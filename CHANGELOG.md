@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.6.5] | 15 | 2026-10-03 | Dans les réglages des tours, un appui long agit aussi |
 | [0.6.4] | 14 | 2026-10-03 | De retour d'un tour, les tuiles répondent, appui bref ou long |
 | [0.6.3] | 13 | 2026-10-03 | Un appui long sur un bouton du menu agit aussi |
 | [0.6.2] | 12 | 2026-10-03 | De retour au menu, les tuiles répondent tout de suite |
@@ -22,6 +23,13 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.6.5] — 2026-10-03
+
+15 commits
+
+- **Dans les réglages des tours aussi, un appui long sur un bouton agit.** Comme dans le menu principal, un doigt posé longtemps sur un bouton n'envoyait pas de clic sur Android : un dos de carte, une case à cocher ou la croix s'enfonçaient sans agir. Un même module pour les quatre tours (`src/tours/boutons-tactiles.ts`) suit le doigt sur tout le panneau de réglages et donne au bouton touché son clic quand le doigt se relève — un seul, appui bref ou long. Le code de chaque tour n'a pas changé. Les curseurs (délai, fondu…) ne sont pas concernés, et un doigt qui fait défiler les réglages n'appuie sur rien.
+- Test dans Chrome : sans clic après un appui long, comme sur Android, un dos de couleur, une case à cocher (basculée une seule fois, comme au toucher bref) et la croix agissent. Il échoue sans la correction.
 
 ## [0.6.4] — 2026-10-03
 
@@ -157,6 +165,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.6.5]: https://github.com/dezande/mes-tours/releases/tag/v0.6.5
 [0.6.4]: https://github.com/dezande/mes-tours/releases/tag/v0.6.4
 [0.6.3]: https://github.com/dezande/mes-tours/releases/tag/v0.6.3
 [0.6.2]: https://github.com/dezande/mes-tours/releases/tag/v0.6.2
