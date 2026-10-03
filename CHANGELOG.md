@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.6.1] | 11 | 2026-10-03 | Le « 5 » et le « î » redessinés dans la police du menu |
 | [0.6.0] | 10 | 2026-10-03 | Le menu principal façon console 16 bits, icônes redessinées |
 | [0.5.0] | 9 | 2026-10-03 | Les réglages des tours : une même structure, le nom du tour, une croix pour fermer |
 | [0.4.0] | 8 | 2026-10-03 | Un bouton FR / EN dans le menu, pour le menu et tous les tours |
@@ -18,6 +19,13 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.6.1] — 2026-10-03
+
+11 commits
+
+- **Le « 5 » ne ressemble plus à un « S »**, et **l'accent du « î » se voit** : dans la police Pixelify Sans, le 5 est dessiné presque comme un S (« AQ‑52 » se lisait « AQ‑S2 »), et le chevron de « î » n'est qu'un demi-pixel collé à la lettre (« apparaît » se lisait « apparait »). Les deux glyphes sont redessinés sur la grille de pixels de la police : un 5 classique, barre du haut droite et ventre en bas, et un chevron de trois pixels au-dessus de la lettre.
+- La police retouchée s'appelle `pixelify-sans-mes-tours.woff2` ; elle est produite par `outils/pixelify-mes-tours.py` à partir de l'originale, rangée dans `outils/`. Pixelify Sans est sous licence SIL OFL 1.1, sans nom réservé : la retoucher est permis, et sa version le signale.
 
 ## [0.6.0] — 2026-10-03
 
@@ -121,6 +129,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.6.1]: https://github.com/dezande/mes-tours/releases/tag/v0.6.1
 [0.6.0]: https://github.com/dezande/mes-tours/releases/tag/v0.6.0
 [0.5.0]: https://github.com/dezande/mes-tours/releases/tag/v0.5.0
 [0.4.0]: https://github.com/dezande/mes-tours/releases/tag/v0.4.0
