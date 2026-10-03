@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.8.0] | 17 | 2026-10-03 | L'app allégée : code regroupé, icônes nettes, fiche d'installation |
 | [0.7.0] | 16 | 2026-10-03 | Chaque tour dans sa propre page : plus de toucher perdu, rien sous la caméra |
 | [0.6.5] | 15 | 2026-10-03 | Dans les réglages des tours, un appui long agit aussi |
 | [0.6.4] | 14 | 2026-10-03 | De retour d'un tour, les tuiles répondent, appui bref ou long |
@@ -24,6 +25,17 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.8.0] — 2026-10-03
+
+17 commits
+
+L'app allégée : moitié moins lourde, des pages qui s'ouvrent plus vite, une fiche d'installation complète.
+
+- **Le code de chaque page regroupé et compressé** : le menu et chaque tour chargent un seul fichier JavaScript minifié, au lieu d'une vingtaine chargés l'un après l'autre. JavaScript 306 → 126 ko, styles 84 → 59 ko (compressés), code transmis 120 → 74 ko ; l'app entière en cache hors-ligne passe de 804 à environ 450 ko et de 109 à 36 fichiers. Fait au build par `outils/regrouper.ts` (esbuild, outil de build seulement).
+- **Des icônes nettes et légères** : l'icône de 192 était réduite en lissant les pixels — floue, 6 455 couleurs, 31 ko. Les deux icônes sont maintenant agrandies un nombre entier de fois depuis le dessin, pixel pour pixel, en palette exacte : 2 ko et 3 ko, les 67 couleurs du dessin sans aucune perte (`outils/icones-png.py`).
+- **Une fiche d'installation complète** : trois captures d'écran (le menu, Pile ou face, des réglages), une description et des catégories dans le manifeste ; Android les montre au moment d'installer.
+- **CI plus sûre** : l'étape des tests dans Chrome est limitée à 6 minutes et le processus de test se termine de force une fois les tests finis — une CI bloquée 20 minutes ne se reproduira plus ; un nouveau push sur une pull request annule la vérification devenue inutile de la précédente.
 
 ## [0.7.0] — 2026-10-03
 
@@ -176,6 +188,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.8.0]: https://github.com/dezande/mes-tours/releases/tag/v0.8.0
 [0.7.0]: https://github.com/dezande/mes-tours/releases/tag/v0.7.0
 [0.6.5]: https://github.com/dezande/mes-tours/releases/tag/v0.6.5
 [0.6.4]: https://github.com/dezande/mes-tours/releases/tag/v0.6.4
