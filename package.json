@@ -7,10 +7,8 @@
 		"name": "Mes tours",
 		"cachePrefix": "mes-tours",
 		"requiredFiles": [
-			"content/tours.js",
-			"menu.js",
-			"scene.js",
-			"tours/pont.js",
+			"fonts/pixelify-sans-mes-tours.woff2",
+			"fonts/caveat-latin.woff2",
 			"tours/boule-de-cristal/index.html",
 			"tours/boule-de-cristal/app.js",
 			"tours/boule-de-cristal/style.css",
@@ -22,11 +20,7 @@
 			"tours/six-predictions/style.css",
 			"tours/pile-ou-face/index.html",
 			"tours/pile-ou-face/app.js",
-			"tours/pile-ou-face/style.css",
-			"pixel.js",
-			"content/pixels.js",
-			"fonts/pixelify-sans-mes-tours.woff2",
-			"fonts/caveat-latin.woff2"
+			"tours/pile-ou-face/style.css"
 		]
 	},
 	"engines": {
@@ -34,16 +28,17 @@
 	},
 	"scripts": {
 		"clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
-		"build": "npm run clean && node -e \"require('node:fs').cpSync('public', 'dist', { recursive: true })\" && sass --no-source-map src/styles/main.scss:dist/style.css src/tours/boule-de-cristal/styles/main.scss:dist/tours/boule-de-cristal/style.css src/tours/analyseur-q/styles/main.scss:dist/tours/analyseur-q/style.css src/tours/six-predictions/styles/main.scss:dist/tours/six-predictions/style.css src/tours/pile-ou-face/styles/main.scss:dist/tours/pile-ou-face/style.css && tsc -p src && tsc -p src/sw && node src/kit/node/check-dist.ts && node src/kit/node/stamp-build.ts",
+		"build": "npm run clean && node -e \"require('node:fs').cpSync('public', 'dist', { recursive: true })\" && sass --no-source-map --style=compressed src/styles/main.scss:dist/style.css src/tours/boule-de-cristal/styles/main.scss:dist/tours/boule-de-cristal/style.css src/tours/analyseur-q/styles/main.scss:dist/tours/analyseur-q/style.css src/tours/six-predictions/styles/main.scss:dist/tours/six-predictions/style.css src/tours/pile-ou-face/styles/main.scss:dist/tours/pile-ou-face/style.css && node outils/regrouper.ts && tsc -p src/sw && node src/kit/node/check-dist.ts && node src/kit/node/stamp-build.ts",
 		"typecheck": "tsc -p src --noEmit && tsc -p src/sw --noEmit && tsc",
 		"test": "node --test \"tests/logic/**/*.test.ts\" \"tests/tours/**/*.test.ts\"",
 		"check:changelog": "node src/kit/node/check-changelog.ts",
-		"test:e2e": "node --test --test-concurrency=1 \"tests/e2e/**/*.e2e.ts\"",
+		"test:e2e": "node --test --test-concurrency=1 --test-force-exit \"tests/e2e/**/*.e2e.ts\"",
 		"serve": "npm run build && node src/kit/node/serve.ts",
 		"deploy": "node src/kit/node/deploy.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^24.13.4",
+		"esbuild": "^0.28.2",
 		"sass": "^1.104.1",
 		"typescript": "^7.0.2"
 	}

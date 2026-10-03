@@ -55,6 +55,8 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 Les mêmes règles que les autres apps, énoncées une fois dans le [kit](https://github.com/dezande/kit-scene#règles-de-la-branche-main) : `main` protégée, pull request, fusion en rebase, CI verte (« Types, tests, build et tests dans Chrome »), une ligne dans le [journal des versions](CHANGELOG.md) pour chaque changement. Chaque fusion sur `main` publie le site.
 
+**Le build regroupe le code de chaque page** en un seul fichier JavaScript minifié ([`outils/regrouper.ts`](outils/regrouper.ts), avec esbuild, outil de build seulement : l'app publiée n'a aucune dépendance), et les styles sont compressés. Une page charge ainsi un fichier au lieu d'une vingtaine. Seul le numéro de version du kit reste à part (`kit/web/build.js`), là où le kit l'inscrit au build.
+
 **Le service worker** est celui du kit, à partir de la v1.3.1 : il ne renvoie la page de l'app que pour sa propre adresse, jamais pour une autre page du site — un test dans Chrome le vérifie.
 
 ```sh
@@ -73,13 +75,13 @@ Le menu principal a l'allure des menus de jeux de rôle des consoles 16 bits : f
 
 Les icônes des tours (32 × 32), l'écrou ⚙ (24 × 24) et la main sont des **grilles de caractères**, un par pixel, dans [`src/content/pixels.ts`](src/content/pixels.ts) ; [`src/pixel.ts`](src/pixel.ts) en fait des SVG nets à toutes les tailles. Les icônes et l'écrou sont **engendrés** par [`outils/icones-16-bits.py`](outils/icones-16-bits.py) — éclairage des volumes, tramage des ombres — : pour en changer un, modifier le script, le lancer (`python3 outils/icones-16-bits.py` écrit `icones.json` et un aperçu `apercu.svg`), puis recopier les grilles et la palette dans `src/content/pixels.ts`. Les tests vérifient que l'écrou est symétrique dans tous les sens, son trou au centre exact.
 
-### Icônes
+### Icônes et captures
 
-L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes des quatre tours, chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus avec Chrome sans interface :
+L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes des quatre tours, chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus **pixel pour pixel** par [`outils/icones-png.py`](outils/icones-png.py) : le dessin de 80 × 80 agrandi un nombre entier de fois (× 6 pour 512, × 2 pour 192), sans lissage, en palette exacte — nets et légers (2 et 3 ko).
+
+Les captures de la fiche d'installation (`public/captures/`, citées par `manifest.json`) sont prises dans Chrome sans interface par [`outils/captures.ts`](outils/captures.ts), après un build.
 
 ```sh
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
-	--screenshot="public/icons/icon-512.png" --window-size=512,512 "file://$PWD/src/icon/icon.svg"
-cp public/icons/icon-512.png public/icons/icon-192.png
-sips -z 192 192 public/icons/icon-192.png
+python3 outils/icones-png.py    # il faut Pillow : pip install pillow
+npm run build && node outils/captures.ts
 ```

@@ -9,6 +9,12 @@ on:
 permissions:
   contents: read
 
+# Un nouveau push sur une pull request annule la vérification devenue inutile de la précédente.
+# Jamais sur main : chaque fusion doit aller jusqu'à la publication.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     name: Types, tests, build et tests dans Chrome
@@ -53,8 +59,10 @@ jobs:
       # chaque routine jusqu’au retour au menu, l’écrou des réglages, la sortie de secours et le hors-ligne.
       # Google Chrome est préinstallé sur les machines ubuntu de GitHub (variable CHROME_BIN).
       # En cas d'échec, rien n'est publié.
+      # Limite de temps : une page de Chrome qui ne se ferme pas ne doit plus bloquer la CI 20 minutes.
       - name: Tests dans Chrome
         if: github.event_name != 'push'
+        timeout-minutes: 6
         run: npm run test:e2e
 
       - name: Artefact GitHub Pages

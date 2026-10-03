@@ -2,7 +2,7 @@
 	"id": "/mes-tours/",
 	"name": "Mes tours",
 	"short_name": "Mes tours",
-	"description": "Tous mes accessoires de scène dans une seule app : boule de cristal, pile ou face, les six prédictions, Analyseur Q. Un écrou de réglages par tour, retour au menu à la fin de chaque routine. 100 % hors-ligne.",
+	"description": "Tous mes accessoires de scène dans une seule app : boule de cristal, pile ou face, les six prédictions, Analyseur Q. Un écrou de réglages par tour, retour au menu à la fin de chaque routine, en français ou en anglais. 100 % hors-ligne.",
 	"lang": "fr",
 	"dir": "ltr",
 	"start_url": "./",
@@ -12,9 +12,56 @@
 	"background_color": "#0b0b2b",
 	"theme_color": "#0b0b2b",
 	"icons": [
-		{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-		{ "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-		{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-		{ "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+		{
+			"src": "icons/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "icons/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"categories": [
+		"entertainment",
+		"lifestyle"
+	],
+	"screenshots": [
+		{
+			"src": "captures/menu.webp",
+			"sizes": "780x1688",
+			"type": "image/webp",
+			"form_factor": "narrow",
+			"label": "Le menu : les quatre tours, et l'écrou de réglages de chacun"
+		},
+		{
+			"src": "captures/pile-ou-face.webp",
+			"sizes": "780x1688",
+			"type": "image/webp",
+			"form_factor": "narrow",
+			"label": "Pile ou face : la prédiction et la pièce de 20 centimes, dessinées à la main"
+		},
+		{
+			"src": "captures/reglages.webp",
+			"sizes": "780x1688",
+			"type": "image/webp",
+			"form_factor": "narrow",
+			"label": "Les réglages d'un tour : le dos et la couleur des cartes"
+		}
 	]
 }
