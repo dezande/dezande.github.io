@@ -71,6 +71,56 @@ jobs:
         with:
           path: dist
 
+  # Le vrai Chrome d'Android, sur un émulateur : là où sont apparus les bugs du toucher.
+  # Vrais gestes Android (toucher, appui long, touche retour), voir tests/android.
+  # Sur les pull requests seulement, à côté des tests dans Chrome de bureau.
+  android:
+    name: Tests dans Chrome pour Android (émulateur)
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # L'émulateur a besoin de l'accélération matérielle (KVM) de la machine.
+      - name: Accélération de l'émulateur
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Tests dans Chrome pour Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: npm run test:android
+
+      - name: Capture de l'émulateur en cas d'échec
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: android-ecran
+          path: android-ecran.png
+          if-no-files-found: ignore
+
   deploy:
     name: Déploiement GitHub Pages
     needs: build

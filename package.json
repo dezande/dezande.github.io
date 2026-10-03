@@ -36,6 +36,7 @@
 		"test": "node --test \"tests/logic/**/*.test.ts\" \"tests/tours/**/*.test.ts\"",
 		"check:changelog": "node src/kit/node/check-changelog.ts",
 		"test:e2e": "node --test --test-concurrency=1 --test-force-exit \"tests/e2e/**/*.e2e.ts\"",
+		"test:android": "node --test --test-concurrency=1 --test-force-exit \"tests/android/**/*.e2e.ts\"",
 		"serve": "npm run build && node src/kit/node/serve.ts",
 		"deploy": "node src/kit/node/deploy.ts"
 	},

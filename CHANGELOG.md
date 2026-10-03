@@ -30,6 +30,16 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ---
 
+## [Non publié]
+
+- **Des tests dans le vrai Chrome d'Android**, sur un émulateur Android 14, à chaque pull request (`npm run test:android` en local, avec un émulateur ou un téléphone branché à adb). Les gestes sont de vrais gestes Android — toucher, appui long, touche retour, double toucher sur l'écran tactile — là où les tests de bureau les simulaient. Ils vérifient :
+  - qu'une tuile s'ouvre au toucher bref comme à l'appui long ;
+  - que l'appui de 3 s et la touche retour ramènent au menu, et que le menu répond ensuite ;
+  - l'écrou ⚙ et la croix ;
+  - que la fin de routine reste dans le tour (Pile ou face, Boule de cristal) ;
+  - que les marges de l'écran ne changent pas une fois le tour posé.
+  Le README explique comment installer le même émulateur sur un Mac.
+
 ## [0.10.0] — 2026-10-03
 
 22 commits

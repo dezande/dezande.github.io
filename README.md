@@ -66,8 +66,28 @@ npm install
 npm run serve       # build puis serveur local sur http://localhost:8000
 npm test            # tests unitaires (l'app et les cinq tours)
 npm run test:e2e    # tests dans Chrome (après npm run build)
+npm run test:android  # tests dans Chrome pour Android (après npm run build, un appareil dans adb)
 npm run typecheck
 npm run check:changelog
+```
+
+### Tests dans Chrome pour Android
+
+Les tests de [`tests/android`](tests/android/android.e2e.ts) jouent l'app dans le vrai Chrome d'Android, avec de vrais gestes : toucher et appui long (`adb shell input`), touche retour, doubles touchers écrits directement sur l'écran tactile (il faut le root de l'émulateur : `input`, ou un `sendevent` par événement, mettent trop de temps à se lancer pour deux touchers à moins de 450 ms ; les événements sont préparés dans des fichiers, puis recopiés sur l'écran d'un coup). La CI les lance sur un émulateur Android 14 (Pixel 6) à chaque pull request.
+
+Deux pièges, contournés par les tests :
+
+- **la fiche « Installer »** que Chrome affiche au bas de l'écran prend le toucher suivant : les tests l'écartent (`beforeinstallprompt`) ;
+- **juste après un changement de page**, Chrome écarte les touchers tant que la nouvelle page n'est pas vraiment affichée : un test ne touche une page qu'une demi-seconde après son premier affichage, mesuré par Chrome (sur l'émulateur lent de la CI, il peut venir bien après le chargement). Un vrai doigt n'est jamais aussi rapide.
+
+Sur un Mac à puce Apple, le même émulateur en local (une fois, ~6 Go) :
+
+```sh
+brew install openjdk@17 && brew install --cask android-commandlinetools
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17 ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+sdkmanager --sdk_root=$ANDROID_HOME "emulator" "platform-tools" "system-images;android-34;google_apis;arm64-v8a"
+echo no | avdmanager create avd -n mes-tours -k "system-images;android-34;google_apis;arm64-v8a" -d pixel_6
+$ANDROID_HOME/emulator/emulator -avd mes-tours -no-window -noaudio &   # puis npm run test:android
 ```
 
 ### Le menu, façon console 16 bits
