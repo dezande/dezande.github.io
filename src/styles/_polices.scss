@@ -1,21 +1,22 @@
 /*
- * Press Start 2P, la police pixel du menu principal, embarquée avec l'app.
+ * Pixelify Sans, la police pixel du menu principal, façon console 16 bits, embarquée avec l'app.
  *
  * Le fichier est servi par l'app elle-même (`public/fonts/`, donc `dist/fonts/`) : il part dans le
  * cache hors-ligne avec le reste, et la Content-Security-Policy l'autorise (`font-src 'self'`).
- * Sous-ensemble latin : 5 ko, lettres accentuées comprises.
+ * Police variable, sous-ensemble latin : 12 ko pour les graisses de 400 à 700, lettres accentuées
+ * comprises.
  *
- * Press Start 2P, par The Press Start 2P Project Authors, sous licence SIL Open Font License 1.1 —
- * le texte de la licence accompagne le fichier, dans `public/fonts/OFL-press-start-2p.txt`.
+ * Pixelify Sans, par The Pixelify Sans Project Authors, sous licence SIL Open Font License 1.1 —
+ * le texte de la licence accompagne le fichier, dans `public/fonts/OFL-pixelify-sans.txt`.
  *
  * (Caveat, l'écriture des prédictions, reste dans `public/fonts/` : les tours s'en servent.)
  */
 @font-face {
-	font-family: "Press Start 2P";
+	font-family: "Pixelify Sans";
 	font-style: normal;
-	font-weight: 400;
+	font-weight: 400 700;
 	// « block » et non « swap » : le menu ne change pas de police une fois affiché. Le fichier
 	// venant du cache, l'attente est de toute façon imperceptible.
 	font-display: block;
-	src: url("fonts/press-start-2p-latin.woff2") format("woff2");
+	src: url("fonts/pixelify-sans-latin.woff2") format("woff2");
 }

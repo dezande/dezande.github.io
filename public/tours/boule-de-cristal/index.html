@@ -141,25 +141,23 @@
 					<button type="button" id="test-btn" class="test-zones">Test des zones</button>
 				</div>
 
-				<div class="card status">
-					<span class="dot" id="wake-dot"></span>
-					<div><span id="wake-text">Écran : verrou inactif</span><small id="wake-detail"></small></div>
-				</div>
-
-				<details class="card help">
-					<summary>Gestes</summary>
-					<ul>
-						<li>Toucher une zone (une bande, ou un coin avec 4 zones) : arme sa valeur. L'écran se verrouille aussitôt.</li>
-						<li>Double tap n'importe où, quand un nombre est armé ou affiché : le nombre s'estompe, fin de la routine, retour au menu de Mes tours.</li>
-						<li>Appui de 3 s n'importe où pendant le tour : on le quitte, retour au menu de Mes tours. Ces réglages s'ouvrent par l'écrou ⚙ du menu.</li>
-					</ul>
-				</details>
-
 				<button type="button" id="defaults-btn" class="link">Rétablir les réglages par défaut</button>
 
 				<!-- Ce qui ne sert qu'au tour ouvert seul (hors de « Mes tours ») : gardé pour son code,
 				     jamais affiché ici. -->
 				<div hidden>
+					<details class="card help">
+						<summary>Gestes</summary>
+						<ul>
+							<li>Toucher une zone (une bande, ou un coin avec 4 zones) : arme sa valeur. L'écran se verrouille aussitôt.</li>
+							<li>Double tap n'importe où, quand un nombre est armé ou affiché : le nombre s'estompe, fin de la routine, retour au menu de Mes tours.</li>
+							<li>Appui de 3 s n'importe où pendant le tour : on le quitte, retour au menu de Mes tours. Ces réglages s'ouvrent par l'écrou ⚙ du menu.</li>
+						</ul>
+					</details>
+					<div class="card status">
+						<span class="dot" id="wake-dot"></span>
+						<div><span id="wake-text">Écran : verrou inactif</span><small id="wake-detail"></small></div>
+					</div>
 					<div class="card about">
 						<div class="about-row">Version <span id="about-version"></span></div>
 						<div class="about-row">Commit <span id="about-commit"></span></div>

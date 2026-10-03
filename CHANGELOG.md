@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.6.0] | 10 | 2026-10-03 | Le menu principal façon console 16 bits, icônes redessinées |
 | [0.5.0] | 9 | 2026-10-03 | Les réglages des tours : une même structure, le nom du tour, une croix pour fermer |
 | [0.4.0] | 8 | 2026-10-03 | Un bouton FR / EN dans le menu, pour le menu et tous les tours |
 | [0.3.0] | 7 | 2026-10-03 | Le menu principal en pixel art, façon console 8 bits |
@@ -17,6 +18,21 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.6.0] — 2026-10-03
+
+10 commits
+
+Le menu principal passe de la console 8 bits à la console 16 bits, dans l'esprit des menus de jeux de rôle. Les tours eux-mêmes ne changent pas.
+
+- **Des fenêtres bleues en dégradé, bordées de blanc**, aux coins arrondis, avec une ombre portée ; touchée, la fenêtre s'illumine et s'enfonce.
+- **La main des jeux de rôle** apparaît à gauche de la tuile touchée.
+- **Des icônes redessinées, quatre fois plus fines** (32 × 32 au lieu de 16 × 16), avec lumière, ombres tramées et reflets : la boule de cristal violette, sa brume et son reflet sur un pied doré ; une vraie pièce de 20 centimes en relief, avec « 20 » et ses encoches ; l'éventail de dos rouges et la carte écrite ; le pique blanc de l'analyseur dans son orbite orange. Elles sont engendrées par `outils/icones-16-bits.py`.
+- **L'écrou ⚙ en relief doré**, toujours symétrique, son trou au centre exact.
+- **La police Pixelify Sans**, plus fine et plus lisible que celle des 8 bits, embarquée avec l'app (12 ko, licence SIL OFL 1.1) ; Press Start 2P est retirée. Le titre est en lettres d'or sur un contour sombre.
+- **Un ciel de nuit** qui s'éclaircit vers le bas, semé d'étoiles.
+- **L'icône de l'app** reprend les quatre nouvelles icônes, chacune dans une fenêtre bleue.
+- **Plus de bloc « Écran : verrou actif » ni « Gestes et touches »** dans les réglages des tours : ils ne gardent que leurs réglages, les aides à la répétition et « Rétablir les réglages par défaut ». L'écran reste allumé pendant les tours comme avant ; les gestes sont décrits dans le README.
 
 ## [0.5.0] — 2026-10-03
 
@@ -105,6 +121,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.6.0]: https://github.com/dezande/mes-tours/releases/tag/v0.6.0
 [0.5.0]: https://github.com/dezande/mes-tours/releases/tag/v0.5.0
 [0.4.0]: https://github.com/dezande/mes-tours/releases/tag/v0.4.0
 [0.3.0]: https://github.com/dezande/mes-tours/releases/tag/v0.3.0

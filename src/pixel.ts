@@ -3,13 +3,14 @@
  * même couleur regroupés en une seule bande pour alléger le dessin. Net à toutes les tailles.
  */
 
-import { PALETTE, TAILLE, type Couleur } from './content/pixels.ts';
+import { PALETTE } from './content/pixels.ts';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function dessinPixel(grille: readonly string[], classe: string): SVGSVGElement {
+	const largeur = Math.max(...grille.map((ligne) => ligne.length));
 	const svg = document.createElementNS(SVG_NS, 'svg');
-	svg.setAttribute('viewBox', `0 0 ${TAILLE} ${TAILLE}`);
+	svg.setAttribute('viewBox', `0 0 ${largeur} ${grille.length}`);
 	svg.setAttribute('class', classe);
 	svg.setAttribute('aria-hidden', 'true');
 	// Pas d'anticrénelage : chaque pixel garde ses bords francs.
@@ -26,7 +27,7 @@ export function dessinPixel(grille: readonly string[], classe: string): SVGSVGEl
 				bande.setAttribute('y', String(y));
 				bande.setAttribute('width', String(fin - x));
 				bande.setAttribute('height', '1');
-				bande.setAttribute('fill', PALETTE[c as Couleur]);
+				bande.setAttribute('fill', PALETTE[c] ?? 'currentColor');
 			}
 			x = fin;
 		}
