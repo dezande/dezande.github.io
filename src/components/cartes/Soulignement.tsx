@@ -13,7 +13,7 @@ export function Soulignement({ index }: { index: number }) {
 	return (
 		// Étiré à la largeur du texte : les traits suivent le mot, quelle que soit sa longueur.
 		<svg className="soulignement" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
-			<g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
 				{chemins.map((d) => <path key={d} d={d} />)}
 			</g>
 		</svg>

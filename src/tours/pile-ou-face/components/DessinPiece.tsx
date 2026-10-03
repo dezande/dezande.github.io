@@ -96,7 +96,7 @@ const FACE: readonly string[] = [
 /** Un groupe de traits à l'encre de la carte. */
 function Traits({ chemins, epaisseur }: { chemins: readonly string[]; epaisseur: number }) {
 	return (
-		<g fill="none" stroke="currentColor" strokeWidth={epaisseur} strokeLinecap="round" strokeLinejoin="round">
+		<g fill="none" stroke="currentColor" stroke-width={epaisseur} stroke-linecap="round" stroke-linejoin="round">
 			{chemins.map((d, i) => <path key={i} d={d} />)}
 		</g>
 	);
@@ -104,7 +104,7 @@ function Traits({ chemins, epaisseur }: { chemins: readonly string[]; epaisseur:
 
 /** Une inscription, écrite à la main dans la police de la prédiction. */
 function Inscription({ texte, x, y, taille }: { texte: string; x: number; y: number; taille: number }) {
-	return <text x={x} y={y} fontSize={taille} fontFamily="Caveat, cursive" fontWeight="700" textAnchor="middle" fill="currentColor">{texte}</text>;
+	return <text x={x} y={y} font-size={taille} font-family="Caveat, cursive" font-weight="700" text-anchor="middle" fill="currentColor">{texte}</text>;
 }
 
 /** Les douze étoiles de l'Europe, sur l'anneau entre le listel et le bord (côté face). */

@@ -4,7 +4,8 @@
  * plus de choix de langue à eux.
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, type ComponentChildren } from 'preact';
+import { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'preact/hooks';
 import type { Lang } from '../logic/i18n.ts';
 import { enregistrerLangue, langueDeDepart } from './langue.ts';
 
@@ -15,11 +16,11 @@ interface ContexteLangue {
 
 const Contexte = createContext<ContexteLangue | null>(null);
 
-export function LangueProvider({ children }: { children: ReactNode }) {
+export function LangueProvider({ children }: { children: ComponentChildren }) {
 	const [langue, setLangueEnCours] = useState<Lang>(langueDeDepart);
 
-	// La langue du document, pour les lecteurs d'écran.
-	useEffect(() => {
+	// La langue du document, pour les lecteurs d'écran : posée avant l'affichage.
+	useLayoutEffect(() => {
 		document.documentElement.lang = langue;
 	}, [langue]);
 

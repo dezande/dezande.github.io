@@ -1,6 +1,7 @@
 /*
  * La page d'un tour : il s'ouvre à la place du menu, en plein écran, prêt pour une nouvelle
- * routine (#/tours/<dossier>), ou seulement ses réglages (#/tours/<dossier>?reglages).
+ * routine (#/tours/<dossier>), ou seulement ses réglages (#/tours/<dossier>?reglages). L'adresse a
+ * déjà été vérifiée (src/logic/adresses.ts) : seul un tour publié arrive ici.
  *
  * Le tour reçoit par le pont (tours/pont.tsx) la langue du menu, son nom, et de quoi revenir au
  * menu. Il y revient par l'historique : le menu réapparaît, et l'historique ne grandit pas d'un tour
@@ -10,12 +11,13 @@
  * html[data-tour] pour le fond derrière #app et la couleur de la barre du téléphone.
  */
 
-import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import type { ComponentType } from 'preact';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { TOURS } from '../content/tours.ts';
 import { useLangue } from '../langue/LangueContext.tsx';
+import { naviguer } from '../routeur.ts';
 import { PontContext, type Pont } from '../tours/pont.tsx';
-import { adresseDuTour, entreeDuRegistre, type EntreeDuRegistre } from '../tours/registre.ts';
+import { entreeDuRegistre } from '../tours/registre.ts';
 
 /** La couleur de la barre du téléphone sur le menu (index.html). */
 const COULEUR_DU_MENU = '#0b0b2b';
@@ -24,25 +26,37 @@ function couleurTheme(couleur: string): void {
 	document.querySelector('meta[name="theme-color"]')?.setAttribute('content', couleur);
 }
 
-/** Les seuls paramètres d'adresse acceptés : aucun, ou l'ouverture des réglages seuls (écrou ⚙). */
-const PARAMETRES_ACCEPTES = ['', '?reglages'];
+/** Les tours déjà chargés : rouverts, ils s'affichent tout de suite. */
+const charges = new Map<string, ComponentType>();
 
-export function PageTour({ dossier }: { dossier: string }) {
-	const { key, pathname, search } = useLocation();
-	const tour = TOURS.find((t) => t.dossier === dossier);
-	const entree = entreeDuRegistre(dossier);
-	// L'adresse exacte, et rien d'autre : pas de « / » final, pas de paramètre inconnu.
-	const exacte = pathname === adresseDuTour(dossier) && PARAMETRES_ACCEPTES.includes(search);
-	if (!tour || !entree || !exacte) return <Navigate to="/" replace />;
-	// Une clé par ouverture : rouvrir un tour repart toujours d'une nouvelle routine.
-	return <Tour key={key} dossier={dossier} nomDuTour={tour.nom} entree={entree} />;
+interface Props {
+	/** Un tour publié (src/App.tsx ne donne que ceux-là). */
+	dossier: string;
+	/** Ouvert par l'écrou ⚙ : seulement ses réglages. */
+	enReglages: boolean;
+	/** Ouvert par le menu de l'app : le retour au menu passe par l'historique. */
+	depuisLApp: boolean;
 }
 
-function Tour({ dossier, nomDuTour, entree }: { dossier: string; nomDuTour: Record<string, string>; entree: EntreeDuRegistre }) {
+export function PageTour({ dossier, enReglages, depuisLApp }: Props) {
 	const { langue } = useLangue();
-	const navigate = useNavigate();
-	const location = useLocation();
-	const enReglages = location.search === '?reglages';
+	const tour = TOURS.find((t) => t.dossier === dossier)!;
+	const entree = entreeDuRegistre(dossier)!;
+
+	// Le tour est chargé à sa première ouverture ; ensuite, il est déjà là.
+	const [Composant, setComposant] = useState<ComponentType | null>(() => charges.get(dossier) ?? null);
+	useEffect(() => {
+		if (Composant) return undefined;
+		let actif = true;
+		void entree.charger().then(({ default: charge }) => {
+			charges.set(dossier, charge);
+			// Une fonction se passe à setState sous forme de… fonction qui la renvoie.
+			if (actif) setComposant(() => charge);
+		});
+		return () => {
+			actif = false;
+		};
+	}, [Composant, dossier, entree]);
 
 	/*
 	 * Retour au menu. Ouvert depuis le menu, le tour y revient par l'historique ; ouvert autrement
@@ -53,9 +67,9 @@ function Tour({ dossier, nomDuTour, entree }: { dossier: string; nomDuTour: Reco
 	const quitter = useCallback(() => {
 		if (parti.current) return;
 		parti.current = true;
-		if (location.key !== 'default') navigate(-1);
-		else navigate('/', { replace: true });
-	}, [location.key, navigate]);
+		if (depuisLApp) history.back();
+		else naviguer('/', { remplacer: true });
+	}, [depuisLApp]);
 
 	useEffect(() => {
 		document.documentElement.dataset.tour = dossier;
@@ -67,18 +81,13 @@ function Tour({ dossier, nomDuTour, entree }: { dossier: string; nomDuTour: Reco
 	}, [dossier, entree]);
 
 	const pont = useMemo<Pont>(
-		() => ({ dossier, nomDuTour: nomDuTour[langue] ?? '', langue, enReglages, quitter }),
-		[dossier, nomDuTour, langue, enReglages, quitter],
+		() => ({ dossier, nomDuTour: tour.nom[langue], langue, enReglages, quitter }),
+		[dossier, tour, langue, enReglages, quitter],
 	);
-	const { Composant } = entree;
 
 	return (
 		<PontContext.Provider value={pont}>
-			<div className={`scene scene-${dossier}`}>
-				<Suspense fallback={null}>
-					<Composant />
-				</Suspense>
-			</div>
+			<div className={`scene scene-${dossier}`}>{Composant && <Composant />}</div>
 		</PontContext.Provider>
 	);
 }

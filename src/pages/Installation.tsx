@@ -8,7 +8,7 @@
  * « Installer » l'ouvre directement.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'preact/hooks';
 import { BoutonTactile } from '../components/BoutonTactile.tsx';
 import { TEXTES } from '../content/textes.ts';
 import { useLangue } from '../langue/LangueContext.tsx';

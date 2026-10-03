@@ -17,14 +17,14 @@ export function DosDeCarte({ dessin }: { dessin: DessinDeDos }) {
 	return (
 		<svg className="dos-motif" viewBox="0 0 100 140" preserveAspectRatio="none" aria-hidden="true">
 			{/* Les épaisseurs sont données dans le repère du dessin : elles grandissent avec la carte. */}
-			<g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
 				{MOTIFS[dessin].map((trait, i) => (
 					<path
 						key={i}
 						d={trait.d}
 						// Sans épaisseur, la forme est un aplat : le tracé et le remplissage prennent la même couleur.
 						fill={trait.w === undefined ? 'currentColor' : undefined}
-						strokeWidth={trait.w}
+						stroke-width={trait.w}
 						opacity={trait.o}
 						transform={transformation(trait)}
 					/>

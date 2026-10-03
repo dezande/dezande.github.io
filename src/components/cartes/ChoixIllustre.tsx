@@ -13,7 +13,7 @@
  * [data-valeur], .vignette[data-couleur] ; styles : styles/components/_cartes.scss (vignettes).
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentChildren } from 'preact';
 import { DosDeCarte } from './DosDeCarte.tsx';
 import type { DessinDeDos } from './dos.ts';
 
@@ -36,7 +36,7 @@ interface Props<V extends string> {
 	choisie: V;
 	/** Le nom de chaque valeur, en étiquette du bouton. */
 	nom: (valeur: V) => string;
-	apercu: (valeur: V) => ReactNode;
+	apercu: (valeur: V) => ComponentChildren;
 	choisir: (valeur: V) => void;
 }
 

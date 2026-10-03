@@ -5,7 +5,6 @@
  * .shown sur le nombre. Les phases sont tenues par src/hooks/usePhasesZones.ts.
  */
 
-import type { CSSProperties } from 'react';
 import { useReposSansTransition, type EtatZones } from '../../../hooks/usePhasesZones.ts';
 import type { Settings } from '../logic/settings.ts';
 
@@ -38,38 +37,38 @@ const SOCLE = (
 	<svg className="base" id="base" viewBox="0 0 240 120" aria-hidden="true">
 		<defs>
 			<linearGradient id="g-metal" x1="0" x2="1">
-				<stop offset="0" stopColor="#040208" />
-				<stop offset=".28" stopColor="#1d1030" />
-				<stop offset=".42" stopColor="#3a2552" />
-				<stop offset=".56" stopColor="#1a0e2b" />
-				<stop offset="1" stopColor="#030106" />
+				<stop offset="0" stop-color="#040208" />
+				<stop offset=".28" stop-color="#1d1030" />
+				<stop offset=".42" stop-color="#3a2552" />
+				<stop offset=".56" stop-color="#1a0e2b" />
+				<stop offset="1" stop-color="#030106" />
 			</linearGradient>
 			<linearGradient id="g-top" x1="0" x2="1">
-				<stop offset="0" stopColor="#07030d" />
-				<stop offset=".35" stopColor="#2b1a42" />
-				<stop offset=".5" stopColor="#46306a" />
-				<stop offset=".7" stopColor="#21133a" />
-				<stop offset="1" stopColor="#050209" />
+				<stop offset="0" stop-color="#07030d" />
+				<stop offset=".35" stop-color="#2b1a42" />
+				<stop offset=".5" stop-color="#46306a" />
+				<stop offset=".7" stop-color="#21133a" />
+				<stop offset="1" stop-color="#050209" />
 			</linearGradient>
 			<radialGradient id="g-lip-glow" cx=".5" cy="0" r=".7">
-				<stop offset="0" stopColor="#9a7ce6" stopOpacity=".5" />
-				<stop offset="1" stopColor="#9a7ce6" stopOpacity="0" />
+				<stop offset="0" stop-color="#9a7ce6" stop-opacity=".5" />
+				<stop offset="1" stop-color="#9a7ce6" stop-opacity="0" />
 			</radialGradient>
 			<linearGradient id="g-gold" x1="0" x2="1">
-				<stop offset="0" stopColor="#c9a45c" stopOpacity="0" />
-				<stop offset=".35" stopColor="#ecd092" stopOpacity=".75" />
-				<stop offset=".65" stopColor="#c9a45c" stopOpacity=".5" />
-				<stop offset="1" stopColor="#c9a45c" stopOpacity="0" />
+				<stop offset="0" stop-color="#c9a45c" stop-opacity="0" />
+				<stop offset=".35" stop-color="#ecd092" stop-opacity=".75" />
+				<stop offset=".65" stop-color="#c9a45c" stop-opacity=".5" />
+				<stop offset="1" stop-color="#c9a45c" stop-opacity="0" />
 			</linearGradient>
 		</defs>
 		<path d="M16 96 L10 106 C50 122 190 122 230 106 L224 96 Z" fill="url(#g-metal)" />
 		<ellipse cx="120" cy="96" rx="104" ry="12" fill="url(#g-top)" />
-		<path d="M16 96 C56 110 184 110 224 96" fill="none" stroke="url(#g-gold)" strokeWidth=".8" />
+		<path d="M16 96 C56 110 184 110 224 96" fill="none" stroke="url(#g-gold)" stroke-width=".8" />
 		<path d="M76 40 C96 50 144 50 164 40 C150 58 136 70 138 94 C128 100 112 100 102 94 C104 70 90 58 76 40 Z" fill="url(#g-metal)" />
 		<path d="M14 10 C58 40 182 40 226 10 L216 30 C178 58 62 58 24 30 Z" fill="url(#g-metal)" />
 		<path d="M14 10 C58 40 182 40 226 10 L216 30 C178 58 62 58 24 30 Z" fill="url(#g-lip-glow)" />
-		<path d="M14 10 C58 40 182 40 226 10" fill="none" stroke="url(#g-gold)" strokeWidth="1" />
-		<path d="M24 30 C62 58 178 58 216 30" fill="none" stroke="url(#g-gold)" strokeWidth=".6" opacity=".6" />
+		<path d="M14 10 C58 40 182 40 226 10" fill="none" stroke="url(#g-gold)" stroke-width="1" />
+		<path d="M24 30 C62 58 178 58 216 30" fill="none" stroke="url(#g-gold)" stroke-width=".6" opacity=".6" />
 	</svg>
 );
 
@@ -82,7 +81,7 @@ export function Boule({ etat, reglages, finInstant }: Props) {
 	if (etat.instant) classes.push('instant');
 
 	return (
-		<div ref={autel} className={classes.join(' ')} id="altar" style={{ '--mist-t': `${dureeDeLaBrume(etat, reglages)}s` } as CSSProperties}>
+		<div ref={autel} className={classes.join(' ')} id="altar" style={{ '--mist-t': `${dureeDeLaBrume(etat, reglages)}s` }}>
 			<div className="halo"></div>
 			<div className="halo-warm"></div>
 			<div className="floor"></div>
@@ -95,7 +94,7 @@ export function Boule({ etat, reglages, finInstant }: Props) {
 					</div>
 					<div className="inner-glow"></div>
 					<div className="warm-glow"></div>
-					<div className={etat.phase === 'shown' ? 'number shown' : 'number'} id="number" style={{ '--num-k': String(numberScale(etat.valeur)) } as CSSProperties}>
+					<div className={etat.phase === 'shown' ? 'number shown' : 'number'} id="number" style={{ '--num-k': String(numberScale(etat.valeur)) }}>
 						<span id="number-text">{etat.valeur}</span>
 					</div>
 					<div className="mist-wrap front">

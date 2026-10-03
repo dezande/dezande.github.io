@@ -7,7 +7,7 @@
  * jouer, pas pour reprendre le tour précédent.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { SLIDES } from '../content/slides.ts';
 import { applyMove, clampIndex, type Move } from '../logic/deck.ts';
 import { t, type Lang } from '../../../logic/i18n.ts';

@@ -22,7 +22,7 @@
  * les styles sont dans src/styles/tours/six-predictions/.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'preact/hooks';
 import { JaugeAppui } from '../../components/JaugeAppui.tsx';
 import { useClavier } from '../../hooks/useClavier.ts';
 import { useGestesDoubleToucher } from '../../hooks/useGestesDoubleToucher.ts';

@@ -1,5 +1,5 @@
 // Pile ou face dans l'app (src/tours/pile-ou-face/) : la routine au clavier, et ses réglages.
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/preact';
 import { App } from '../../src/App.tsx';
 
 beforeEach(() => {
@@ -15,6 +15,9 @@ async function ouvrir(adresse: string): Promise<HTMLElement> {
 	render(<App />);
 	// Le tour est chargé à sa première ouverture (src/tours/registre.ts).
 	await waitFor(() => expect(document.querySelector('#table .carte')).not.toBeNull());
+	// Preact branche les écouteurs (clavier…) après l'affichage, à l'image suivante : on laisse
+	// passer un instant, comme le ferait quelqu'un avant d'appuyer sur une touche.
+	await act(() => new Promise((fin) => setTimeout(fin, 150)));
 	return document.querySelector<HTMLElement>('#table .carte')!;
 }
 

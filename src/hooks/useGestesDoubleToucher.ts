@@ -13,7 +13,8 @@
  * et le point du doigt levé dans le repère de #app (qui peut être pivotée : kit/web/orientation.ts).
  */
 
-import { useRef, useState, type MouseEvent, type PointerEvent } from 'react';
+import type { TargetedMouseEvent, TargetedPointerEvent } from 'preact';
+import { useRef, useState } from 'preact/hooks';
 import { appPoint } from '../kit/web/orientation.ts';
 import { keepScreenAwake } from '../kit/web/wake-lock.ts';
 import { GESTURE, GestureTracker } from '../logic/double-toucher.ts';
@@ -35,7 +36,7 @@ export function useGestesDoubleToucher(jaugeVisible: boolean, surGeste: (geste: 
 	useQuandLAppSeCache(() => gestes.reset());
 
 	const scene = {
-		onPointerDown: (event: PointerEvent<HTMLElement>): void => {
+		onPointerDown: (event: TargetedPointerEvent<HTMLElement>): void => {
 			if (event.pointerType === 'mouse' && event.button !== 0) return;
 			void keepScreenAwake();
 			const { x, y } = appPoint(event.clientX, event.clientY);
@@ -55,22 +56,22 @@ export function useGestesDoubleToucher(jaugeVisible: boolean, surGeste: (geste: 
 				if (gestes.holdCompleted(id)) quitter();
 			});
 		},
-		onPointerMove: (event: PointerEvent<HTMLElement>): void => {
+		onPointerMove: (event: TargetedPointerEvent<HTMLElement>): void => {
 			const { x, y } = appPoint(event.clientX, event.clientY);
 			if (gestes.move(event.pointerId, x, y)) appui.arreter();
 		},
-		onPointerUp: (event: PointerEvent<HTMLElement>): void => {
+		onPointerUp: (event: TargetedPointerEvent<HTMLElement>): void => {
 			appui.arreter();
 			const point = appPoint(event.clientX, event.clientY);
 			const geste = gestes.release(event.pointerId, point.x, point.y, performance.now());
 			if (geste !== 'none') dernier.current(geste, point);
 		},
-		onPointerCancel: (event: PointerEvent<HTMLElement>): void => {
+		onPointerCancel: (event: TargetedPointerEvent<HTMLElement>): void => {
 			appui.arreter();
 			gestes.cancel(event.pointerId);
 		},
 		// Pas de menu contextuel ni de loupe sur appui long.
-		onContextMenu: (event: MouseEvent<HTMLElement>): void => event.preventDefault(),
+		onContextMenu: (event: TargetedMouseEvent<HTMLElement>): void => event.preventDefault(),
 	};
 
 	return { scene, jauge: appui.jauge };

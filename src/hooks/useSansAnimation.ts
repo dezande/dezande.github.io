@@ -9,7 +9,7 @@
  *   <div id="table" className={sansAnimation ? 'no-anim' : undefined}>
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'preact/hooks';
 
 export function useSansAnimation(relance: unknown = null): boolean {
 	const [sansAnimation, setSansAnimation] = useState(true);

@@ -1,5 +1,5 @@
 /*
- * Build de l'app avec Vite : React, Sass, et les fichiers de src/assets/ (polices, images), copiés
+ * Build de l'app avec Vite : Preact, Sass, et les fichiers de src/assets/ (polices, images), copiés
  * dans dist/assets/ sous un nom qui change avec leur contenu. public/ est recopié tel quel (manifeste,
  * icônes, captures, licences des polices).
  *
@@ -11,7 +11,7 @@
  *   dist/kit/web/build.js       le numéro de version du kit, que stamp-build.ts inscrit au build ;
  *   dist/kit/web/wake-lock.js   et updates.js, que check-dist.ts attend.
  */
-import react from '@vitejs/plugin-react';
+import preact from '@preact/preset-vite';
 import { defineConfig, type Plugin } from 'vite';
 
 /** Les modules du kit qui gardent leur propre fichier, à leur nom. */
@@ -30,7 +30,7 @@ const contentSecurityPolicy = (): Plugin => ({
 export default defineConfig({
 	// Adresses relatives : l'app est publiée dans un dossier du site (dezande.github.io/mes-tours/).
 	base: './',
-	plugins: [react(), contentSecurityPolicy()],
+	plugins: [preact(), contentSecurityPolicy()],
 	build: {
 		outDir: 'dist',
 		emptyOutDir: true,

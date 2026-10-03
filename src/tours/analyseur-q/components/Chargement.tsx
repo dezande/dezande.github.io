@@ -7,11 +7,11 @@
  * écran noir, ou app en arrière-plan, pour ne jamais changer de slide dans le dos de l'artiste.
  *
  * L'anneau et le camembert changent à chaque image : ils sont réglés directement sur leurs
- * éléments (refs), sans repasser par React. Le pourcentage et l'étape, qui changent rarement,
+ * éléments (refs), sans repasser par Preact. Le pourcentage et l'étape, qui changent rarement,
  * sont un état comme un autre.
  */
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { LOADING, loadingProgress, percentLabel, stepIndex } from '../logic/loading.ts';
 import { Ligne } from './Ligne.tsx';
 
@@ -69,7 +69,7 @@ export function Chargement({ secondes, etapes, messageFin, visible, termine, lan
 			// L'anneau se règle en pour-cent (pathLength = 100), le camembert par --part.
 			arc.current?.style.setProperty('stroke-dasharray', `${progression * 100} 100`);
 			cadran.current?.style.setProperty('--part', `${progression * 100}%`);
-			// React ne réaffiche que si le texte change : une centaine de fois en tout.
+			// Preact ne réaffiche que si le texte change : une centaine de fois en tout.
 			setPourcent(percentLabel(progression));
 			const index = stepIndex(progression, nombreEtapes);
 			setEtape((actuelle) => (actuelle.index === index && actuelle.n === lancement ? actuelle : { index, n: lancement }));

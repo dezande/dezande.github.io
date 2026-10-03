@@ -7,7 +7,7 @@
  * coûtent ainsi que le prix de trois slides.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from 'preact/hooks';
 import { useReajustement } from '../../../hooks/useReajustement.ts';
 import { useSansAnimation } from '../../../hooks/useSansAnimation.ts';
 import { SLIDES } from '../content/slides.ts';

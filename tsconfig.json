@@ -5,6 +5,7 @@
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
 		"jsx": "react-jsx",
+		"jsxImportSource": "preact",
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 		"types": ["node", "jest", "jest-expect-message", "@testing-library/jest-dom", "vite/client"]

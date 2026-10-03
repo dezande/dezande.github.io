@@ -15,7 +15,7 @@
  *   <JaugeAppui jauge={appui.jauge} />
  */
 
-import { useCallback, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useRef, useState } from 'preact/hooks';
 
 export interface Jauge {
 	/** Le point touché, dans le repère de #app (kit/web/orientation.ts : appPoint). */
@@ -53,6 +53,6 @@ export function JaugeAppui({ jauge }: { jauge: Jauge | null }) {
 		top: `${jauge.y}px`,
 		'--ring-delay': `${jauge.delaiMs}ms`,
 		'--ring-duration': `${jauge.dureeMs}ms`,
-	} as CSSProperties;
+	};
 	return <div key={jauge.n} id="hold-ring" className="run" aria-hidden="true" style={style}>{ANNEAU}</div>;
 }

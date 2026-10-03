@@ -15,7 +15,8 @@
  * zones sont en paysage.
  */
 
-import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
+import type { RefObject } from 'preact';
+import { useCallback, useLayoutEffect, useRef } from 'preact/hooks';
 import { currentRotation } from '../kit/web/orientation.ts';
 import { appSize, toAppPoint, type Rotation, type Viewport } from '../kit/web/orientation-logic.ts';
 import { landscapeRotation } from '../logic/paysage.ts';

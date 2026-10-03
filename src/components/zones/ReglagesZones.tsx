@@ -70,7 +70,7 @@ export function ReglagesZones({ libelles, noms, valeurs, reglages, enregistrer, 
 			{curseurs.map(({ cle, titre, texte }) => (
 				<div key={cle} className="card">
 					<label className="row-label" htmlFor={cle}>{titre} <output id={`${cle}-out`}>{texte(reglages[cle])}</output></label>
-					<input id={cle} type="range" min={BORNES[cle].min} max={BORNES[cle].max} step={BORNES[cle].pas} value={reglages[cle]} onChange={(event) => changer({ [cle]: Number(event.target.value) })} />
+					<input id={cle} type="range" min={BORNES[cle].min} max={BORNES[cle].max} step={BORNES[cle].pas} value={reglages[cle]} onInput={(event) => changer({ [cle]: Number(event.currentTarget.value) })} />
 				</div>
 			))}
 		</PanneauReglages>

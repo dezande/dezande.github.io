@@ -3,7 +3,7 @@
  * principal. `onAction` remplace onClick.
  */
 
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes } from 'preact';
 import { useSurToucher } from '../hooks/useSurToucher.ts';
 
 interface Props extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'type'> {

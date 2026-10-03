@@ -3,13 +3,8 @@
  * composants (jest.config.js, setupFiles) :
  *   - #app, que le verrou portrait du kit (kit/web/orientation.ts) cherche dès son import ;
  *   - matchMedia (pointeur grossier, mode d'affichage) ;
- *   - la lecture des vidéos, que le maintien de l'écran allumé (kit/web/wake-lock.ts) lance ;
- *   - TextEncoder et TextDecoder, dont React Router se sert.
+ *   - la lecture des vidéos, que le maintien de l'écran allumé (kit/web/wake-lock.ts) lance.
  */
-
-import { TextDecoder, TextEncoder } from 'node:util';
-
-Object.assign(globalThis, { TextEncoder, TextDecoder });
 
 const app = document.createElement('div');
 app.id = 'app';

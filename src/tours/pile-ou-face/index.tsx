@@ -19,7 +19,7 @@
  * sont dans src/styles/tours/pile-ou-face/.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { JaugeAppui } from '../../components/JaugeAppui.tsx';
 import { useClavier } from '../../hooks/useClavier.ts';
 import { useGestesDoubleToucher } from '../../hooks/useGestesDoubleToucher.ts';

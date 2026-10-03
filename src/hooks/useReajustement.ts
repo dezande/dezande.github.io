@@ -12,7 +12,7 @@
  *   useReajustement(fit, '600 38px Caveat');     // la place ou la police a changé
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'preact/hooks';
 
 export function useReajustement(reajuster: () => void, police?: string): void {
 	// Toujours la dernière version, sans rebrancher les écouteurs à chaque rendu.

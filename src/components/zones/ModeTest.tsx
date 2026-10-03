@@ -9,7 +9,8 @@
  * tour (styles/tours/<dossier>/_test-mode.scss).
  */
 
-import { useLayoutEffect, useState, type RefObject } from 'react';
+import type { RefObject } from 'preact';
+import { useLayoutEffect, useState } from 'preact/hooks';
 import type { Phase } from '../../hooks/usePhasesZones.ts';
 import { zoneRects } from '../../logic/zones.ts';
 

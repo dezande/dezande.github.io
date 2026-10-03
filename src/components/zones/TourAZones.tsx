@@ -25,7 +25,8 @@
  * Les styles sont ceux du tour (styles/tours/<dossier>/), avec styles/components/_zones.scss.
  */
 
-import { useCallback, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
+import type { TargetedPointerEvent, ComponentChildren } from 'preact';
+import { useCallback, useRef, useState } from 'preact/hooks';
 import { JaugeAppui } from '../JaugeAppui.tsx';
 import { useAppuiLong } from '../../hooks/useAppuiLong.ts';
 import { useClavier } from '../../hooks/useClavier.ts';
@@ -59,7 +60,7 @@ interface Props {
 	/** Le tour se joue téléphone tenu en largeur : la scène et le test des zones pivotent. */
 	paysage?: boolean;
 	/** Le décor, dans la scène : il montre l'état des phases. */
-	decor: (etat: EtatZones, reglages: Reglages, finInstant: () => void) => ReactNode;
+	decor: (etat: EtatZones, reglages: Reglages, finInstant: () => void) => ComponentChildren;
 }
 
 export function TourAZones({ cleReglages, valider, zones, noms, valeurs, libelles, libellesPhases, paysage = false, decor }: Props) {
@@ -96,9 +97,9 @@ export function TourAZones({ cleReglages, valider, zones, noms, valeurs, libelle
 	const poses = useRef(new Set<PointerId>());
 
 	/** Identifiant du contact : chaque doigt, ou « mouse » pour répéter sur ordinateur. */
-	const idDe = (event: PointerEvent<HTMLElement>): PointerId => (event.pointerType === 'mouse' ? 'mouse' : event.pointerId);
+	const idDe = (event: TargetedPointerEvent<HTMLElement>): PointerId => (event.pointerType === 'mouse' ? 'mouse' : event.pointerId);
 
-	const surAppui = (event: PointerEvent<HTMLElement>): void => {
+	const surAppui = (event: TargetedPointerEvent<HTMLElement>): void => {
 		if (event.pointerType === 'mouse' && event.button !== 0) return;
 		void keepScreenAwake();
 		const id = idDe(event);
@@ -140,12 +141,12 @@ export function TourAZones({ cleReglages, valider, zones, noms, valeurs, libelle
 	};
 
 	/** Doigt déplacé : au-delà de la tolérance, l'appui long est abandonné. */
-	const surDeplacement = (event: PointerEvent<HTMLElement>): void => {
+	const surDeplacement = (event: TargetedPointerEvent<HTMLElement>): void => {
 		if (gestes.move(idDe(event), event.clientX, event.clientY) !== null) appui.arreter();
 	};
 
 	/** Doigt levé, ou contact interrompu par le système (`interrompu`) : il ne compte pas comme tap. */
-	const relacher = (event: PointerEvent<HTMLElement>, interrompu: boolean): void => {
+	const relacher = (event: TargetedPointerEvent<HTMLElement>, interrompu: boolean): void => {
 		const id = idDe(event);
 		poses.current.delete(id);
 		if (gestes.release(id, performance.now(), interrompu)) appui.arreter();
@@ -170,7 +171,7 @@ export function TourAZones({ cleReglages, valider, zones, noms, valeurs, libelle
 			<main
 				id="stage"
 				ref={scene}
-				style={{ '--fade': `${reglages.fade}s` } as CSSProperties}
+				style={{ '--fade': `${reglages.fade}s` }}
 				onPointerDown={surAppui}
 				onPointerMove={surDeplacement}
 				onPointerUp={(event) => relacher(event, false)}
@@ -183,7 +184,7 @@ export function TourAZones({ cleReglages, valider, zones, noms, valeurs, libelle
 
 			<JaugeAppui jauge={appui.jauge} />
 			{/* Voile de luminosité. */}
-			<div id="dim" style={{ '--dim': String((100 - reglages.brightness) / 100) } as CSSProperties}></div>
+			<div id="dim" style={{ '--dim': String((100 - reglages.brightness) / 100) }}></div>
 
 			{modeTest && (
 				<ModeTest zones={zones} noms={noms} valeurs={valeurs} libellesPhases={libellesPhases} phase={etat.phase} scene={scene} eclair={eclair} surReglages={() => testerLesZones(false)} surQuitter={quitter} />

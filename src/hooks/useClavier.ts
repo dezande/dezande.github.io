@@ -13,7 +13,7 @@
  * un tour qui les cache (le test des zones) le précise.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'preact/hooks';
 import { keepScreenAwake } from '../kit/web/wake-lock.ts';
 import { usePont } from '../tours/pont.tsx';
 

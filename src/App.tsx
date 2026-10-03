@@ -1,36 +1,37 @@
 /*
- * Les pages de l'app, dans l'adresse après le « # » : le service worker ne connaît ainsi qu'une
- * page (index.html), qui s'ouvre hors-ligne quel que soit le tour demandé.
- *
- *   #/                          le menu principal
- *   #/tours/<dossier>           un tour, prêt pour une nouvelle routine
- *   #/tours/<dossier>?reglages  seulement ses réglages (écrou ⚙ du menu)
- *
- * Des adresses strictes : une route exacte par tour de la liste (content/tours.ts) inscrit au
- * registre (tours/registre.ts), sensible à la casse. Toute autre adresse — un nom inventé, un tour
- * hors du registre, une majuscule, un « / » final, un paramètre inconnu — ramène au menu (la page
- * du tour vérifie le reste : pages/PageTour.tsx).
+ * L'app : le menu principal, ou le tour demandé par l'adresse (src/logic/adresses.ts), suivie par
+ * le routeur maison (src/routeur.ts). Seuls les tours de la liste (content/tours.ts) inscrits au
+ * registre (tours/registre.ts) ont une adresse ; toute autre adresse ramène au menu, et la barre
+ * d'adresse affiche alors celle du menu.
  */
 
-import { HashRouter, Navigate, Route, Routes } from 'react-router';
+import { useEffect } from 'preact/hooks';
 import { TOURS } from './content/tours.ts';
 import { LangueProvider } from './langue/LangueContext.tsx';
+import { resoudre } from './logic/adresses.ts';
 import { Menu } from './pages/Menu.tsx';
 import { PageTour } from './pages/PageTour.tsx';
-import { adresseDuTour, entreeDuRegistre } from './tours/registre.ts';
+import { naviguer, useAdresse } from './routeur.ts';
+import { entreeDuRegistre } from './tours/registre.ts';
+
+/** Les tours publiés : dans la liste, et au registre. */
+const PUBLIES = TOURS.map((tour) => tour.dossier).filter((dossier) => entreeDuRegistre(dossier));
 
 export function App() {
+	const adresse = useAdresse();
+	const page = resoudre(adresse.hash, PUBLIES);
+
+	// Adresse refusée : le menu, à sa place dans l'historique.
+	useEffect(() => {
+		if (page.page === 'refusee') naviguer('/', { remplacer: true });
+	}, [page.page, adresse]);
+
 	return (
 		<LangueProvider>
-			<HashRouter>
-				<Routes>
-					<Route path="/" element={<Menu />} />
-					{TOURS.filter((tour) => entreeDuRegistre(tour.dossier)).map((tour) => (
-						<Route key={tour.dossier} path={adresseDuTour(tour.dossier)} caseSensitive element={<PageTour dossier={tour.dossier} />} />
-					))}
-					<Route path="*" element={<Navigate to="/" replace />} />
-				</Routes>
-			</HashRouter>
+			{page.page === 'tour'
+				// Une clé par ouverture : rouvrir un tour repart toujours d'une nouvelle routine.
+				? <PageTour key={adresse.cle} dossier={page.dossier} enReglages={page.reglages} depuisLApp={adresse.depuisLApp} />
+				: <Menu />}
 		</LangueProvider>
 	);
 }
