@@ -396,6 +396,36 @@ test('écrou ⚙ : tous les réglages ont la même structure, le nom du tour en 
 	});
 });
 
+test('écrou ⚙ : dans les réglages, un appui long agit aussi, une seule fois', TIMEOUT, async () => {
+	// Comme sur Android : pas de clic du doigt après un appui long (on supprime ceux de Chrome).
+	await withApp(async (page) => {
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#couleur-choix button'))`, true);
+		await page.evaluate(dansLeTour(`document.addEventListener('click', (e) => { if (e.detail > 0) e.stopImmediatePropagation(); }, true)`));
+		const centre = async (selecteur: string) => page.evaluate<Point>(dansLeTour(`(() => { const e = document.querySelector('${selecteur}'); e.scrollIntoView({ block: 'center' }); const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`));
+		const appuiLongSur = async (selecteur: string) => {
+			await page.touchStart(await centre(selecteur));
+			await sleep(1200);
+			await page.touchEnd();
+			await sleep(300);
+		};
+		// Un dos de couleur : choisi.
+		await appuiLongSur('#couleur-choix button[data-valeur="bleu"]');
+		assert.equal(await page.evaluate(dansLeTour(`JSON.parse(localStorage.getItem('pile-ou-face:settings:v1')).couleur`)), 'bleu');
+		// Une case à cocher : basculée une seule fois.
+		const avant = await page.evaluate<boolean>(dansLeTour(`document.querySelector('#show-hold-ring').checked`));
+		await appuiLongSur('label[for="show-hold-ring"]');
+		assert.equal(await page.evaluate<boolean>(dansLeTour(`document.querySelector('#show-hold-ring').checked`)), !avant, 'la case n’a pas basculé, ou deux fois');
+		// Un toucher bref aussi, une seule fois.
+		const centreCase = await centre('label[for="show-hold-ring"]');
+		await page.tap(centreCase);
+		await sleep(300);
+		assert.equal(await page.evaluate<boolean>(dansLeTour(`document.querySelector('#show-hold-ring').checked`)), avant, 'un toucher bref n’a pas basculé la case une seule fois');
+		// La croix.
+		await appuiLongSur('#close-btn');
+		await attendreLeMenu(page);
+	});
+});
+
 test('écrou ⚙ : en anglais, « Settings » et le nom anglais du tour', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await choisirLangue(page, 'en');

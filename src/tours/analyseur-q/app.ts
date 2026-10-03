@@ -36,6 +36,7 @@
 
 import { requestPersistentStorage } from '../../kit/web/storage.ts';
 import { keepScreenAwake } from '../../kit/web/wake-lock.ts';
+import { boutonsTactiles } from '../boutons-tactiles.ts';
 import { enReglages, remplirEntete } from '../pont.ts';
 import { openMenu } from './settings/panel.ts';
 import './stage/input.ts';
@@ -48,6 +49,10 @@ void requestPersistentStorage();
 
 // L'en-tête des réglages, le même pour tous les tours : « Réglages » et le nom du tour.
 remplirEntete();
+
+// Les boutons des réglages agissent au lever du doigt, appui bref ou long (Android).
+const panneau = document.querySelector<HTMLElement>('#menu');
+if (panneau) boutonsTactiles(panneau);
 
 // Ouvert par l'écrou ⚙ du menu principal : seulement les réglages, que l'on ferme pour revenir.
 if (enReglages) openMenu();
