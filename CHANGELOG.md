@@ -10,7 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
-| [1.0.0] | 26 | 2026-10-03 | L'app réécrite en composants (Preact), styles et images regroupés, tests avec Jest |
+| [1.0.0] | 27 | 2026-10-03 | L'app réécrite en composants (Preact), styles et images regroupés, tests avec Jest |
 | [0.10.0] | 22 | 2026-10-03 | La carte de visite, nouveau tour en largeur ; dans le navigateur, le menu dit que c'est une app |
 | [0.9.0] | 20 | 2026-10-03 | À la fin de la routine, on reste dans le tour ; l'appui de 3 s ramène au menu |
 | [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
@@ -33,7 +33,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ## [1.0.0] — 2026-10-03
 
-26 commits
+27 commits
 
 - **L'app est réécrite en composants, avec [Preact](https://preactjs.com/)** (l'API de React en 4 ko), construite par Vite, comme une app classique, avant d'y ajouter d'autres tours ; la carte de visite et le bandeau d'installation de la 0.10.0 compris. Pour l'artiste, rien ne change : les mêmes tours, les mêmes gestes, les mêmes réglages (gardés sur le téléphone).
   - Une seule page : le menu et chaque tour sont des pages (`#/`, `#/tours/<dossier>`), suivies par un routeur maison, un tour chargé à sa première ouverture. **Le code chargé à l'ouverture de l'app pèse 34 ko (13 ko compressé)** : avec React et React Router, il en pesait 276 (88 compressé). Le menu, le panneau de réglages, la jauge de l'appui long, les boutons qui agissent au lever du doigt et les dos de cartes sont des composants partagés.
@@ -50,6 +50,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
   - la vérification des types refuse désormais le code inutilisé.
 - **Des adresses strictes.** Seule l'adresse exacte d'un tour publié l'ouvre (`#/tours/<dossier>`, avec `?reglages` pour ses réglages seuls) ; un nom inventé ou hérité de JavaScript (« constructor »), une majuscule, un « / » final ou un paramètre inconnu ramènent au menu. Le registre des tours et leur liste doivent nommer les mêmes tours : un tour en préparation n'est ni compilé ni publié.
 - Test dans Chrome : la police du menu, qui arrive du cache hors-ligne de façon asynchrone, est attendue au lieu d'être vérifiée à l'instant (le test échouait parfois).
+- Tests dans Chrome : le lancement de Chrome a jusqu'à 90 s, comme chaque test (le délai de 5 s de Jest ne suffisait pas sur les machines de la CI).
 
 ## [0.10.0] — 2026-10-03
 
