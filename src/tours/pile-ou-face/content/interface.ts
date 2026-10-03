@@ -6,7 +6,7 @@
  * ui(clé, langue), dans la langue du menu principal.
  */
 
-import type { Lang, Texte } from '../logic/i18n.ts';
+import type { Lang, Texte } from '../../../logic/i18n.ts';
 
 export const INTERFACE = {
 	// Menu

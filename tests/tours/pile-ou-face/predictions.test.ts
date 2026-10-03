@@ -1,6 +1,6 @@
 // Le contenu de src/content/predictions.ts : deux prédictions, chacune sur deux lignes.
 import { PREDICTIONS } from '../../../src/tours/pile-ou-face/content/predictions.ts';
-import { isTexte, LANGS, t } from '../../../src/tours/pile-ou-face/logic/i18n.ts';
+import { isTexte, LANGS, t } from '../../../src/logic/i18n.ts';
 import { COTES } from '../../../src/tours/pile-ou-face/logic/piece.ts';
 
 test('une prédiction pour pile, une pour face, et rien d’autre', () => {

@@ -1,0 +1,142 @@
+// Ce que partagent les tours à zones de toucher, la boule de cristal et la carte de visite :
+// le fond du tour avec son voile de luminosité, et le mode test des zones.
+//
+// Dans un nouveau tour de ce genre, dans ses partiels (chargés sous .scene-<dossier>) :
+//
+//   @use "../../components/zones";
+//   @include zones.base-du-tour($fade: 1.5s, $couleur: $gold, $police: $sans);   // _base.scss
+//   @include zones.mode-test($prefixe: "xyz", $or: $gold, $or-doux: $gold-soft,  // _test-mode.scss
+//   	$filet: $gold, $serif: $serif);
+
+@use "sass:color";
+
+// Le tour remplit #app, dans ses couleurs (la remise à zéro commune est dans styles/_base.scss), et
+// #dim, le voile de luminosité (src/tours/<dossier>/index.tsx), l'assombrit.
+//
+// Valeurs par défaut des réglages appliqués à l'exécution : --fade (sur #stage) et --dim (sur #dim).
+// Le bloc @content ajoute d'autres propriétés au tour (la taille de la boule, par exemple).
+//
+// Paramètres :
+//   $fade     la durée du fondu par défaut ;
+//   $couleur  la couleur du texte ;
+//   $police   la police du texte.
+@mixin base-du-tour($fade, $couleur, $police) {
+	& {
+		--fade: #{$fade};
+		--dim: 0;
+		@content;
+		color: $couleur;
+		font-family: $police;
+	}
+
+	// Voile de luminosité, piloté par --dim.
+	#dim {
+		position: fixed;
+		inset: 0;
+		z-index: 20;
+		background: #000;
+		opacity: var(--dim);
+		pointer-events: none;
+	}
+}
+
+// Mode test (components/ModeTest.tsx de chaque tour) : les limites des zones (#zones, une .zone
+// par bande, avec son étiquette .tag), et la barre d'état (#testbar). Une zone touchée s'allume
+// (.hit). Le bloc @content complète .zone (les coins de la carte de visite, par exemple).
+//
+// Paramètres :
+//   $prefixe  le préfixe des animations du tour (« xyz » donne xyz-hit) ;
+//   $or       le texte des étiquettes et de la barre ;
+//   $or-doux  le bord des boutons de la barre ;
+//   $filet    la couleur des limites et du fond des zones, et du bord des étiquettes ;
+//   $serif    la police de la valeur dans l'étiquette.
+@mixin mode-test($prefixe, $or, $or-doux, $filet, $serif) {
+	#zones {
+		position: fixed;
+		inset: 0;
+		z-index: 30;
+		pointer-events: none;
+	}
+
+	.zone {
+		position: absolute;
+		box-sizing: border-box;
+		border-top: 1px dashed color.change($filet, $alpha: .6);
+		background: color.change($filet, $alpha: .035);
+
+		// Première bande : pas de trait en haut.
+		&:first-child {
+			border-top: none;
+		}
+
+		@content;
+
+		&.hit {
+			animation: #{$prefixe}-hit 1s ease-out;
+		}
+
+		.tag {
+			left: calc(12px + var(--safe-l));
+			top: 50%;
+			transform: translateY(-50%);
+		}
+	}
+
+	@keyframes #{$prefixe}-hit {
+		from { background: color.change($filet, $alpha: .3); }
+		to { background: color.change($filet, $alpha: .035); }
+	}
+
+	.tag {
+		position: absolute;
+		font: 600 12px/1.2 -apple-system, system-ui, sans-serif;
+		color: $or;
+		background: rgba(10, 5, 22, .8);
+		border: 1px solid color.change($filet, $alpha: .3);
+		padding: 5px 10px;
+		border-radius: 999px;
+		white-space: nowrap;
+
+		b {
+			font: 400 18px/1 $serif;
+			margin-left: 4px;
+		}
+	}
+
+	#testbar {
+		position: fixed;
+		z-index: 40;
+		left: 50%;
+		top: calc(var(--safe-t) + 10px);
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 5px;
+		border-radius: 999px;
+		background: rgba(12, 6, 26, .9);
+		border: 1px solid color.change($filet, $alpha: .25);
+		font: 13px/1 -apple-system, system-ui, sans-serif;
+		color: $or;
+		white-space: nowrap;
+		touch-action: none;
+
+		.state {
+			padding: 0 8px;
+			min-width: 8.5em;
+			opacity: .9;
+		}
+
+		button {
+			font-family: inherit;
+			color: $or;
+			background: rgba(255, 255, 255, .05);
+			border: 1px solid $or-doux;
+			cursor: pointer;
+			min-height: 34px;
+			padding: 0 14px;
+			border-radius: 999px;
+			font-size: 13px;
+		}
+	}
+}

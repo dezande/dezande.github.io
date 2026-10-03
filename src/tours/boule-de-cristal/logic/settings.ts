@@ -5,6 +5,8 @@
  * tout passe par sanitizeSettings() avant d'être utilisé.
  */
 
+import { validerReglagesZones, type ReglagesZones } from '../../../logic/reglages-zones.ts';
+
 /**
  * La routine des 3 boulettes : l'écran est coupé en 3 bandes horizontales, une prédiction par bande,
  * de haut en bas. Elle est fixée ici : il n'y a plus de routine à choisir (Arcane Système est devenu
@@ -13,16 +15,8 @@
 export const ZONES = 3;
 export const PREDICTIONS: readonly string[] = Object.freeze(['6', '16', '26']);
 
-export interface Settings {
-	/** Délai entre le toucher et l'apparition du nombre, en secondes. */
-	delay: number;
-	/** Durée du fondu d'apparition et de disparition, en secondes. */
-	fade: number;
-	/** Luminosité de la scène, en pourcentage. */
-	brightness: number;
-	/** Jauge de l'appui long sur la scène : aide à la répétition, à masquer avant de jouer. */
-	showHoldRing: boolean;
-}
+/** Les réglages d'un tour à zones (src/logic/reglages-zones.ts). */
+export type Settings = ReglagesZones;
 
 export const DEFAULTS: Readonly<Settings> = Object.freeze({
 	delay: 3,
@@ -31,25 +25,4 @@ export const DEFAULTS: Readonly<Settings> = Object.freeze({
 	showHoldRing: true,
 });
 
-const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
-/** Nombre borné entre lo et hi, ou la valeur par défaut si ce n'est pas un nombre. */
-const num = (v: unknown, fallback: number, lo: number, hi: number): number =>
-	typeof v === 'number' && Number.isFinite(v) ? clamp(v, lo, hi) : fallback;
-const bool = (v: unknown, fallback: boolean): boolean => (typeof v === 'boolean' ? v : fallback);
-
-/**
- * Réglages valides à partir de n'importe quelle donnée (JSON enregistré, réglages en cours…) :
- * chaque champ absent ou invalide reprend sa valeur par défaut, les nombres sont bornés et arrondis
- * au pas des curseurs.
- */
-export function sanitizeSettings(raw: unknown): Settings {
-	const src: Partial<Record<keyof Settings, unknown>> = raw && typeof raw === 'object' ? raw : {};
-	// Les anciennes versions enregistraient une routine, un nombre de zones et des valeurs : ils sont
-	// ignorés.
-	return {
-		delay: Math.round(num(src.delay, DEFAULTS.delay, 0, 10) * 2) / 2,
-		fade: Math.round(num(src.fade, DEFAULTS.fade, 0.5, 6) * 10) / 10,
-		brightness: Math.round(num(src.brightness, DEFAULTS.brightness, 30, 100)),
-		showHoldRing: bool(src.showHoldRing, DEFAULTS.showHoldRing),
-	};
-}
+export const sanitizeSettings = validerReglagesZones(DEFAULTS);

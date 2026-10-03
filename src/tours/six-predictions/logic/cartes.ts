@@ -4,7 +4,7 @@
  * Le contenu lui-même est dans content/cartes.ts.
  */
 
-import { isTexte, t, type Lang, type Texte } from './i18n.ts';
+import { isTexte, t, type Lang, type Texte } from '../../../logic/i18n.ts';
 
 export interface Carte {
 	/** La prédiction, écrite à la main au dos de la carte. C'est le seul champ obligatoire. */

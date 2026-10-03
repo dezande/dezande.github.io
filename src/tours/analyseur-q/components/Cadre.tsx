@@ -4,7 +4,7 @@
  */
 
 import { ui } from '../content/interface.ts';
-import type { Lang } from '../logic/i18n.ts';
+import type { Lang } from '../../../logic/i18n.ts';
 
 export function Cadre({ langue }: { langue: Lang }) {
 	return (

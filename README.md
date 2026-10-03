@@ -56,9 +56,11 @@ src/
   main.tsx              démarrage : verrou portrait, écran allumé, mises à jour, rendu de <App />
   App.tsx               les adresses (React Router)
   pages/                Menu.tsx (le menu 16 bits), PageTour.tsx (la page qui accueille un tour)
-  components/           partagés : BoutonTactile, PanneauReglages, JaugeAppui, PixelArt,
-                        cartes/ (dos de cartes et soulignement, partagés par deux tours)
-  hooks/                useSurToucher, useBoutonsTactiles, useReglagesEnregistres
+  components/           les briques des tours (voir « Ajouter un tour ») : PanneauReglages,
+                        JaugeAppui, BoutonTactile, PixelArt ; cartes/ (tours à cartes),
+                        zones/ (tours à zones : TourAZones, prêt à l'emploi)
+  hooks/                appui long, clavier, gestes, réglages enregistrés, ajustement du texte…
+  logic/                logique pure partagée, testée sous Node : langues, gestes, zones, paysage
   langue/               la langue FR / EN, pour le menu et tous les tours (LangueContext)
   content/              LA LISTE DES TOURS (tours.ts), le texte du menu, les dessins en pixels
   tours/
@@ -66,12 +68,14 @@ src/
     pont.tsx            ce qu'un tour reçoit de l'app : langue, nom, réglages seuls, quitter()
     <dossier>/          un tour : index.tsx, components/, hooks/, content/ (textes),
                         logic/ (logique pure, sans DOM, testée sous Node)
-  styles/               TOUT le Sass : main.scss, _base.scss, menu/, tours/<dossier>/
+  styles/               TOUT le Sass : main.scss, _base.scss, abstracts/, components/ (styles
+                        des briques, en mixins), menu/, tours/<dossier>/
   assets/               polices (fonts/), images (images/<dossier>/), icône de l'app (icons/)
   kit/                  code commun des accessoires de scène (sous-module kit-scene)
   sw/                   compilation du service worker du kit
 public/                 copié tel quel : manifeste, icônes, captures, licences des polices
-tests/                  Jest : logic/ et tours/ (unitaires), composants/ (React), e2e/ (Chrome)
+tests/                  Jest : logic/ (logique partagée) et tours/ (unitaires), composants/ (React),
+                        e2e/ (Chrome)
 ```
 
 - **Chaque tour vient de son app d'origine** ([boule-de-cristal](https://github.com/dezande/boule-de-cristal), [pile-ou-face](https://github.com/dezande/pile-ou-face), [six-predictions](https://github.com/dezande/six-predictions), [analyseur-q](https://github.com/dezande/analyseur-q) ; la carte de visite est née ici, de l'ancienne routine Arcane Système de la boule) : sa logique (`logic/`) et ses textes (`content/`) sont repris tels quels, avec leurs tests ; son affichage est réécrit en composants React. Les dépôts d'origine ne sont pas touchés.
@@ -82,10 +86,58 @@ tests/                  Jest : logic/ et tours/ (unitaires), composants/ (React)
 
 ## Ajouter un tour
 
-1. Son code dans `src/tours/<dossier>/` : un `index.tsx` dont l'export par défaut est le tour (voir Pile ou face, le plus simple), la logique pure dans `logic/`. Il lit `usePont()` : `quitter()` à l'appui de 3 s, `enReglages` pour n'afficher que ses réglages (`<PanneauReglages>`), `langue`.
-2. Ses styles dans `src/styles/tours/<dossier>/`, rangés sous `.scene-<dossier>` par son `_index.scss`, et une ligne `@use` dans `src/styles/main.scss` ; ses images dans `src/assets/images/<dossier>/`, importées par le code.
+1. Son code dans `src/tours/<dossier>/` : un `index.tsx` dont l'export par défaut est le tour, sa logique pure dans `logic/` (testée dans `tests/tours/<dossier>/`), ses textes dans `content/`. Il est fait des briques ci-dessous.
+2. Ses styles dans `src/styles/tours/<dossier>/` : un `_index.scss` qui range tout sous `.scene-<dossier>` (voir ceux des autres tours), une ligne `@use` dans `src/styles/main.scss`. Ses images dans `src/assets/images/<dossier>/`, importées par le code.
 3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), une dans [`src/tours/registre.ts`](src/tours/registre.ts), son icône en pixels (32 × 32, ajoutée à `outils/icones-16-bits.py`) dans [`src/content/pixels.ts`](src/content/pixels.ts).
-4. Ses tests unitaires dans `tests/tours/<dossier>/`, ses composants dans `tests/composants/`, et sa routine dans les tests dans Chrome.
+4. Ses composants dans `tests/composants/`, et sa routine dans les tests dans Chrome.
+
+### Les briques communes
+
+Chaque fichier commence par un commentaire qui dit à quoi il sert et comment s'en servir, exemple compris.
+
+| Pour… | Brique | Fichier |
+| --- | --- | --- |
+| Savoir d'où l'on vient et y retourner | `usePont()` : `langue`, `nomDuTour`, `enReglages`, `quitter()` | [`tours/pont.tsx`](src/tours/pont.tsx) |
+| Les réglages, gardés sur le téléphone | `useReglagesEnregistres(clé, valider)` | [`hooks/useReglagesEnregistres.ts`](src/hooks/useReglagesEnregistres.ts) |
+| Le panneau de l'écrou ⚙, la même structure partout | `<PanneauReglages aide jauge autresAides defauts>`, `<Interrupteur>` | [`components/PanneauReglages.tsx`](src/components/PanneauReglages.tsx) |
+| L'appui de 3 s qui ramène au menu, et sa jauge | `useAppuiLong()`, `<JaugeAppui>` | [`hooks/useAppuiLong.ts`](src/hooks/useAppuiLong.ts) |
+| Le clavier et les télécommandes (Échap / M : menu) | `useClavier(keyAction, agir)` | [`hooks/useClavier.ts`](src/hooks/useClavier.ts) |
+| Oublier les gestes quand l'app passe en arrière-plan | `useQuandLAppSeCache(action)` | [`hooks/useQuandLAppSeCache.ts`](src/hooks/useQuandLAppSeCache.ts) |
+| Pas de transition à l'ouverture | `useSansAnimation()` | [`hooks/useSansAnimation.ts`](src/hooks/useSansAnimation.ts) |
+| Un texte qui remplit sa place | `plusGrandeEchelle()`, `useReajustement()` | [`logic/ajustement.ts`](src/logic/ajustement.ts), [`hooks/useReajustement.ts`](src/hooks/useReajustement.ts) |
+| Les deux langues | `t()`, `isTexte()`, types `Lang`, `Texte` | [`logic/i18n.ts`](src/logic/i18n.ts) |
+| Un tour joué en largeur | `usePaysage()` | [`hooks/usePaysage.ts`](src/hooks/usePaysage.ts) |
+
+**Un tour à double toucher** (comme Pile ou face, Les six prédictions) : `useGestesDoubleToucher()` donne le tap, le double toucher et l'appui de 3 s sur la scène ([`hooks/useGestesDoubleToucher.ts`](src/hooks/useGestesDoubleToucher.ts)). Avec des cartes : `<DosDeCarte>`, `<Soulignement>`, `<ChoixIllustre>` et `<Vignette>` ([`components/cartes/`](src/components/cartes/)).
+
+**Un tour à zones** (comme la Boule de cristal, la Carte de visite) : [`<TourAZones>`](src/components/zones/TourAZones.tsx) fait tout — gestes, clavier, phases, réglages, test des zones, paysage. Le tour ne donne que ses zones, ses valeurs, ses mots et son décor :
+
+```tsx
+export default function MonTour() {
+	return (
+		<TourAZones cleReglages="mon-tour:settings:v1" valider={sanitizeSettings}
+			zones={3} noms={['Haut', 'Milieu', 'Bas']} valeurs={['6', '16', '26']}
+			libelles={LIBELLES} libellesPhases={PHASES}
+			decor={(etat, reglages, finInstant) => <MonDecor etat={etat} finInstant={finInstant} />} />
+	);
+}
+```
+
+**Les styles des briques** sont des mixins, dans `src/styles/components/`, que le tour inclut avec ses couleurs :
+
+```scss
+// tours/mon-tour/_overlays.scss : la jauge de l'appui long
+@use "tokens" as *;
+@use "../../components/jauge";
+@include jauge.jauge($prefixe: "mt", $couleur: $accent, $piste: rgba($ink, .18));
+
+// tours/mon-tour/_menu.scss : le panneau de réglages
+@use "../../components/panneau-reglages" as panneau;
+@include panneau.panneau-reglages($fond: $bg, $texte: $ink, $texte-doux: $ink-soft,
+	$filet: $ink-faint, $accent: $accent, $carte: $panel, $serif: $serif);
+```
+
+Un tour à cartes ajoute `cartes.tapis`, `cartes.cartes(…)` et `cartes.vignettes(…)` ([`_cartes.scss`](src/styles/components/_cartes.scss)) ; un tour à zones, `zones.base-du-tour(…)`, `zones.mode-test(…)` et `panneau.panneau-reglages-dore(…)` ([`_zones.scss`](src/styles/components/_zones.scss)).
 
 ## Publication et développement
 

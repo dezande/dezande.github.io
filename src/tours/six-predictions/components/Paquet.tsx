@@ -4,7 +4,7 @@
  * CSS font le reste (styles/tours/six-predictions/_cartes.scss).
  */
 
-import type { Langue } from '../../../content/textes.ts';
+import type { Lang } from '../../../logic/i18n.ts';
 import { CARTES } from '../content/cartes.ts';
 import type { Cran } from '../logic/etalement.ts';
 import { estVide, type Etat } from '../logic/paquet.ts';
@@ -21,7 +21,7 @@ interface Props {
 	 * prédictions qui se referment — n'aurait aucun sens.
 	 */
 	sansAnimation: boolean;
-	langue: Langue;
+	langue: Lang;
 	motif: Motif;
 	couleur: Couleur;
 }

@@ -14,12 +14,12 @@
  * (tests/logic/tours.test.ts) vérifient la forme de ce fichier et la présence de chaque copie.
  */
 
-import type { Texte } from './textes.ts';
+import type { Traduction } from '../logic/i18n.ts';
 
 export interface Tour {
 	dossier: string;
-	nom: Texte;
-	description: Texte;
+	nom: Traduction;
+	description: Traduction;
 }
 
 export const TOURS: readonly Tour[] = [

@@ -13,13 +13,15 @@
  * place et ajusté quand la carte se retourne, sans le moindre calcul sous les yeux du public.
  */
 
-import { Fragment, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { Fragment, useCallback, useLayoutEffect, useRef } from 'react';
 import { DosDeCarte } from '../../../components/cartes/DosDeCarte.tsx';
 import { Soulignement } from '../../../components/cartes/Soulignement.tsx';
-import type { Langue } from '../../../content/textes.ts';
+import { useReajustement } from '../../../hooks/useReajustement.ts';
+import { plusGrandeEchelle } from '../../../logic/ajustement.ts';
+import type { Lang } from '../../../logic/i18n.ts';
 import { ui } from '../content/interface.ts';
 import { PREDICTIONS } from '../content/predictions.ts';
-import { t } from '../logic/i18n.ts';
+import { t } from '../../../logic/i18n.ts';
 import type { Cote, Etat } from '../logic/piece.ts';
 import type { Dessin, Teinte } from '../logic/settings.ts';
 import { DessinPiece } from './DessinPiece.tsx';
@@ -38,13 +40,13 @@ interface Props {
 	etat: Etat;
 	/** Le côté dont la prédiction est écrite à l'avant (gardé quand la carte revient face cachée). */
 	coteEcrit: Cote | null;
-	langue: Langue;
+	langue: Lang;
 	motif: Dessin;
 	couleur: Teinte;
 }
 
 /** La prédiction d'un côté, ligne par ligne : seul un retour à la ligne du texte la casse. */
-const lignes = (cote: Cote, langue: Langue): string[] => (t(PREDICTIONS[cote], langue) ?? '').split('\n');
+const lignes = (cote: Cote, langue: Lang): string[] => (t(PREDICTIONS[cote], langue) ?? '').split('\n');
 
 export function Carte({ etat, coteEcrit, langue, motif, couleur }: Props) {
 	const carteRef = useRef<HTMLElement>(null);
@@ -53,7 +55,7 @@ export function Carte({ etat, coteEcrit, langue, motif, couleur }: Props) {
 
 	/*
 	 * Plus grande échelle (--fit, entre MIN_FIT et MAX_FIT) à laquelle le bloc écrit — la
-	 * prédiction, son soulignement et la pièce — tient dans la carte. Recherche par dichotomie. Les
+	 * prédiction, son soulignement et la pièce — tient dans la carte (src/logic/ajustement.ts). Les
 	 * prédictions tiennent sur deux lignes : elles restent d'aplomb, jamais en diagonale.
 	 */
 	const fit = useCallback(() => {
@@ -68,39 +70,18 @@ export function Carte({ etat, coteEcrit, langue, motif, couleur }: Props) {
 			carte.style.setProperty('--fit', String(scale));
 			return ecriture.offsetWidth <= width && ecriture.offsetHeight <= height;
 		};
-		let lo = MIN_FIT;
-		let hi = MAX_FIT;
-		for (let step = 0; step < 16; step++) {
-			const mid = (lo + hi) / 2;
-			if (tient(mid)) lo = mid;
-			else hi = mid;
-		}
-		carte.style.setProperty('--fit', String(lo));
+		carte.style.setProperty('--fit', String(plusGrandeEchelle(tient, MIN_FIT, MAX_FIT)));
 	}, []);
 
 	// La prédiction vient d'être écrite : ajustée avant d'être montrée.
 	useLayoutEffect(fit, [fit, coteEcrit, langue]);
 
-	useEffect(() => {
-		let image = 0;
-		const surRedimension = (): void => {
-			cancelAnimationFrame(image);
-			image = requestAnimationFrame(fit);
-		};
-		window.addEventListener('resize', surRedimension);
-		/*
-		 * La police manuscrite n'est demandée qu'à la première prédiction écrite : sans précaution,
-		 * le premier tour serait mesuré avec la police de secours, et la prédiction sortirait trop
-		 * petite. On la charge donc dès l'ouverture, et on réajuste quand elle arrive.
-		 */
-		void document.fonts?.load('600 38px Caveat').then(fit, () => undefined);
-		document.fonts?.addEventListener('loadingdone', fit);
-		return () => {
-			cancelAnimationFrame(image);
-			window.removeEventListener('resize', surRedimension);
-			document.fonts?.removeEventListener('loadingdone', fit);
-		};
-	}, [fit]);
+	/*
+	 * La place ou la police a changé. La police manuscrite n'est demandée qu'à la première prédiction
+	 * écrite : sans précaution, le premier tour serait mesuré avec la police de secours, et la
+	 * prédiction sortirait trop petite. Elle est donc chargée dès l'ouverture.
+	 */
+	useReajustement(fit, '600 38px Caveat');
 
 	const montree = etat.phase === 'montree';
 	return (
@@ -136,6 +117,6 @@ export function Carte({ etat, coteEcrit, langue, motif, couleur }: Props) {
 }
 
 /** Ce qui est à l'écran, pour les lecteurs d'écran seulement. */
-export function annonce(etat: Etat, langue: Langue): string {
+export function annonce(etat: Etat, langue: Lang): string {
 	return etat.phase === 'montree' ? lignes(etat.cote, langue).join(' ') : ui('carte.dos', langue);
 }

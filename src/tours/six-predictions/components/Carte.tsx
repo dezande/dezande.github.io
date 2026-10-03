@@ -13,14 +13,15 @@
  * se retourne sans le moindre calcul de mise en page au moment où le doigt la touche.
  */
 
-import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties } from 'react';
+import { Fragment, useCallback, useLayoutEffect, useRef, type CSSProperties } from 'react';
 import { DosDeCarte } from '../../../components/cartes/DosDeCarte.tsx';
 import { Soulignement } from '../../../components/cartes/Soulignement.tsx';
-import type { Langue } from '../../../content/textes.ts';
+import { useReajustement } from '../../../hooks/useReajustement.ts';
+import { plusGrandeEchelle } from '../../../logic/ajustement.ts';
+import { t, type Lang } from '../../../logic/i18n.ts';
 import { CARTES } from '../content/cartes.ts';
 import { ui } from '../content/interface.ts';
 import type { Cran } from '../logic/etalement.ts';
-import { t } from '../logic/i18n.ts';
 import type { Dessin, Teinte } from '../logic/settings.ts';
 
 /** Plus petite échelle du texte : en dessous, mieux vaut raccourcir la prédiction. */
@@ -57,7 +58,7 @@ interface Props {
 	lisible: boolean;
 	/** Sa place dans l'étalement, tirée au sort à chaque remise du paquet. */
 	cran: Cran;
-	langue: Langue;
+	langue: Lang;
 	dessin: Dessin;
 	teinte: Teinte;
 }
@@ -108,16 +109,7 @@ export function Carte({ index, place, retournee, lisible, cran, langue, dessin, 
 		};
 
 		/** Plus grande échelle qui tienne à cet angle. */
-		const cherche = (angle: number): number => {
-			let lo = MIN_FIT;
-			let hi = MAX_FIT;
-			for (let step = 0; step < 16; step++) {
-				const mid = (lo + hi) / 2;
-				if (tient(mid, angle)) lo = mid;
-				else hi = mid;
-			}
-			return lo;
-		};
+		const cherche = (angle: number): number => plusGrandeEchelle((scale) => tient(scale, angle), MIN_FIT, MAX_FIT);
 
 		const plat = cherche(0);
 		// Une prédiction sur plusieurs lignes reste d'aplomb : un pavé de texte en biais ne se lit plus.
@@ -130,27 +122,12 @@ export function Carte({ index, place, retournee, lisible, cran, langue, dessin, 
 	// La prédiction est écrite : ajustée avant d'être peinte.
 	useLayoutEffect(fit, [fit, langue]);
 
-	// Taille d'écran ou polices changées : tout est à réajuster.
-	useEffect(() => {
-		let image = 0;
-		const surRedimension = (): void => {
-			cancelAnimationFrame(image);
-			image = requestAnimationFrame(fit);
-		};
-		window.addEventListener('resize', surRedimension);
-		/*
-		 * La police manuscrite peut arriver après l'ouverture du tour : sans précaution, les cartes
-		 * seraient mesurées avec la police de secours, et la prédiction sortirait trop petite. On
-		 * la demande donc tout de suite, et on réajuste quand elle arrive.
-		 */
-		void document.fonts?.load('600 38px Caveat').then(fit, () => undefined);
-		document.fonts?.addEventListener('loadingdone', fit);
-		return () => {
-			cancelAnimationFrame(image);
-			window.removeEventListener('resize', surRedimension);
-			document.fonts?.removeEventListener('loadingdone', fit);
-		};
-	}, [fit]);
+	/*
+	 * Taille d'écran ou polices changées : tout est à réajuster. La police manuscrite peut arriver
+	 * après l'ouverture du tour : elle est demandée tout de suite, pour ne pas mesurer la prédiction
+	 * avec la police de secours.
+	 */
+	useReajustement(fit, '600 38px Caveat');
 
 	/*
 	 * Où la carte est posée, et à quel rang du paquet (styles/tours/six-predictions/_cartes.scss).

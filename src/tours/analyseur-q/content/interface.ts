@@ -8,7 +8,7 @@
  * Le nom de l'app (« Analyseur Q », « AQ-52 ») n'est pas traduit.
  */
 
-import type { Lang, Texte } from '../logic/i18n.ts';
+import type { Lang, Texte } from '../../../logic/i18n.ts';
 
 export const INTERFACE = {
 	// Cadre d'instrument (décor autour des slides).

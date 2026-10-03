@@ -5,7 +5,7 @@
  */
 
 import { ui } from '../content/interface.ts';
-import { isTexte, LANGS, t, type Lang, type Texte } from './i18n.ts';
+import { isTexte, LANGS, t, type Lang, type Texte } from '../../../logic/i18n.ts';
 import { LOADING } from './loading.ts';
 
 /*

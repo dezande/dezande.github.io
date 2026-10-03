@@ -7,7 +7,7 @@
  *   appui de 3 s n'importe où, Échap ou M : retour au menu principal
  *
  * Organisation du dossier :
- *   index.tsx    ce fichier : la scène, l'état du paquet, les gestes et le clavier
+ *   index.tsx    ce fichier : la scène et l'état du paquet (gestes et clavier : src/hooks/)
  *   components/  Paquet (les six cartes à leur place), Carte (le dos, la prédiction, le
  *                retournement, l'ajustement du texte), Reglages (le panneau de l'écrou ⚙)
  *   content/     LE TEXTE : cartes.ts (les six prédictions, en français et en anglais) et
@@ -16,28 +16,25 @@
  *     cartes.ts      forme d'une carte, vérification du contenu
  *     paquet.ts      l'état du paquet et ce que chaque toucher en fait
  *     etalement.ts   de combien chaque carte du dessous dépasse de sa voisine, tiré au sort
- *     gestures.ts    décision de chaque geste
  *     keys.ts        touches du clavier
  *     settings.ts    forme et validation des réglages
- *     i18n.ts        les deux langues
  * Les dos de cartes et le soulignement sont partagés avec Pile ou face (src/components/cartes/),
  * les styles sont dans src/styles/tours/six-predictions/.
  */
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
-import { JaugeAppui, useJaugeAppui } from '../../components/JaugeAppui.tsx';
-import type { Langue } from '../../content/textes.ts';
+import { useCallback, useRef, useState } from 'react';
+import { JaugeAppui } from '../../components/JaugeAppui.tsx';
+import { useClavier } from '../../hooks/useClavier.ts';
+import { useGestesDoubleToucher } from '../../hooks/useGestesDoubleToucher.ts';
 import { useReglagesEnregistres } from '../../hooks/useReglagesEnregistres.ts';
-import { appPoint } from '../../kit/web/orientation.ts';
-import { keepScreenAwake } from '../../kit/web/wake-lock.ts';
+import { useSansAnimation } from '../../hooks/useSansAnimation.ts';
+import { t, type Lang } from '../../logic/i18n.ts';
 import { usePont } from '../pont.tsx';
 import { Paquet } from './components/Paquet.tsx';
 import { Reglages } from './components/Reglages.tsx';
 import { CARTES } from './content/cartes.ts';
 import { ui } from './content/interface.ts';
 import { crans, nouveauSemis, type Cran } from './logic/etalement.ts';
-import { GESTURE, GestureTracker } from './logic/gestures.ts';
-import { t } from './logic/i18n.ts';
 import { keyAction } from './logic/keys.ts';
 import { apresToucher, compteurLabel, DEPART, estVide, remettre, type Etat } from './logic/paquet.ts';
 import { sanitizeSettings } from './logic/settings.ts';
@@ -52,9 +49,6 @@ const CLE_REGLAGES = 'six-predictions:settings:v1';
 const valider = (brut: unknown) => sanitizeSettings(brut);
 
 const NOMBRE = CARTES.length;
-
-/** La jauge n'apparaît qu'après un court instant : un tap normal ne la montre jamais. */
-const JAUGE_DELAI_MS = GESTURE.tapMaxMs;
 
 /**
  * Délai pendant lequel un nouveau toucher est ignoré, le temps qu'une carte finisse de se
@@ -72,16 +66,15 @@ const ACTION_GUARD_MS = 260;
 const nouvelEtalement = (): Cran[] => crans(nouveauSemis(), NOMBRE);
 
 /** Ce qui est à l'écran, pour les lecteurs d'écran seulement. */
-function annonce(etat: Etat, langue: Langue): string {
+function annonce(etat: Etat, langue: Lang): string {
 	if (estVide(etat, NOMBRE)) return ui('carte.vide', langue);
 	if (etat.retournee) return t(CARTES[etat.index]?.texte, langue) ?? '';
 	return `${ui('carte.dos', langue)} ${compteurLabel(etat, NOMBRE)}`;
 }
 
 export default function SixPredictions() {
-	const { langue, enReglages, quitter } = usePont();
+	const { langue, enReglages } = usePont();
 	const [reglages, enregistrer] = useReglagesEnregistres(CLE_REGLAGES, valider);
-	const { jauge, montrerJauge, cacherJauge } = useJaugeAppui();
 
 	/* ---------- L'état du paquet ---------- */
 
@@ -89,8 +82,6 @@ export default function SixPredictions() {
 	const [etalement, setEtalement] = useState<Cran[]>(nouvelEtalement);
 	// Lus par les gestes et le clavier, qui doivent toujours voir la dernière valeur.
 	const etatRef = useRef(etat);
-	const reglagesRef = useRef(reglages);
-	reglagesRef.current = reglages;
 	const prochainToucherA = useRef(0);
 
 	/*
@@ -98,14 +89,8 @@ export default function SixPredictions() {
 	 * sa place. Les transitions reprennent une fois la nouvelle position peinte (deux images plus
 	 * tard) ; `remises` relance cette attente à chaque remise.
 	 */
-	const [sansAnimation, setSansAnimation] = useState(true);
 	const [remises, setRemises] = useState(0);
-	useEffect(() => {
-		let image = requestAnimationFrame(() => {
-			image = requestAnimationFrame(() => setSansAnimation(false));
-		});
-		return () => cancelAnimationFrame(image);
-	}, [remises]);
+	const sansAnimation = useSansAnimation(remises);
 
 	const changer = useCallback((suivant: Etat): void => {
 		etatRef.current = suivant;
@@ -128,22 +113,12 @@ export default function SixPredictions() {
 	 */
 	const remettrePaquet = useCallback((): void => {
 		prochainToucherA.current = 0;
-		setSansAnimation(true);
 		setRemises((n) => n + 1);
 		setEtalement(nouvelEtalement());
 		changer(remettre());
 	}, [changer]);
 
-	/* ---------- Gestes sur la scène ---------- */
-
-	const [gestures] = useState(() => new GestureTracker());
-	const holdTimer = useRef(0);
-
-	const stopHold = useCallback(() => {
-		clearTimeout(holdTimer.current);
-		holdTimer.current = 0;
-		cacherJauge();
-	}, [cacherJauge]);
+	/* ---------- Gestes sur la scène, clavier ---------- */
 
 	/**
 	 * Ce qu'un geste de la scène déclenche :
@@ -151,99 +126,20 @@ export default function SixPredictions() {
 	 *   un double     remet le paquet si la table est vide, et se comporte comme un tap sinon —
 	 *                 deux touchers vifs en pleine routine ne doivent rien avoir d'exceptionnel.
 	 */
-	const appliquer = (geste: 'tap' | 'double'): void => {
+	const { scene, jauge } = useGestesDoubleToucher(reglages.showHoldRing, (geste) => {
 		if (geste === 'double' && estVide(etatRef.current, NOMBRE)) remettrePaquet();
 		else toucher();
-	};
+	});
 
-	// Coordonnées dans le repère de l'app, qui peut être pivotée (kit/web/orientation.ts).
-	const surAppui = (event: PointerEvent<HTMLElement>): void => {
-		if (event.pointerType === 'mouse' && event.button !== 0) return;
-		void keepScreenAwake();
-		const { x, y } = appPoint(event.clientX, event.clientY);
-		if (!gestures.press(event.pointerId, x, y, performance.now())) {
-			stopHold();
-			return;
-		}
-		const id = event.pointerId;
-		// La souris qui sort de la scène ne perd pas son relâchement.
-		try {
-			event.currentTarget.setPointerCapture(id);
-		} catch {
-			// Contact déjà terminé.
-		}
-		if (reglagesRef.current.showHoldRing) montrerJauge(x, y, JAUGE_DELAI_MS, GESTURE.holdMs - JAUGE_DELAI_MS);
-		holdTimer.current = window.setTimeout(() => {
-			stopHold();
-			// Appui de 3 s : sortie de secours, retour au menu principal.
-			if (gestures.holdCompleted(id)) quitter();
-		}, GESTURE.holdMs);
-	};
-
-	const surDeplacement = (event: PointerEvent<HTMLElement>): void => {
-		const { x, y } = appPoint(event.clientX, event.clientY);
-		if (gestures.move(event.pointerId, x, y)) stopHold();
-	};
-
-	const surRelachement = (event: PointerEvent<HTMLElement>): void => {
-		stopHold();
-		const { x, y } = appPoint(event.clientX, event.clientY);
-		const geste = gestures.release(event.pointerId, x, y, performance.now());
-		if (geste !== 'none') appliquer(geste);
-	};
-
-	const surAnnulation = (event: PointerEvent<HTMLElement>): void => {
-		stopHold();
-		gestures.cancel(event.pointerId);
-	};
-
-	/* ---------- Clavier et télécommande ---------- */
-
-	useEffect(() => {
-		const surTouche = (event: KeyboardEvent): void => {
-			if (event.metaKey || event.ctrlKey || event.altKey) return;
-			const action = keyAction(event.key);
-			if (!action) return;
-			// Réglages ouverts : Échap ou M les ferment, le reste ne touche pas au paquet.
-			if (enReglages && action !== 'menu') return;
-			event.preventDefault();
-			void keepScreenAwake();
-			if (action === 'menu') quitter();
-			else if (action === 'remettre') remettrePaquet();
-			else toucher();
-		};
-		document.addEventListener('keydown', surTouche);
-		return () => document.removeEventListener('keydown', surTouche);
-	}, [enReglages, quitter, remettrePaquet, toucher]);
-
-	// App en arrière-plan : aucun geste commencé ne doit se terminer plus tard, et le tap qui
-	// attendait son double est oublié.
-	useEffect(() => {
-		const surVisibilite = (): void => {
-			stopHold();
-			gestures.reset();
-		};
-		document.addEventListener('visibilitychange', surVisibilite);
-		return () => {
-			document.removeEventListener('visibilitychange', surVisibilite);
-			clearTimeout(holdTimer.current);
-		};
-	}, [gestures, stopHold]);
+	// → ou Espace : toucher la carte ; R : remettre le paquet ; Échap ou M : retour au menu.
+	useClavier(keyAction, (action) => (action === 'remettre' ? remettrePaquet() : toucher()));
 
 	/* ---------- Affichage ---------- */
 
 	return (
 		<>
 			{/* La scène reçoit tous les touchers. */}
-			<main
-				id="stage"
-				onPointerDown={surAppui}
-				onPointerMove={surDeplacement}
-				onPointerUp={surRelachement}
-				onPointerCancel={surAnnulation}
-				// Pas de menu contextuel ni de loupe sur appui long.
-				onContextMenu={(event) => event.preventDefault()}
-			>
+			<main id="stage" {...scene}>
 				<Paquet etat={etat} etalement={etalement} sansAnimation={sansAnimation} langue={langue} motif={reglages.motif} couleur={reglages.couleur} />
 			</main>
 

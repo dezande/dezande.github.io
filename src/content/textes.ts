@@ -6,11 +6,7 @@
  * passée par le pont (src/tours/pont.tsx).
  */
 
-export const LANGUES = ['fr', 'en'] as const;
-export type Langue = (typeof LANGUES)[number];
-
-/** Un texte dans les deux langues. */
-export type Texte = Readonly<Record<Langue, string>>;
+import type { Traduction } from '../logic/i18n.ts';
 
 export const TEXTES = {
 	invite: { fr: 'Choisis un tour', en: 'Pick a trick' },
@@ -35,4 +31,4 @@ export const TEXTES = {
 		en: 'Install it to get it full screen, even offline.',
 	},
 	installer: { fr: 'Installer', en: 'Install' },
-} as const satisfies Record<string, Texte>;
+} as const satisfies Record<string, Traduction>;

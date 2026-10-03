@@ -3,9 +3,9 @@
  * slides, aides à la répétition (notes pour l'artiste, jauge de l'appui long), réglages par défaut.
  */
 
-import { PanneauReglages } from '../../../components/PanneauReglages.tsx';
+import { Interrupteur, PanneauReglages } from '../../../components/PanneauReglages.tsx';
 import { ui } from '../content/interface.ts';
-import type { Lang } from '../logic/i18n.ts';
+import type { Lang } from '../../../logic/i18n.ts';
 import { TRANSITIONS, type Settings } from '../logic/settings.ts';
 
 interface Props {
@@ -19,7 +19,12 @@ export function Reglages({ reglages, langue, enregistrer }: Props) {
 	const changer = (changement: Partial<Settings>): void => enregistrer({ ...reglages, ...changement });
 
 	return (
-		<PanneauReglages>
+		<PanneauReglages
+			aide={ui('menu.aides', langue)}
+			jauge={{ libelle: ui('menu.jauge', langue), visible: reglages.showHoldRing, changer: (showHoldRing) => changer({ showHoldRing }) }}
+			autresAides={<Interrupteur id="show-notes" libelle={ui('menu.notes', langue)} coche={reglages.showNotes} changer={(showNotes) => changer({ showNotes })} />}
+			defauts={{ libelle: ui('menu.defauts', langue), retablir: () => enregistrer(null) }}
+		>
 			<div className="card">
 				<div className="row-label">{ui('menu.transition', langue)}</div>
 				{/* Le nom de chaque transition dans la langue en cours ; la valeur enregistrée ne change pas. */}
@@ -31,18 +36,6 @@ export function Reglages({ reglages, langue, enregistrer }: Props) {
 					))}
 				</div>
 			</div>
-
-			<div className="card options">
-				<p className="hint">{ui('menu.aides', langue)}</p>
-				<label className="toggle-row" htmlFor="show-notes">
-					<span>{ui('menu.notes', langue)}</span> <input id="show-notes" type="checkbox" checked={reglages.showNotes} onChange={(event) => changer({ showNotes: event.target.checked })} />
-				</label>
-				<label className="toggle-row" htmlFor="show-hold-ring">
-					<span>{ui('menu.jauge', langue)}</span> <input id="show-hold-ring" type="checkbox" checked={reglages.showHoldRing} onChange={(event) => changer({ showHoldRing: event.target.checked })} />
-				</label>
-			</div>
-
-			<button type="button" id="defaults-btn" className="link" onClick={() => enregistrer(null)}>{ui('menu.defauts', langue)}</button>
 		</PanneauReglages>
 	);
 }

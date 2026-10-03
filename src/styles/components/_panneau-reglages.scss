@@ -1,0 +1,363 @@
+// Le panneau de réglages d'un tour (src/components/PanneauReglages.tsx), ouvert par l'écrou ⚙ du
+// menu principal : #menu (ou #settings), sa feuille .sheet qui défile, la barre d'en-tête
+// .menu-head qui reste en haut (.titre-reglages, .nom-du-tour, la croix .croix), puis les réglages
+// du tour : cartes .card, .row-label, .hint, interrupteurs .toggle-row dans .options, et
+// « Rétablir les réglages par défaut » (#defaults-btn, .link).
+//
+// Deux allures, à choisir selon le tour :
+//   panneau-reglages       sobre, sur le fond du tour (pile ou face, six prédictions, analyseur Q),
+//                          pour <PanneauReglages> (#menu) ;
+//   panneau-reglages-dore  doré, titres en serif, sur un halo (boule de cristal, carte de visite),
+//                          pour <PanneauReglages id="settings" classeNom="sub">.
+// Le curseur (input[type="range"]) est à part : seuls certains tours en ont un.
+//
+// Dans un nouveau tour, son _menu.scss (chargé sous .scene-<dossier>) :
+//
+//   @use "tokens" as *;
+//   @use "../../components/panneau-reglages" as panneau;
+//
+//   @include panneau.panneau-reglages($fond: $bg, $texte: $ink, $texte-doux: $ink-soft,
+//   	$filet: $ink-faint, $accent: $accent, $carte: $panel, $serif: $serif);
+//   @include panneau.curseur($accent);
+//   // … puis les styles des réglages propres au tour.
+
+@use "sass:color";
+@use "../abstracts/mixins" as *;
+
+// La feuille qui défile, en entier sur la hauteur de l'app. Les marges laissent la place des
+// encoches (--safe-*) : la barre d'en-tête les reprend, en négatif, pour couvrir tout le haut.
+@mixin -feuille($largeur, $marge-haut, $marge-cote) {
+	width: 100%;
+	max-width: $largeur;
+	height: 100%;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+	// Pas « pan-y » : cette direction se lit par rapport à l'écran, et bloquerait le défilement
+	// quand l'app est pivotée en paysage (kit/web/orientation.ts).
+	touch-action: manipulation;
+	padding: calc(var(--safe-t) + #{$marge-haut}) calc(var(--safe-r) + #{$marge-cote}) calc(var(--safe-b) + 32px) calc(var(--safe-l) + #{$marge-cote});
+}
+
+// Les boutons de la feuille, et le lien « Rétablir les réglages par défaut » (.link).
+@mixin -boutons($couleur, $bord, $lien) {
+	button {
+		min-height: 46px;
+		border-radius: 12px;
+		font-family: inherit;
+		font-size: 15px;
+		color: $couleur;
+		background: rgba(255, 255, 255, .05);
+		border: 1px solid $bord;
+		cursor: pointer;
+
+		@content;
+
+		&.link {
+			width: 100%;
+			margin-top: 6px;
+			border: none;
+			background: none;
+			color: $lien;
+			font-size: 13px;
+			text-decoration: underline;
+		}
+	}
+}
+
+// Les aides à la répétition : une case à cocher par ligne, séparées d'un filet.
+@mixin -options($filet, $accent) {
+	.options {
+		display: grid;
+	}
+
+	.toggle-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		padding: 4px 0;
+		font-size: 15px;
+		cursor: pointer;
+
+		& + & {
+			margin-top: 6px;
+			padding-top: 10px;
+			border-top: 1px solid $filet;
+		}
+
+		input {
+			flex: none;
+			width: 22px;
+			height: 22px;
+			margin: 0;
+			accent-color: $accent;
+		}
+	}
+}
+
+// La croix de fermeture, dans la barre d'en-tête, à la place du bouton « Fermer » (« Mes tours »).
+@mixin -croix($couleur, $fond, $bord) {
+	.croix {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		padding: 0;
+		border-radius: 12px;
+		color: $couleur;
+		background: $fond;
+		border: 1px solid $bord;
+		cursor: pointer;
+
+		svg {
+			width: 20px;
+			height: 20px;
+			fill: none;
+			stroke: currentColor;
+			stroke-width: 2.4;
+			stroke-linecap: round;
+		}
+	}
+}
+
+// L'en-tête des réglages (« Mes tours ») : une barre qui reste en haut quand les réglages défilent,
+// sur le fond du tour. Le contenu passe dessous, jamais par-dessus : la croix reste toujours
+// visible. Les marges négatives lui font couvrir toute la largeur et le haut de la feuille.
+@mixin -en-tete-collant($marge-haut, $marge-cote, $fond, $bord) {
+	.menu-head {
+		position: sticky;
+		// Collée au tout haut de l'écran, et non sous la marge haute de la feuille : rien ne défile
+		// au-dessus d'elle.
+		top: calc(-1 * (var(--safe-t) + #{$marge-haut}));
+		z-index: 3;
+		align-items: flex-start;
+		margin: calc(-1 * (var(--safe-t) + #{$marge-haut})) calc(-1 * (var(--safe-r) + #{$marge-cote})) 18px calc(-1 * (var(--safe-l) + #{$marge-cote}));
+		padding: calc(var(--safe-t) + #{$marge-haut}) calc(var(--safe-r) + #{$marge-cote}) 14px calc(var(--safe-l) + #{$marge-cote});
+		background: $fond;
+		border-bottom: 1px solid $bord;
+	}
+}
+
+// Le curseur d'un réglage (un délai, une durée…), sur toute la largeur de sa carte.
+@mixin curseur($accent) {
+	input[type="range"] {
+		width: 100%;
+		height: 32px;
+		margin: 0;
+		accent-color: $accent;
+	}
+}
+
+// Le panneau sobre, sur le fond du tour.
+//
+// Paramètres :
+//   $fond        le fond du panneau et de sa barre d'en-tête ;
+//   $texte       le texte et la croix ;
+//   $texte-doux  le nom du tour, les intitulés, les rappels et le lien ;
+//   $filet       le bord des boutons et de la barre d'en-tête ;
+//   $accent      les cases cochées ;
+//   $carte       le fond des cartes de réglages ;
+//   $serif       la police du titre.
+@mixin panneau-reglages($fond, $texte, $texte-doux, $filet, $accent, $carte, $serif) {
+	$marge-haut: 22px;
+	$marge-cote: 16px;
+	// Les séparations, à peine visibles : le bord des cartes, le filet entre les cases à cocher.
+	$separation: color.change($texte, $alpha: .08);
+
+	// Menu, par-dessus tout le reste.
+	#menu {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		display: flex;
+		justify-content: center;
+		background: $fond;
+		color: $texte;
+	}
+
+	.sheet {
+		@include -feuille(560px, $marge-haut, $marge-cote);
+		@include -boutons($texte, $filet, $texte-doux);
+	}
+
+	.menu-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		margin-bottom: 16px;
+
+		h1 {
+			margin: 0;
+			font: 400 30px/1.1 $serif;
+		}
+	}
+
+	.menu-version {
+		@include user-select(text);
+		margin: 4px 0 0;
+		font-size: 13px;
+		color: $texte-doux;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.card {
+		margin-bottom: 12px;
+		padding: 14px 16px;
+		border-radius: 16px;
+		background: $carte;
+		border: 1px solid $separation;
+	}
+
+	.row-label {
+		margin-bottom: 10px;
+		font-size: 15px;
+		color: $texte-doux;
+	}
+
+	.hint {
+		margin: 0 0 8px;
+		font-size: 13px;
+		color: $texte-doux;
+	}
+
+	@include -options($separation, $accent);
+	@include -croix($texte, rgba(255, 255, 255, .06), $filet);
+
+	// Le nom du tour sous « Réglages » (« Mes tours ») : un peu plus présent que l'ancienne version.
+	.nom-du-tour {
+		font-size: 15px;
+	}
+
+	@include -en-tete-collant($marge-haut, $marge-cote, $fond, $filet);
+}
+
+// Le panneau doré, sur un halo coloré : titres en serif, chiffres et bords dorés.
+//
+// Paramètres :
+//   $fond        le fond du tour, sous le halo ;
+//   $halo        la lueur en haut du panneau, et $voile, le fond sombre où elle s'éteint ;
+//   $barre       le fond de la barre d'en-tête ;
+//   $or          les boutons, la croix et les valeurs ; ses bords et filets en sont tirés ;
+//   $or-vif      le titre et les valeurs rappelées ;
+//   $or-doux     le bord des boutons et de la barre d'en-tête ;
+//   $texte       le texte (sans transparence : elle est posée ici) ;
+//   $texte-doux  les intitulés secondaires et les rappels (idem) ;
+//   $lien        le lien « Rétablir les réglages par défaut » ;
+//   $serif       la police du titre et des valeurs rappelées.
+@mixin panneau-reglages-dore($fond, $halo, $voile, $barre, $or, $or-vif, $or-doux, $texte, $texte-doux, $lien, $serif) {
+	$marge-haut: 24px;
+	$marge-cote: 18px;
+	$separation: color.change($or, $alpha: .12);
+	$accent: #d9b86c;
+
+	#settings {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		display: flex;
+		justify-content: center;
+		background: radial-gradient(ellipse at 50% 0%, $halo, $voile 70%), $fond;
+		color: color.change($texte, $alpha: .9);
+	}
+
+	.sheet {
+		@include -feuille(520px, $marge-haut, $marge-cote);
+
+		h1 {
+			margin: 0;
+			font: 400 30px/1.1 $serif;
+			letter-spacing: .02em;
+			color: $or-vif;
+		}
+
+		.sub {
+			margin: 6px 0 20px;
+			font-size: 13px;
+			color: color.change($texte-doux, $alpha: .55);
+		}
+
+		@include -boutons($or, $or-doux, $lien);
+	}
+
+	.card {
+		margin-bottom: 12px;
+		padding: 16px;
+		border-radius: 16px;
+		background: rgba(255, 255, 255, .035);
+		border: 1px solid $separation;
+	}
+
+	.row-label {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 12px;
+		margin-bottom: 10px;
+		font-size: 15px;
+
+		small {
+			color: color.change($texte-doux, $alpha: .5);
+			font-size: 12px;
+		}
+	}
+
+	output {
+		color: $or;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.values {
+		display: grid;
+		gap: 6px;
+	}
+
+	// Rappel des valeurs du tour (prédictions, numéros…) : leur nom, puis la valeur.
+	.value-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 12px;
+		font-size: 15px;
+		color: color.change($texte, $alpha: .8);
+
+		b {
+			color: $or-vif;
+			font: 400 22px/1 $serif;
+		}
+	}
+
+	@include curseur($accent);
+
+	// Rappel en tête de la carte des options.
+	.hint {
+		margin: 0 0 10px;
+		color: color.change($texte-doux, $alpha: .5);
+		font-size: 12px;
+		line-height: 1.4;
+	}
+
+	@include -options($separation, $accent);
+	@include -croix($or, rgba(255, 255, 255, .05), $or-doux);
+
+	// L'en-tête commun à tous les tours (« Mes tours ») : le titre, le nom du tour dessous, et la croix.
+	.menu-head {
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+
+		.sub {
+			margin: 6px 0 0;
+			font-size: 15px;
+		}
+	}
+
+	// Le test des zones, dans la carte des aides à la répétition.
+	.test-zones {
+		width: 100%;
+		margin-top: 12px;
+	}
+
+	@include -en-tete-collant($marge-haut, $marge-cote, $barre, $or-doux);
+}

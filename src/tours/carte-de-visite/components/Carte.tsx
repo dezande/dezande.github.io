@@ -3,14 +3,14 @@
  * ouvrit à Paris en 1845, et que Georges Méliès reprit en 1888 ; il était au 8, boulevard des
  * Italiens, et fut démoli en 1924. Le recto imprimé ; au verso, seulement le numéro, en grand, écrit
  * à la plume. Classes d'état (styles/tours/carte-de-visite/_carte.scss) : .retournee (verso montré)
- * et .instant (retour au recto sans transition). Les phases sont tenues par hooks/useCarte.ts.
+ * et .instant (retour au recto sans transition). Les phases sont tenues par
+ * src/hooks/usePhasesZones.ts ; la valeur armée est le numéro écrit au verso.
  */
 
-import { useLayoutEffect, useRef } from 'react';
-import type { EtatCarte } from '../hooks/useCarte.ts';
+import { useReposSansTransition, type EtatZones } from '../../../hooks/usePhasesZones.ts';
 
 interface Props {
-	etat: EtatCarte;
+	etat: EtatZones;
 	/** Appelé une fois le recto rétabli sans transition (.instant retiré). */
 	finInstant: () => void;
 }
@@ -71,15 +71,7 @@ const RECTO = (
 );
 
 export function Carte({ etat, finInstant }: Props) {
-	const carte = useRef<HTMLDivElement>(null);
-
-	// .instant coupe les transitions le temps de retirer la classe d'état : la lecture de la mise en
-	// page force le navigateur à appliquer l'état sans transition, avant de les réactiver.
-	useLayoutEffect(() => {
-		if (!etat.instant) return;
-		void carte.current?.offsetWidth;
-		finInstant();
-	}, [etat.instant, finInstant]);
+	const carte = useReposSansTransition<HTMLDivElement>(etat.instant, finInstant);
 
 	const classes = ['carte'];
 	if (etat.phase === 'shown') classes.push('retournee');
@@ -92,7 +84,7 @@ export function Carte({ etat, finInstant }: Props) {
 				<article className="face verso">
 					{COINS}
 					{/* Le numéro seul, en grand, à la plume. */}
-					<span className="numero" id="number"><span id="number-text">{etat.numero}</span></span>
+					<span className="numero" id="number"><span id="number-text">{etat.valeur}</span></span>
 				</article>
 			</div>
 		</div>
