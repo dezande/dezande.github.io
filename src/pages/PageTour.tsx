@@ -11,11 +11,11 @@
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Navigate, useLocation, useNavigate } from 'react-router';
 import { TOURS } from '../content/tours.ts';
 import { useLangue } from '../langue/LangueContext.tsx';
 import { PontContext, type Pont } from '../tours/pont.tsx';
-import { REGISTRE } from '../tours/registre.ts';
+import { adresseDuTour, entreeDuRegistre, type EntreeDuRegistre } from '../tours/registre.ts';
 
 /** La couleur de la barre du téléphone sur le menu (index.html). */
 const COULEUR_DU_MENU = '#0b0b2b';
@@ -24,22 +24,25 @@ function couleurTheme(couleur: string): void {
 	document.querySelector('meta[name="theme-color"]')?.setAttribute('content', couleur);
 }
 
-export function PageTour() {
-	const { dossier = '' } = useParams();
-	const { key } = useLocation();
+/** Les seuls paramètres d'adresse acceptés : aucun, ou l'ouverture des réglages seuls (écrou ⚙). */
+const PARAMETRES_ACCEPTES = ['', '?reglages'];
+
+export function PageTour({ dossier }: { dossier: string }) {
+	const { key, pathname, search } = useLocation();
 	const tour = TOURS.find((t) => t.dossier === dossier);
-	const entree = REGISTRE[dossier];
-	if (!tour || !entree) return <Navigate to="/" replace />;
+	const entree = entreeDuRegistre(dossier);
+	// L'adresse exacte, et rien d'autre : pas de « / » final, pas de paramètre inconnu.
+	const exacte = pathname === adresseDuTour(dossier) && PARAMETRES_ACCEPTES.includes(search);
+	if (!tour || !entree || !exacte) return <Navigate to="/" replace />;
 	// Une clé par ouverture : rouvrir un tour repart toujours d'une nouvelle routine.
 	return <Tour key={key} dossier={dossier} nomDuTour={tour.nom} entree={entree} />;
 }
 
-function Tour({ dossier, nomDuTour, entree }: { dossier: string; nomDuTour: Record<string, string>; entree: (typeof REGISTRE)[string] }) {
+function Tour({ dossier, nomDuTour, entree }: { dossier: string; nomDuTour: Record<string, string>; entree: EntreeDuRegistre }) {
 	const { langue } = useLangue();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const [parametres] = useSearchParams();
-	const enReglages = parametres.has('reglages');
+	const enReglages = location.search === '?reglages';
 
 	/*
 	 * Retour au menu. Ouvert depuis le menu, le tour y revient par l'historique ; ouvert autrement

@@ -4,6 +4,11 @@
  *
  * Ajouter un tour : son dossier dans src/tours/<dossier>/ avec son index.tsx, ses styles dans
  * src/styles/tours/<dossier>/, une ligne dans content/tours.ts et une ici.
+ *
+ * Seuls les tours inscrits ici sont compilés et publiés : le site est public, et tout ce qui est
+ * publié peut être lu. Un tour en préparation reste hors du registre (son code n'est alors importé
+ * nulle part, donc absent de dist/). Le registre et content/tours.ts nomment exactement les mêmes
+ * tours (tests/logic/tours.test.ts).
  */
 
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
@@ -37,6 +42,12 @@ export const REGISTRE: Readonly<Record<string, EntreeDuRegistre>> = {
 		couleurTheme: '#0b0b0d',
 	},
 };
+
+/**
+ * L'entrée du registre d'un tour, ou null. Seuls les noms écrits ci-dessus comptent : ni un nom
+ * inventé, ni un nom hérité de tout objet JavaScript (« constructor », « __proto__ »…).
+ */
+export const entreeDuRegistre = (dossier: string): EntreeDuRegistre | null => (Object.hasOwn(REGISTRE, dossier) ? REGISTRE[dossier]! : null);
 
 /** L'adresse d'un tour dans l'app ; `reglages` : seulement ses réglages (écrou ⚙). */
 export const adresseDuTour = (dossier: string, reglages = false): string => `/tours/${dossier}${reglages ? '?reglages' : ''}`;

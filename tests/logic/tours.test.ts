@@ -2,6 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { TEXTES } from '../../src/content/textes.ts';
 import { LANGS } from '../../src/logic/i18n.ts';
+import { REGISTRE } from '../../src/tours/registre.ts';
 import { TOURS } from '../../src/content/tours.ts';
 
 test('les cinq tours, chacun une seule fois', () => {
@@ -31,4 +32,10 @@ test('chaque texte du menu existe dans les deux langues', () => {
 	for (const [cle, texte] of Object.entries(TEXTES)) {
 		for (const lang of LANGS) expect(texte[lang].trim(), `« ${cle} » vide en ${lang}`).not.toBe('');
 	}
+});
+
+test('le registre et la liste des tours nomment exactement les mêmes tours', () => {
+	// Un tour en préparation reste hors des deux : seul ce qui est au registre est compilé et publié,
+	// et seul ce qui est dans la liste a une tuile et une adresse.
+	expect(Object.keys(REGISTRE).sort()).toStrictEqual(TOURS.map((tour) => tour.dossier).sort());
 });
