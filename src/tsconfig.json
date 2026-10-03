@@ -8,5 +8,5 @@
 		"rootDir": ".",
 		"outDir": "../dist"
 	},
-	"include": ["*.ts", "content", "kit/web"]
+	"include": ["*.ts", "content", "tours", "kit/web"]
 }

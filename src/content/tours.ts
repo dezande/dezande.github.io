@@ -1,12 +1,11 @@
 /*
  * LES TOURS de l'app « Mes tours » : un par accessoire de scène publié sur dezande.github.io.
  *
- * Chaque tour reste une app à part, dans son propre dépôt et son propre dossier du site ; ce menu
- * ne fait que l'ouvrir. L'app « Mes tours » est installée à la racine du site : un tour ouvert
- * depuis ici s'affiche donc dans la même app, en plein écran, et le bouton « Mes tours » du menu
- * de chaque tour ramène ici.
+ * Chaque tour est une copie de son app, dans src/tours/<dossier>/ (code) et public/tours/<dossier>/
+ * (page et fichiers) ; ses dépôts d'origine ne sont pas touchés. Il s'ouvre en plein écran depuis
+ * sa tuile, ses réglages depuis l'écrou ⚙, et revient ici à la fin de sa routine (src/scene.ts).
  *
- *   dossier      le dossier du tour sur le site (et le nom de son dépôt) ;
+ *   dossier      le dossier du tour dans l'app (et le nom de son dépôt d'origine) ;
  *   nom          ce qui est écrit sur la tuile ;
  *   description  une ligne pour se souvenir de ce qu'il fait.
  *

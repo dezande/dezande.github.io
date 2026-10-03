@@ -1,0 +1,73 @@
+// Décision de chaque geste : tap, double toucher, appui long, et tout ce qui ne doit rien produire.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { GESTURE, GestureTracker } from '../../../src/tours/pile-ou-face/logic/gestures.ts';
+
+/** Un doigt posé puis relevé au même endroit, `ms` plus tard. */
+function tap(tracker: GestureTracker, x: number, y: number, at: number, ms = 100): ReturnType<GestureTracker['release']> {
+	tracker.press(1, x, y, at);
+	return tracker.release(1, x, y, at + ms);
+}
+
+test('un tap n’importe où compte', () => {
+	const tracker = new GestureTracker();
+	assert.equal(tap(tracker, 10, 10, 0), 'tap');
+	assert.equal(tap(tracker, 380, 800, 5000), 'tap');
+});
+
+test('deux taps rapprochés font un double toucher', () => {
+	const tracker = new GestureTracker();
+	assert.equal(tap(tracker, 200, 400, 0), 'tap');
+	assert.equal(tap(tracker, 210, 410, 300), 'double');
+	// Un troisième tap repart d'un simple tap : trois touchers ne font pas deux doubles.
+	assert.equal(tap(tracker, 210, 410, 500), 'tap');
+});
+
+test('deux taps trop espacés, dans le temps ou sur l’écran, restent deux taps', () => {
+	const tracker = new GestureTracker();
+	assert.equal(tap(tracker, 200, 400, 0), 'tap');
+	assert.equal(tap(tracker, 200, 400, GESTURE.doubleMaxMs + 200), 'tap');
+
+	const loin = new GestureTracker();
+	assert.equal(tap(loin, 60, 100, 0), 'tap');
+	assert.equal(tap(loin, 60 + GESTURE.doubleSlopPx + 10, 100, 200), 'tap');
+});
+
+test('un doigt qui glisse ou qui s’attarde ne fait rien', () => {
+	const tracker = new GestureTracker();
+	tracker.press(1, 200, 400, 0);
+	assert.equal(tracker.move(1, 200 + GESTURE.slopPx + 10, 400), true, 'le mouvement annule l’appui long');
+	assert.equal(tracker.release(1, 200 + GESTURE.slopPx + 10, 400, 200), 'none');
+
+	assert.equal(tap(tracker, 200, 400, 1000, GESTURE.tapMaxMs + 100), 'none', 'trop long pour un tap');
+});
+
+test('un tap annulé ne compte pas pour le double toucher suivant', () => {
+	const tracker = new GestureTracker();
+	assert.equal(tap(tracker, 200, 400, 0), 'tap');
+	tracker.reset();
+	assert.equal(tap(tracker, 200, 400, 200), 'tap', 'le tap oublié ne fait pas un double');
+});
+
+test('appui long : le menu s’ouvre une fois, et le doigt relevé ne fait rien', () => {
+	const tracker = new GestureTracker();
+	assert.equal(tracker.press(1, 200, 400, 0), true);
+	assert.equal(tracker.holdCompleted(1), true);
+	assert.equal(tracker.holdCompleted(1), false, 'une seule ouverture par appui');
+	assert.equal(tracker.release(1, 200, 400, GESTURE.holdMs + 100), 'none');
+});
+
+test('un second doigt annule le geste en cours', () => {
+	const tracker = new GestureTracker();
+	assert.equal(tracker.press(1, 100, 100, 0), true);
+	assert.equal(tracker.press(2, 300, 300, 10), false, 'le second doigt ne démarre pas d’appui long');
+	assert.equal(tracker.holdCompleted(1), false);
+	assert.equal(tracker.release(1, 100, 100, 100), 'none');
+});
+
+test('un contact interrompu par le système ne déclenche rien', () => {
+	const tracker = new GestureTracker();
+	tracker.press(1, 200, 400, 0);
+	tracker.cancel(1);
+	assert.equal(tracker.release(1, 200, 400, 100), 'none');
+});

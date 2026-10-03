@@ -1,0 +1,28 @@
+@use "tokens" as *;
+
+/*
+ * Le tapis : un feutre vert de table de jeu, éclairé au centre et qui s'assombrit vers les bords,
+ * avec un grain fin pour la texture du drap. Décor seulement — rien ne bouge pendant la routine,
+ * et tout reste assez sombre pour que les cartes claires s'en détachent.
+ */
+#app {
+	background:
+		// Le grain du feutre : deux trames croisées, à peine visibles.
+		repeating-linear-gradient(58deg, rgba(255, 255, 255, .022) 0 1px, transparent 1px 3px),
+		repeating-linear-gradient(-58deg, rgba(0, 0, 0, .05) 0 1px, transparent 1px 3px),
+		// La lumière au-dessus de la table.
+		radial-gradient(90% 62% at 50% 34%, rgba(255, 246, 214, .13), transparent 70%),
+		radial-gradient(130% 95% at 50% 42%, $tapis-clair, $tapis 45%, $tapis-sombre 100%);
+}
+
+// La scène reçoit tous les touchers : « none » pour qu'aucun défilement ni zoom ne s'y glisse.
+#stage {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	padding: calc(var(--safe-t) + 16px) calc(var(--safe-r) + 16px) calc(var(--safe-b) + 16px) calc(var(--safe-l) + 16px);
+	touch-action: none;
+	// La carte en 3D reste enfermée ici : jamais par-dessus le menu ni la jauge.
+	isolation: isolate;
+}

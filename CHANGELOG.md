@@ -14,6 +14,16 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 ---
 
+## [Non publié]
+
+- **Tous les tours dans une seule application.** Mes tours ne se contente plus d'ouvrir les apps des tours : elle contient sa propre copie de chacun (Boule de cristal, Pile ou face, Les six prédictions, Analyseur Q), dans `src/tours/` et `public/tours/`, et les affiche en plein écran dans un cadre qui isole leurs styles et leurs gestes. Les dépôts d'origine ne sont pas touchés : leurs adresses continuent de fonctionner seules.
+- **Un écrou ⚙ sur chaque tuile** ouvre les réglages du tour, et seulement eux (dos des cartes, délai, routine, langue…) ; « Fermer » ramène au menu. Le menu du tour ne s'ouvre plus pendant la routine.
+- **La fin de la routine ramène au menu** : le double toucher après la révélation (boule de cristal, pile ou face), le double toucher sur la table vide (six prédictions), « suivante » après la dernière slide (analyseur). La touche R d'une télécommande fait de même.
+- **L'appui de 3 s pendant un tour est une sortie de secours** : retour au menu, sans finir la routine. Le doigt qui se relève sur le menu ne relance pas la tuile placée dessous. Le geste retour d'Android referme aussi le tour.
+- Chaque ouverture d'un tour commence une nouvelle routine (l'analyseur reprend à la première slide). Les réglages de chaque tour sont gardés d'une ouverture à l'autre.
+- Un seul service worker met toute l'application en cache, tours compris : tout fonctionne hors-ligne dès la première ouverture avec du réseau. Une nouvelle version ne s'affiche jamais en plein tour.
+- Tests : les tests unitaires des quatre tours sont repris (178 en tout), et 12 tests dans Chrome jouent chaque routine en entier jusqu'au retour au menu, l'écrou ⚙, la sortie de secours, le geste retour et le hors-ligne.
+
 ## [0.1.0] — 2026-10-02
 
 2 commits

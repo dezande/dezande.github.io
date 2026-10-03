@@ -1,0 +1,14 @@
+@mixin cover {
+	position: absolute;
+	inset: 0;
+}
+
+@mixin backface-hidden {
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+
+@mixin user-select($value) {
+	-webkit-user-select: $value;
+	user-select: $value;
+}
