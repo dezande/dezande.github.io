@@ -1,0 +1,20 @@
+@use "tokens" as *;
+
+// Le tour remplit #app, dans ses couleurs (la remise à zéro commune est dans styles/_base.scss).
+// Valeurs par défaut des réglages appliqués à l'exécution : --fade (sur #stage) et --dim (sur #dim).
+& {
+	--fade: 1.2s;
+	--dim: 0;
+	color: $gold;
+	font-family: $sans;
+}
+
+// Voile de luminosité, piloté par --dim.
+#dim {
+	position: fixed;
+	inset: 0;
+	z-index: 20;
+	background: #000;
+	opacity: var(--dim);
+	pointer-events: none;
+}

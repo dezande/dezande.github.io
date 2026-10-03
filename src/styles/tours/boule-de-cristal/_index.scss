@@ -1,0 +1,23 @@
+/*
+ * Boule de cristal (src/tours/boule-de-cristal/) : tous ses styles sont rangés sous
+ * .scene-boule-de-cristal, la page du tour (src/pages/PageTour.tsx). Ses animations sont préfixées
+ * « boule- » : les @keyframes, eux, valent pour toute l'app.
+ */
+@use "sass:meta";
+@use "tokens";
+
+// Le fond derrière #app quand elle pivote, et sous la barre du téléphone.
+html[data-tour="boule-de-cristal"],
+html[data-tour="boule-de-cristal"] body {
+	background: tokens.$bg;
+	color: tokens.$gold;
+}
+
+.scene-boule-de-cristal {
+	@include meta.load-css("base");
+	@include meta.load-css("stage");
+	@include meta.load-css("ball");
+	@include meta.load-css("test-mode");
+	@include meta.load-css("settings");
+	@include meta.load-css("hold-ring");
+}

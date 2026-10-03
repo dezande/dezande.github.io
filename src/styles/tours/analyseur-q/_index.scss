@@ -1,0 +1,21 @@
+/*
+ * Analyseur Q (src/tours/analyseur-q/) : tous ses styles sont rangés sous .scene-analyseur-q,
+ * la page du tour (src/pages/PageTour.tsx). Ses animations sont préfixées « aq- » : les
+ * @keyframes, eux, valent pour toute l'app.
+ */
+@use "sass:meta";
+@use "tokens";
+
+// Le fond derrière #app quand elle pivote, et sous la barre du téléphone.
+html[data-tour="analyseur-q"],
+html[data-tour="analyseur-q"] body {
+	background: tokens.$bg;
+}
+
+.scene-analyseur-q {
+	@include meta.load-css("base");
+	@include meta.load-css("fond");
+	@include meta.load-css("deck");
+	@include meta.load-css("overlays");
+	@include meta.load-css("menu");
+}

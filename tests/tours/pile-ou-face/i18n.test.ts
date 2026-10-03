@@ -1,42 +1,40 @@
 // Les deux langues : textes traduits, langue du téléphone.
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
 import { INTERFACE, ui } from '../../../src/tours/pile-ou-face/content/interface.ts';
 import { deviceLang, isLang, isTexte, LANGS, t } from '../../../src/tours/pile-ou-face/logic/i18n.ts';
 
 test('t : une chaîne vaut pour les deux langues, un objet donne la bonne', () => {
-	assert.equal(t('AQ-52', 'fr'), 'AQ-52');
-	assert.equal(t({ fr: 'Demain', en: 'Tomorrow' }, 'en'), 'Tomorrow');
-	assert.equal(t(undefined, 'fr'), undefined);
+	expect(t('AQ-52', 'fr')).toBe('AQ-52');
+	expect(t({ fr: 'Demain', en: 'Tomorrow' }, 'en')).toBe('Tomorrow');
+	expect(t(undefined, 'fr')).toBe(undefined);
 });
 
 test('isTexte : les deux langues sont obligatoires, et non vides', () => {
-	assert.equal(isTexte('x'), true);
-	assert.equal(isTexte({ fr: 'a', en: 'b' }), true);
-	assert.equal(isTexte({ fr: 'a' }), false);
-	assert.equal(isTexte({ fr: 'a', en: '' }), false);
-	assert.equal(isTexte({ fr: 'a', en: 'b', de: 'c' }), false);
-	for (const raw of [null, undefined, 42, []]) assert.equal(isTexte(raw), false);
+	expect(isTexte('x')).toBe(true);
+	expect(isTexte({ fr: 'a', en: 'b' })).toBe(true);
+	expect(isTexte({ fr: 'a' })).toBe(false);
+	expect(isTexte({ fr: 'a', en: '' })).toBe(false);
+	expect(isTexte({ fr: 'a', en: 'b', de: 'c' })).toBe(false);
+	for (const raw of [null, undefined, 42, []]) expect(isTexte(raw)).toBe(false);
 });
 
 test('isLang', () => {
-	assert.equal(isLang('fr'), true);
-	assert.equal(isLang('en'), true);
-	for (const raw of ['de', '', null, 3]) assert.equal(isLang(raw), false);
+	expect(isLang('fr')).toBe(true);
+	expect(isLang('en')).toBe(true);
+	for (const raw of ['de', '', null, 3]) expect(isLang(raw)).toBe(false);
 });
 
 test('deviceLang : anglais si le téléphone est en anglais, français sinon', () => {
-	assert.equal(deviceLang(['en-GB', 'fr']), 'en');
-	assert.equal(deviceLang(['fr-CA']), 'fr');
-	assert.equal(deviceLang(['de-DE', 'en-US']), 'en');
-	assert.equal(deviceLang(['de-DE']), 'fr');
-	assert.equal(deviceLang(undefined), 'fr');
-	assert.equal(deviceLang([null as unknown as string]), 'fr');
+	expect(deviceLang(['en-GB', 'fr'])).toBe('en');
+	expect(deviceLang(['fr-CA'])).toBe('fr');
+	expect(deviceLang(['de-DE', 'en-US'])).toBe('en');
+	expect(deviceLang(['de-DE'])).toBe('fr');
+	expect(deviceLang(undefined)).toBe('fr');
+	expect(deviceLang([null as unknown as string])).toBe('fr');
 });
 
 test('interface : chaque texte existe dans les deux langues', () => {
 	for (const [cle, valeur] of Object.entries(INTERFACE)) {
-		assert.equal(isTexte(valeur), true, `« ${cle} » est incomplet`);
-		for (const lang of LANGS) assert.notEqual(ui(cle as keyof typeof INTERFACE, lang).trim(), '', `« ${cle} » est vide en ${lang}`);
+		expect(isTexte(valeur), `« ${cle} » est incomplet`).toBe(true);
+		for (const lang of LANGS) expect(ui(cle as keyof typeof INTERFACE, lang).trim(), `« ${cle} » est vide en ${lang}`).not.toBe('');
 	}
 });

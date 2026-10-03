@@ -1,6 +1,4 @@
 // Gestes : taps, glissements et appui long, avec des rythmes de vrai doigt (lents, hésitants, tremblants).
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
 import { GESTURE, GestureTracker, type Tap } from '../../../src/tours/analyseur-q/logic/gestures.ts';
 
 const WIDTH = 390;
@@ -17,72 +15,72 @@ function gesture(from: { x: number; y: number }, to: { x: number; y: number }, m
 }
 
 test('tap à droite : suivante ; tap sur le tiers gauche : précédente', () => {
-	assert.equal(gesture(RIGHT, RIGHT, 80), 'next');
-	assert.equal(gesture(LEFT, LEFT, 80), 'prev');
-	assert.equal(gesture({ x: WIDTH * GESTURE.prevZone - 1, y: 10 }, { x: WIDTH * GESTURE.prevZone - 1, y: 10 }, 80), 'prev');
-	assert.equal(gesture({ x: WIDTH * GESTURE.prevZone + 1, y: 10 }, { x: WIDTH * GESTURE.prevZone + 1, y: 10 }, 80), 'next');
+	expect(gesture(RIGHT, RIGHT, 80)).toBe('next');
+	expect(gesture(LEFT, LEFT, 80)).toBe('prev');
+	expect(gesture({ x: WIDTH * GESTURE.prevZone - 1, y: 10 }, { x: WIDTH * GESTURE.prevZone - 1, y: 10 }, 80)).toBe('prev');
+	expect(gesture({ x: WIDTH * GESTURE.prevZone + 1, y: 10 }, { x: WIDTH * GESTURE.prevZone + 1, y: 10 }, 80)).toBe('next');
 });
 
 test('tap humain : lent et qui tremble un peu, il compte quand même', () => {
-	assert.equal(gesture(RIGHT, { x: RIGHT.x + 25, y: RIGHT.y - 20 }, 650), 'next');
-	assert.equal(gesture(LEFT, { x: LEFT.x + 30, y: LEFT.y + 15 }, 700), 'prev');
+	expect(gesture(RIGHT, { x: RIGHT.x + 25, y: RIGHT.y - 20 }, 650)).toBe('next');
+	expect(gesture(LEFT, { x: LEFT.x + 30, y: LEFT.y + 15 }, 700)).toBe('prev');
 });
 
 test('tap : c’est la zone où le doigt s’est posé qui compte', () => {
 	// Posé à gauche, roulé de 35 px vers la droite : toujours « précédente ».
-	assert.equal(gesture({ x: 100, y: 400 }, { x: 135, y: 400 }, 200), 'prev');
+	expect(gesture({ x: 100, y: 400 }, { x: 135, y: 400 }, 200)).toBe('prev');
 });
 
 test('appui relâché après la durée d’un tap mais avant le menu : rien', () => {
-	assert.equal(gesture(RIGHT, RIGHT, GESTURE.tapMaxMs + 1), 'none');
-	assert.equal(gesture(RIGHT, RIGHT, 2500), 'none');
+	expect(gesture(RIGHT, RIGHT, GESTURE.tapMaxMs + 1)).toBe('none');
+	expect(gesture(RIGHT, RIGHT, 2500)).toBe('none');
 });
 
 test('glissement vers la gauche : suivante ; vers la droite : précédente, même lentement', () => {
-	assert.equal(gesture({ x: 300, y: 400 }, { x: 180, y: 420 }, 150), 'next');
-	assert.equal(gesture({ x: 100, y: 400 }, { x: 260, y: 380 }, 150), 'prev');
-	assert.equal(gesture({ x: 300, y: 400 }, { x: 200, y: 430 }, 1800), 'next');
+	expect(gesture({ x: 300, y: 400 }, { x: 180, y: 420 }, 150)).toBe('next');
+	expect(gesture({ x: 100, y: 400 }, { x: 260, y: 380 }, 150)).toBe('prev');
+	expect(gesture({ x: 300, y: 400 }, { x: 200, y: 430 }, 1800)).toBe('next');
 });
 
 test('glissement surtout vertical ou trop court : rien', () => {
-	assert.equal(gesture({ x: 200, y: 200 }, { x: 140, y: 500 }, 200), 'none');
-	assert.equal(gesture({ x: 200, y: 400 }, { x: 155, y: 400 }, 200), 'none');
+	expect(gesture({ x: 200, y: 200 }, { x: 140, y: 500 }, 200)).toBe('none');
+	expect(gesture({ x: 200, y: 400 }, { x: 155, y: 400 }, 200)).toBe('none');
 });
 
 test('appui long : ouvre le menu une seule fois, et le relâcher ne change pas de slide', () => {
 	const tracker = new GestureTracker();
-	assert.equal(tracker.press(1, RIGHT.x, RIGHT.y, 0), true);
+	expect(tracker.press(1, RIGHT.x, RIGHT.y, 0)).toBe(true);
 	tracker.move(1, RIGHT.x + 20, RIGHT.y + 20); // doigt qui bouge un peu pendant 3 s
-	assert.equal(tracker.holdCompleted(1), true);
-	assert.equal(tracker.holdCompleted(1), false);
-	assert.equal(tracker.release(1, RIGHT.x, RIGHT.y, 3400, WIDTH), 'none');
+	expect(tracker.holdCompleted(1)).toBe(true);
+	expect(tracker.holdCompleted(1)).toBe(false);
+	expect(tracker.release(1, RIGHT.x, RIGHT.y, 3400, WIDTH)).toBe('none');
 });
 
 test('appui long annulé par un mouvement franc', () => {
 	const tracker = new GestureTracker();
 	tracker.press(1, RIGHT.x, RIGHT.y, 0);
-	assert.equal(tracker.move(1, RIGHT.x, RIGHT.y + GESTURE.slopPx + 5), true);
-	assert.equal(tracker.holdCompleted(1), false);
+	expect(tracker.move(1, RIGHT.x, RIGHT.y + GESTURE.slopPx + 5)).toBe(true);
+	expect(tracker.holdCompleted(1)).toBe(false);
 });
 
 test('second doigt : le geste est abandonné', () => {
 	const tracker = new GestureTracker();
 	tracker.press(1, RIGHT.x, RIGHT.y, 0);
-	assert.equal(tracker.press(2, LEFT.x, LEFT.y, 50), false);
-	assert.equal(tracker.holdCompleted(1), false);
-	assert.equal(tracker.release(2, LEFT.x, LEFT.y, 100, WIDTH), 'none');
-	assert.equal(tracker.release(1, RIGHT.x, RIGHT.y, 120, WIDTH), 'none');
+	expect(tracker.press(2, LEFT.x, LEFT.y, 50)).toBe(false);
+	expect(tracker.holdCompleted(1)).toBe(false);
+	expect(tracker.release(2, LEFT.x, LEFT.y, 100, WIDTH)).toBe('none');
+	expect(tracker.release(1, RIGHT.x, RIGHT.y, 120, WIDTH)).toBe('none');
 	// Le geste suivant fonctionne normalement.
-	assert.equal(gesture(RIGHT, RIGHT, 80, tracker), 'next');
+	expect(gesture(RIGHT, RIGHT, 80, tracker)).toBe('next');
 });
 
 test('contact interrompu par le système ou remise à zéro : rien ne se déclenche', () => {
 	const tracker = new GestureTracker();
 	tracker.press(1, RIGHT.x, RIGHT.y, 0);
 	tracker.cancel(1);
-	assert.equal(tracker.release(1, RIGHT.x, RIGHT.y, 80, WIDTH), 'none');
+	expect(tracker.release(1, RIGHT.x, RIGHT.y, 80, WIDTH)).toBe('none');
 	tracker.press(1, RIGHT.x, RIGHT.y, 0);
 	tracker.reset();
-	assert.equal(tracker.holdCompleted(1), false);
-	assert.equal(tracker.release(1, RIGHT.x, RIGHT.y, 80, WIDTH), 'none');
+	expect(tracker.holdCompleted(1)).toBe(false);
+	expect(tracker.release(1, RIGHT.x, RIGHT.y, 80, WIDTH)).toBe('none');
 });

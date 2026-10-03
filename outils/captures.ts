@@ -29,15 +29,15 @@ try {
 	await page.waitFor(`document.querySelectorAll('#tours .tour').length === 4 && document.fonts.check('16px "Pixelify Sans"')`, 'menu');
 	await capture('menu');
 
-	await page.goto(`${serveur.url}tours/pile-ou-face/index.html?lang=fr&nom=Pile%20ou%20face`);
+	await page.goto(`${serveur.url}#/tours/pile-ou-face`);
 	await page.waitFor(`Boolean(document.querySelector('#table .carte .dos svg'))`, 'pile ou face');
 	await sleep(600);
 	await page.tap({ x: SCREEN.width / 2, y: SCREEN.height * .2 });
 	await sleep(1200);
 	await capture('pile-ou-face');
 
-	await page.goto(`${serveur.url}tours/six-predictions/index.html?lang=fr&nom=Les%20six%20pr%C3%A9dictions&reglages`);
-	await page.waitFor(`!document.querySelector('#menu').hidden`, 'réglages');
+	await page.goto(`${serveur.url}#/tours/six-predictions?reglages`);
+	await page.waitFor(`Boolean(document.querySelector('#menu .sheet'))`, 'réglages');
 	await capture('reglages');
 } finally {
 	await navigateur.close();

@@ -4,9 +4,11 @@
 		"lib": ["es2022", "dom", "dom.iterable"],
 		"module": "esnext",
 		"moduleResolution": "bundler",
-		"rewriteRelativeImportExtensions": true,
-		"rootDir": ".",
-		"outDir": "../dist"
+		"jsx": "react-jsx",
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+		"types": ["vite/client"]
 	},
-	"include": ["*.ts", "content", "tours", "kit/web"]
+	"include": ["**/*.ts", "**/*.tsx", "../vite.config.ts"],
+	"exclude": ["sw", "kit/node", "kit/sw", "kit/tests"]
 }

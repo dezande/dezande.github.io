@@ -1,0 +1,7 @@
+@use "tokens" as *;
+
+// Le tour remplit #app, dans ses couleurs (la remise à zéro commune est dans styles/_base.scss).
+& {
+	color: $ink;
+	font-family: $sans;
+}

@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [1.0.0] | 23 | 2026-10-03 | L'app réécrite en React, styles et images regroupés, tests avec Jest |
 | [0.10.0] | 22 | 2026-10-03 | La carte de visite, nouveau tour en largeur ; dans le navigateur, le menu dit que c'est une app |
 | [0.9.0] | 20 | 2026-10-03 | À la fin de la routine, on reste dans le tour ; l'appui de 3 s ramène au menu |
 | [0.8.2] | 19 | 2026-10-03 | Le dessin des dos, la même marge en haut et en bas |
@@ -29,6 +30,17 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [1.0.0] — 2026-10-03
+
+23 commits
+
+- **L'app est réécrite en React**, construite par Vite, comme une app classique, avant d'y ajouter d'autres tours ; la carte de visite et le bandeau d'installation de la 0.10.0 compris. Pour l'artiste, rien ne change : les mêmes tours, les mêmes gestes, les mêmes réglages (gardés sur le téléphone).
+  - Une seule page : le menu et chaque tour sont des pages React (`#/`, `#/tours/<dossier>`), un tour chargé à sa première ouverture. Le menu, le panneau de réglages, la jauge de l'appui long, les boutons qui agissent au lever du doigt et les dos de cartes sont des composants partagés.
+  - **Tous les styles Sass sont réunis dans `src/styles/`**, un dossier par tour, rangés sous la classe du tour pour qu'ils ne se marchent pas dessus ; **les polices et les images dans `src/assets/`**.
+  - La logique de chaque tour et ses tests sont repris tels quels ; le code qui ne servait qu'aux tours ouverts seuls (aide, version, choix de langue, état de l'écran) est retiré.
+  - La Boule de cristal répond aussi au clavier : R efface le nombre, Échap ou M ramène au menu.
+- **Les tests passent à Jest** : les tests unitaires, de nouveaux tests des composants React (React Testing Library) et les tests dans Chrome.
 
 ## [0.10.0] — 2026-10-03
 
@@ -235,6 +247,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[1.0.0]: https://github.com/dezande/mes-tours/releases/tag/v1.0.0
 [0.10.0]: https://github.com/dezande/mes-tours/releases/tag/v0.10.0
 [0.9.0]: https://github.com/dezande/mes-tours/releases/tag/v0.9.0
 [0.8.2]: https://github.com/dezande/mes-tours/releases/tag/v0.8.2

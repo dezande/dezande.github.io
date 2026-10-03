@@ -1,0 +1,183 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+// Menu, par-dessus tout le reste.
+#menu {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	justify-content: center;
+	background: $bg;
+	color: $ink;
+}
+
+.sheet {
+	width: 100%;
+	max-width: 560px;
+	height: 100%;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+	// Pas « pan-y » : cette direction se lit par rapport à l'écran, et bloquerait le défilement
+	// quand l'app est pivotée en paysage (kit/web/orientation.ts).
+	touch-action: manipulation;
+	padding: calc(var(--safe-t) + 22px) calc(var(--safe-r) + 16px) calc(var(--safe-b) + 32px) calc(var(--safe-l) + 16px);
+
+	button {
+		min-height: 46px;
+		border-radius: 12px;
+		font-family: inherit;
+		font-size: 15px;
+		color: $ink;
+		background: rgba(255, 255, 255, .05);
+		border: 1px solid $ink-faint;
+		cursor: pointer;
+
+		&.link {
+			width: 100%;
+			margin-top: 6px;
+			border: none;
+			background: none;
+			color: $ink-soft;
+			font-size: 13px;
+			text-decoration: underline;
+		}
+	}
+}
+
+.menu-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 16px;
+
+	h1 {
+		margin: 0;
+		font: 400 30px/1.1 $serif;
+	}
+}
+
+.menu-version {
+	@include user-select(text);
+	margin: 4px 0 0;
+	font-size: 13px;
+	color: $ink-soft;
+	font-variant-numeric: tabular-nums;
+}
+
+.card {
+	margin-bottom: 12px;
+	padding: 14px 16px;
+	border-radius: 16px;
+	background: $panel;
+	border: 1px solid rgba(241, 237, 228, .08);
+}
+
+.row-label {
+	margin-bottom: 10px;
+	font-size: 15px;
+	color: $ink-soft;
+}
+
+.hint {
+	margin: 0 0 8px;
+	font-size: 13px;
+	color: $ink-soft;
+}
+
+.seg {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 6px;
+	padding: 4px;
+	border-radius: 12px;
+	background: rgba(0, 0, 0, .35);
+
+	.sheet & button {
+		min-height: 40px;
+		border-color: transparent;
+		background: transparent;
+
+		&[aria-checked="true"] {
+			background: rgba(247, 147, 30, .16);
+			color: $accent;
+			box-shadow: inset 0 0 0 1px $accent;
+		}
+	}
+}
+
+.options {
+	display: grid;
+}
+
+.toggle-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	padding: 4px 0;
+	font-size: 15px;
+	cursor: pointer;
+
+	& + & {
+		margin-top: 6px;
+		padding-top: 10px;
+		border-top: 1px solid rgba(241, 237, 228, .08);
+	}
+
+	input {
+		flex: none;
+		width: 22px;
+		height: 22px;
+		margin: 0;
+		accent-color: $accent;
+	}
+}
+
+// La croix de fermeture, dans la barre d'en-tête, à la place du bouton « Fermer » (« Mes tours »).
+.croix {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border-radius: 12px;
+	color: $ink;
+	background: rgba(255, 255, 255, .06);
+	border: 1px solid $ink-faint;
+	cursor: pointer;
+
+	svg {
+		width: 20px;
+		height: 20px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2.4;
+		stroke-linecap: round;
+	}
+}
+
+// Le nom du tour sous « Réglages » (« Mes tours ») : un peu plus présent que l'ancienne version.
+.nom-du-tour {
+	font-size: 15px;
+}
+
+/*
+ * L'en-tête des réglages (« Mes tours ») : une barre qui reste en haut quand les réglages défilent,
+ * sur le fond du tour. Le contenu passe dessous, jamais par-dessus : la croix reste toujours
+ * visible. Les marges négatives lui font couvrir toute la largeur et le haut de la feuille.
+ */
+.menu-head {
+	position: sticky;
+	// Collée au tout haut de l'écran, et non sous la marge haute de la feuille : rien ne défile
+	// au-dessus d'elle.
+	top: calc(-1 * (var(--safe-t) + 22px));
+	z-index: 3;
+	align-items: flex-start;
+	margin: calc(-1 * (var(--safe-t) + 22px)) calc(-1 * (var(--safe-r) + 16px)) 18px calc(-1 * (var(--safe-l) + 16px));
+	padding: calc(var(--safe-t) + 22px) calc(var(--safe-r) + 16px) 14px calc(var(--safe-l) + 16px);
+	background: $bg;
+	border-bottom: 1px solid $ink-faint;
+}

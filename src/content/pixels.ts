@@ -3,7 +3,7 @@
  * l'écrou ⚙ des réglages (24 × 24) et la main qui montre la tuile touchée.
  *
  * Chaque dessin est une grille de caractères, un par pixel : une lettre de la palette, ou « . »
- * pour un pixel vide. src/pixel.ts en fait un SVG de carrés, net à toutes les tailles.
+ * pour un pixel vide. src/components/PixelArt.tsx en fait un SVG de carrés, net à toutes les tailles.
  *
  * Les icônes et l'écrou sont ENGENDRÉS par outils/icones-16-bits.py (éclairage des volumes,
  * tramage des ombres, comme sur les consoles 16 bits) : pour les changer, modifier le script et
