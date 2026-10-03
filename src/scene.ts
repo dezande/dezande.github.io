@@ -36,7 +36,7 @@ let entreeLibre = false;
  * `reglages` : seulement ses réglages (écrou ⚙), que l'on ferme pour revenir au menu.
  */
 export function ouvrir(dossier: string, nom: string, lang: Langue, reglages = false): void {
-	fermer(false);
+	fermer();
 	cadre = document.createElement('iframe');
 	cadre.title = nom;
 	// index.html et non le dossier : c'est sous ce nom que le service worker met la page en cache.
@@ -54,47 +54,29 @@ export function ouvrir(dossier: string, nom: string, lang: Langue, reglages = fa
 	entreeLibre = false;
 }
 
-/**
- * Le doigt de l'appui de 3 s est encore posé quand le tour se ferme : en se relevant sur le menu,
- * il « cliquerait » sur la tuile placée dessous et relancerait un tour. Dans ce cas seulement — le
- * tour dit si un doigt est posé (src/tours/pont.ts) —, le menu n'obéit qu'à un toucher qui commence
- * sur lui. Après la croix ou la fin d'une routine, aucun doigt n'est posé : le menu répond aussitôt.
- */
-let doigtDuTour = false;
-
-/** Referme le tour et revient au menu principal. `doigtPose` : un doigt est encore sur l'écran. */
-function fermer(doigtPose: boolean): void {
+/** Referme le tour et revient au menu principal. */
+function fermer(): void {
 	if (!cadre) return;
 	scene.hidden = true;
 	scene.replaceChildren();
 	cadre = null;
-	doigtDuTour = doigtPose;
 }
 
-// Un toucher qui commence sur le menu (ou une touche) lève la garde ; un clic sans lui est ignoré.
-for (const debut of ['pointerdown', 'keydown'] as const) {
-	document.addEventListener(debut, () => {
-		doigtDuTour = false;
-	}, true);
-}
-document.addEventListener('click', (event) => {
-	if (!doigtDuTour) return;
-	event.preventDefault();
-	event.stopPropagation();
-}, true);
+// Le doigt de l'appui de 3 s, encore posé quand le tour se ferme, ne déclenche rien en se relevant
+// sur le menu : un bouton n'agit que pour un doigt qui s'est posé sur lui (src/toucher.ts).
 
-window.addEventListener('message', (event: MessageEvent<{ mesTours?: MessageTour; doigtPose?: boolean }>) => {
+window.addEventListener('message', (event: MessageEvent<{ mesTours?: MessageTour }>) => {
 	if (event.origin !== location.origin || !cadre || event.source !== cadre.contentWindow) return;
 	if (event.data?.mesTours !== 'fin' && event.data?.mesTours !== 'quitter') return;
 	// Le menu revient tout de suite ; l'entrée d'historique du tour reste, libre pour le suivant.
-	fermer(event.data.doigtPose === true);
+	fermer();
 	history.replaceState(null, '');
 	entreeLibre = true;
 });
 
-// Geste retour d'Android (ou bouton retour) pendant un tour : il se referme. Le doigt est levé.
+// Geste retour d'Android (ou bouton retour) pendant un tour : il se referme.
 window.addEventListener('popstate', () => {
-	fermer(false);
+	fermer();
 	entreeLibre = false;
 });
 

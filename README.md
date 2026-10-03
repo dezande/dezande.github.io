@@ -14,7 +14,7 @@ Tous mes accessoires de scène dans **une seule application** : https://dezande.
 | Geste | Effet |
 | --- | --- |
 | **FR / EN**, sous le titre | La langue du menu **et de tous les tours** ; gardée d'une ouverture à l'autre |
-| **Toucher une tuile** | Le tour s'ouvre en plein écran, prêt pour une nouvelle routine |
+| **Toucher une tuile** (bref ou long) | Le tour s'ouvre en plein écran, prêt pour une nouvelle routine ; les boutons du menu agissent au lever du doigt |
 | **Toucher l'écrou ⚙** d'une tuile | Les réglages du tour, seuls ; la **croix** en haut à droite ramène au menu |
 | **Fin de la routine** (voir le tableau) | Retour au menu principal |
 | **Appui de 3 s** pendant un tour | Sortie de secours : retour au menu sans finir la routine |

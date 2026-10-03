@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.6.3] | 13 | 2026-10-03 | Un appui long sur un bouton du menu agit aussi |
 | [0.6.2] | 12 | 2026-10-03 | De retour au menu, les tuiles répondent tout de suite |
 | [0.6.1] | 11 | 2026-10-03 | Le « 5 » et le « î » redessinés dans la police du menu |
 | [0.6.0] | 10 | 2026-10-03 | Le menu principal façon console 16 bits, icônes redessinées |
@@ -20,6 +21,14 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.6.3] — 2026-10-03
+
+13 commits
+
+- **Un appui long sur un bouton du menu agit aussi.** Sur Android, un doigt qui reste posé sur un bouton devient un « appui long », et le navigateur n'envoie pas le clic attendu : la tuile, l'écrou ⚙ ou le bouton FR / EN s'enfonçaient sans que rien ne se passe. C'était la vraie cause des boutons qui « ne répondaient pas tout de suite » au retour d'un tour : en scène, on appuie posément. Les boutons du menu agissent maintenant quand le doigt se relève, appui bref ou long, pourvu qu'il se soit posé sur le bouton et n'en ait pas glissé. Le clavier et la télécommande passent toujours par le clic.
+- Du même coup, la garde contre le doigt de l'appui de 3 s devient naturelle : un doigt qui ne s'est pas posé sur le menu — celui qui vient de quitter un tour — ne déclenche rien en se relevant. L'ancienne garde, et le signal « doigt posé » du tour, disparaissent.
+- Tests dans Chrome : un appui long d'une seconde et demie sur une tuile, un écrou et le bouton EN agit, avec les clics supprimés comme sur Android ; un doigt qui glisse hors du bouton ne déclenche rien.
 
 ## [0.6.2] — 2026-10-03
 
@@ -139,6 +148,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.6.3]: https://github.com/dezande/mes-tours/releases/tag/v0.6.3
 [0.6.2]: https://github.com/dezande/mes-tours/releases/tag/v0.6.2
 [0.6.1]: https://github.com/dezande/mes-tours/releases/tag/v0.6.1
 [0.6.0]: https://github.com/dezande/mes-tours/releases/tag/v0.6.0
