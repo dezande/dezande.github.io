@@ -36,7 +36,7 @@
 
 import { requestPersistentStorage } from '../../kit/web/storage.ts';
 import { keepScreenAwake } from '../../kit/web/wake-lock.ts';
-import { enReglages } from '../pont.ts';
+import { enReglages, remplirEntete } from '../pont.ts';
 import { openMenu } from './settings/panel.ts';
 import './stage/input.ts';
 
@@ -45,6 +45,9 @@ void requestPersistentStorage();
 
 // Dans « Mes tours », le hors-ligne et les mises à jour sont ceux de l'app (src/app.ts) : le tour
 // n'enregistre pas de service worker à lui.
+
+// L'en-tête des réglages, le même pour tous les tours : « Réglages » et le nom du tour.
+remplirEntete();
 
 // Ouvert par l'écrou ⚙ du menu principal : seulement les réglages, que l'on ferme pour revenir.
 if (enReglages) openMenu();

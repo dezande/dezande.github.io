@@ -102,8 +102,15 @@
 
 		<section id="settings" hidden aria-label="Réglages">
 			<div class="sheet">
-				<h1>Réglages</h1>
-				<p class="sub">Visible de vous seul. Enregistré sur cet appareil.</p>
+				<!-- En-tête commun à tous les tours (« Mes tours ») : « Réglages » et le nom du tour,
+				     remplis par src/tours/pont.ts, et la croix qui ferme. -->
+				<header class="menu-head">
+					<div>
+						<h1 class="titre-reglages"></h1>
+						<p class="sub nom-du-tour"></p>
+					</div>
+					<button type="button" id="close-btn" class="croix" aria-label="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+				</header>
 
 				<div class="card">
 					<div class="row-label">Routine <small id="zones-hint"></small></div>
@@ -126,26 +133,17 @@
 					<input id="brightness" type="range" min="30" max="100" step="5">
 				</div>
 
-				<div class="card status">
-					<span class="dot" id="wake-dot"></span>
-					<div><span id="wake-text">Écran : verrou inactif</span><small id="wake-detail"></small></div>
-				</div>
-
 				<div class="card options">
 					<p class="hint">Aide à la répétition : à masquer avant de jouer si le public voit l'écran.</p>
 					<label class="toggle-row" for="show-hold-ring">Afficher la jauge de l'appui long <input id="show-hold-ring" type="checkbox"></label>
+				
+					<!-- Le test des zones est une aide à la répétition : il rejoint les autres. -->
+					<button type="button" id="test-btn" class="test-zones">Test des zones</button>
 				</div>
 
-				<div class="card about">
-					<div class="about-row">Version <span id="about-version"></span></div>
-					<div class="about-row">Commit <span id="about-commit"></span></div>
-					<div class="about-row">Cache hors-ligne <span id="about-cache"></span></div>
-					<div class="about-row">Affichage <span id="about-display"></span></div>
-				</div>
-
-				<div class="actions">
-					<button type="button" id="test-btn">Test des zones</button>
-					<button type="button" id="close-btn" class="primary">Fermer</button>
+				<div class="card status">
+					<span class="dot" id="wake-dot"></span>
+					<div><span id="wake-text">Écran : verrou inactif</span><small id="wake-detail"></small></div>
 				</div>
 
 				<details class="card help">
@@ -158,10 +156,20 @@
 				</details>
 
 				<button type="button" id="defaults-btn" class="link">Rétablir les réglages par défaut</button>
+
+				<!-- Ce qui ne sert qu'au tour ouvert seul (hors de « Mes tours ») : gardé pour son code,
+				     jamais affiché ici. -->
+				<div hidden>
+					<div class="card about">
+						<div class="about-row">Version <span id="about-version"></span></div>
+						<div class="about-row">Commit <span id="about-commit"></span></div>
+						<div class="about-row">Cache hors-ligne <span id="about-cache"></span></div>
+						<div class="about-row">Affichage <span id="about-display"></span></div>
+					</div>
+				</div>
 			</div>
 		</section>
 	</div>
-
 
 	<script type="module" src="app.js"></script>
 </body>

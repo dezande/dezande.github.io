@@ -15,11 +15,13 @@ Tous mes accessoires de scène dans **une seule application** : https://dezande.
 | --- | --- |
 | **FR / EN**, sous le titre | La langue du menu **et de tous les tours** ; gardée d'une ouverture à l'autre |
 | **Toucher une tuile** | Le tour s'ouvre en plein écran, prêt pour une nouvelle routine |
-| **Toucher l'écrou ⚙** d'une tuile | Les réglages du tour, seuls ; « Fermer » ramène au menu |
+| **Toucher l'écrou ⚙** d'une tuile | Les réglages du tour, seuls ; la **croix** en haut à droite ramène au menu |
 | **Fin de la routine** (voir le tableau) | Retour au menu principal |
 | **Appui de 3 s** pendant un tour | Sortie de secours : retour au menu sans finir la routine |
 | **Geste retour** d'Android | Retour au menu |
 | Touche **R** (télécommande) | Fin de la routine ; **Échap** ou **M** : quitter le tour |
+
+**Les réglages des quatre tours ont la même structure**, chacun dans ses couleurs : une barre d'en-tête qui reste en haut quand on fait défiler — « Réglages » et, dessous, le nom du tour, avec la croix qui ferme —, puis les réglages propres au tour, les aides à la répétition (le test des zones de la boule y est), l'état de l'écran, les gestes et touches, et « Rétablir les réglages par défaut ». Plus de version ni d'informations techniques : la version de l'app est en bas du menu principal.
 
 **La langue se choisit une fois, dans le menu principal** : les tours n'ont plus de choix de langue à eux (ni dans leurs réglages, ni sur la première slide de l'analyseur). En anglais, Pile ou face écrit « 0.20 euro / tails » et « heads ». La boule de cristal n'a qu'une interface en français ; ce qu'elle montre au public, un nombre, n'a pas de langue. À la toute première ouverture, l'app suit la langue du téléphone.
 
@@ -39,7 +41,7 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 - **Chaque tour est une copie de son app** : son code dans `src/tours/<dossier>/`, sa page et ses images dans `public/tours/<dossier>/`, compilés dans `dist/tours/<dossier>/`. Les dépôts d'origine ne sont pas touchés, et leurs adresses (`dezande.github.io/<dossier>/`) continuent de fonctionner seules. Une correction faite dans un dépôt d'origine est à recopier ici.
 - **Le tour s'affiche dans un cadre** (iframe) par-dessus le menu ([`src/scene.ts`](src/scene.ts)) : ses styles, ses identifiants et ses gestes restent les siens, sans rien renommer.
 - **Le pont** ([`src/tours/pont.ts`](src/tours/pont.ts)) : le tour dit à l'app « fin » (fin de routine) ou « quitter » (appui de 3 s, réglages fermés). Ouvert par l'écrou, il reçoit `?reglages` et n'affiche que son panneau de réglages ; il reçoit toujours `?lang=fr` ou `?lang=en`, la langue du menu, qui remplace la sienne.
-- Ce qui a changé dans les copies : le geste de fin de routine et l'appui de 3 s passent par le pont ; le menu du tour n'a plus que ses réglages (plus d'« aller à », de « remettre », ni de bouton « Mes tours ») ; le tour n'enregistre plus de service worker ni de manifeste à lui ; l'analyseur commence toujours à la première slide.
+- Ce qui a changé dans les copies : le geste de fin de routine et l'appui de 3 s passent par le pont ; le menu du tour n'a plus que ses réglages (plus d'« aller à », de « remettre », de version, ni de bouton « Mes tours »), avec l'en-tête commun que remplit le pont (`remplirEntete()`, d'après `?nom=`) ; ce qui ne sert qu'au tour ouvert seul reste dans un bloc caché, pour son code ; le tour n'enregistre plus de service worker ni de manifeste à lui ; l'analyseur commence toujours à la première slide.
 - **Un seul service worker** (celui du kit, v1.3.1 ou plus) met tout en cache, tours compris. Une nouvelle version ne s'affiche jamais pendant un tour.
 
 ## Ajouter un tour

@@ -10,12 +10,27 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.5.0] | 9 | 2026-10-03 | Les réglages des tours : une même structure, le nom du tour, une croix pour fermer |
 | [0.4.0] | 8 | 2026-10-03 | Un bouton FR / EN dans le menu, pour le menu et tous les tours |
 | [0.3.0] | 7 | 2026-10-03 | Le menu principal en pixel art, façon console 8 bits |
 | [0.2.0] | 6 | 2026-10-03 | Tous les tours dans une seule application, un écrou ⚙ par tour, à sa nouvelle adresse |
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.5.0] — 2026-10-03
+
+9 commits
+
+Les réglages des tours (ouverts par l'écrou ⚙) se ressemblent tous, et se ferment par une croix.
+
+- **Une croix en haut à droite** remplace le bouton « Fermer », dans les réglages des quatre tours. Elle est annoncée « Fermer » (ou « Close ») aux lecteurs d'écran.
+- **Une barre d'en-tête qui reste en haut** quand on fait défiler les réglages, sur le fond du tour : la croix y est toujours visible, et le contenu passe dessous, jamais par-dessus.
+- **Le nom du tour sous « Réglages »**, à la place du numéro de version, pour savoir d'un coup d'œil ce que l'on règle. Il suit la langue du menu : « Settings » et « Heads or tails » en anglais.
+- **La même structure pour les quatre tours**, chacun dans ses couleurs : l'en-tête, les réglages propres au tour, les aides à la répétition, l'état de l'écran, les gestes et touches, puis « Rétablir les réglages par défaut ». Le « Test des zones » de la boule de cristal rejoint les aides à la répétition, et son état de l'écran passe après elles, comme ailleurs.
+- **Plus de bloc « version »** (version, commit, cache hors-ligne, stockage, affichage) dans les réglages des tours : la version de l'app reste en bas du menu principal.
+- Un rechargement de l'app ne laisse plus d'entrée d'historique d'un tour fermé, qui coûtait un « retour » pour rien.
+- Tests dans Chrome : la croix (en haut à droite, toujours visible en faisant défiler, un vrai toucher ramène au menu), la même structure dans les quatre réglages, le nom du tour et l'absence de version, en français et en anglais.
 
 ## [0.4.0] — 2026-10-03
 
@@ -90,6 +105,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.5.0]: https://github.com/dezande/mes-tours/releases/tag/v0.5.0
 [0.4.0]: https://github.com/dezande/mes-tours/releases/tag/v0.4.0
 [0.3.0]: https://github.com/dezande/mes-tours/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dezande/mes-tours/releases/tag/v0.2.0

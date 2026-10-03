@@ -265,3 +265,63 @@ input[type="range"] {
 		line-height: 1.6;
 	}
 }
+
+// La croix de fermeture, dans la barre d'en-tête, à la place du bouton « Fermer » (« Mes tours »).
+.croix {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border-radius: 12px;
+	color: $gold;
+	background: rgba(255, 255, 255, .05);
+	border: 1px solid $gold-soft;
+	cursor: pointer;
+
+	svg {
+		width: 20px;
+		height: 20px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2.4;
+		stroke-linecap: round;
+	}
+}
+
+// L'en-tête commun à tous les tours (« Mes tours ») : le titre, le nom du tour dessous, et la croix.
+.menu-head {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+
+	.sub {
+		margin: 6px 0 0;
+		font-size: 15px;
+	}
+}
+
+// Le test des zones, dans la carte des aides à la répétition.
+.test-zones {
+	width: 100%;
+	margin-top: 12px;
+}
+
+/*
+ * L'en-tête des réglages (« Mes tours ») : une barre qui reste en haut quand les réglages défilent,
+ * sur le fond du tour. Le contenu passe dessous, jamais par-dessus : la croix reste toujours
+ * visible. Les marges négatives lui font couvrir toute la largeur et le haut de la feuille.
+ */
+.menu-head {
+	position: sticky;
+	// Collée au tout haut de l'écran, et non sous la marge haute de la feuille : rien ne défile
+	// au-dessus d'elle.
+	top: calc(-1 * (var(--safe-t) + 24px));
+	z-index: 3;
+	align-items: flex-start;
+	margin: calc(-1 * (var(--safe-t) + 24px)) calc(-1 * (var(--safe-r) + 18px)) 18px calc(-1 * (var(--safe-l) + 18px));
+	padding: calc(var(--safe-t) + 24px) calc(var(--safe-r) + 18px) 14px calc(var(--safe-l) + 18px);
+	background: rgba(20, 10, 38, .97);
+	border-bottom: 1px solid $gold-soft;
+}

@@ -196,6 +196,13 @@ test('geste retour d’Android pendant un tour : retour au menu', TIMEOUT, async
 
 /* ================= L'écrou ⚙ ================= */
 
+/** Touche le bouton de langue du menu principal. */
+async function choisirLangue(page: Page, lang: 'fr' | 'en'): Promise<void> {
+	const centre = await page.evaluate<Point>(`(() => { const r = document.querySelector('#langues button[data-langue="${lang}"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+	await page.tap(centre);
+	await page.waitFor(`document.documentElement.lang === '${lang}'`, `menu en ${lang}`);
+}
+
 test('écrou ⚙ : les réglages du tour s’ouvrent seuls, « Fermer » ramène au menu', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		for (const [dossier, panneau] of [
@@ -224,14 +231,78 @@ test('écrou ⚙ : un réglage changé vaut pour la routine suivante', TIMEOUT, 
 	});
 });
 
-/* ================= Le bouton FR / EN ================= */
+test('écrou ⚙ : une croix en haut à droite ferme les réglages, plus de bouton « Fermer »', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		for (const [dossier, panneau] of [
+			['boule-de-cristal', '#settings'],
+			['pile-ou-face', '#menu'],
+			['six-predictions', '#menu'],
+			['analyseur-q', '#menu'],
+		] as const) {
+			await ouvrir(page, dossier, `Boolean(document.querySelector('${panneau}')) && !document.querySelector('${panneau}').hidden`, true);
+			const croix = await page.evaluate<{ x: number; y: number; haut: number; droite: number; texte: string; etiquette: string | null } | null>(dansLeTour(`(() => {
+				const b = document.querySelector('#close-btn');
+				const r = b.getBoundingClientRect();
+				return { x: r.x + r.width / 2, y: r.y + r.height / 2, haut: r.top, droite: window.innerWidth - r.right, texte: b.textContent.trim(), etiquette: b.getAttribute('aria-label') };
+			})()`));
+			assert.ok(croix, `${dossier} : pas de croix`);
+			assert.ok(croix.haut < 80 && croix.droite < 40, `${dossier} : la croix n’est pas en haut à droite (haut ${croix.haut}, droite ${croix.droite})`);
+			assert.equal(croix.texte, '', `${dossier} : la croix porte du texte`);
+			assert.equal(croix.etiquette, 'Fermer', `${dossier} : la croix n’est pas annoncée « Fermer »`);
+			// Aucun autre bouton visible ne s'appelle « Fermer ».
+			assert.equal(await page.evaluate(dansLeTour(`[...document.querySelectorAll('${panneau} button')].filter((b) => !b.closest('[hidden]') && b.textContent.trim() === 'Fermer').length`)), 0, `${dossier} : un bouton « Fermer » reste`);
+			// La croix reste dans son coin quand les réglages défilent.
+			await page.evaluate(dansLeTour(`document.querySelector('${panneau} .sheet').scrollTop = 400`));
+			assert.equal(Math.round(await page.evaluate<number>(dansLeTour(`document.querySelector('#close-btn').getBoundingClientRect().top`))), Math.round(croix.haut), `${dossier} : la croix défile avec les réglages`);
+			// Un vrai toucher sur la croix ramène au menu.
+			await page.tap({ x: croix.x, y: croix.y });
+			await attendreLeMenu(page);
+		}
+	});
+});
 
-/** Touche le bouton de langue du menu principal. */
-async function choisirLangue(page: Page, lang: 'fr' | 'en'): Promise<void> {
-	const centre = await page.evaluate<Point>(`(() => { const r = document.querySelector('#langues button[data-langue="${lang}"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
-	await page.tap(centre);
-	await page.waitFor(`document.documentElement.lang === '${lang}'`, `menu en ${lang}`);
-}
+test('écrou ⚙ : tous les réglages ont la même structure, le nom du tour en tête, sans version', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		const structures: string[][] = [];
+		for (const [dossier, panneau] of [
+			['boule-de-cristal', '#settings'],
+			['pile-ou-face', '#menu'],
+			['six-predictions', '#menu'],
+			['analyseur-q', '#menu'],
+		] as const) {
+			await ouvrir(page, dossier, `Boolean(document.querySelector('${panneau}')) && !document.querySelector('${panneau}').hidden`, true);
+			const lu = await page.evaluate<{ titre: string; nom: string; blocs: string[]; version: boolean }>(dansLeTour(`({
+				titre: document.querySelector('.titre-reglages').textContent,
+				nom: document.querySelector('.nom-du-tour').textContent,
+				// Les blocs visibles de la feuille, dans l'ordre : leur rôle, d'après leur classe.
+				blocs: [...document.querySelector('${panneau} .sheet').children]
+					.filter((e) => !e.hidden && getComputedStyle(e).display !== 'none')
+					.map((e) => e.classList.contains('menu-head') ? 'en-tête' : e.classList.contains('options') ? 'aides' : e.classList.contains('status') ? 'écran' : e.classList.contains('help') ? 'gestes' : e.id === 'defaults-btn' ? 'défauts' : e.classList.contains('about') ? 'version' : 'réglage'),
+				version: [...document.querySelectorAll('${panneau} *')].some((e) => !e.closest('[hidden]') && e.getClientRects().length > 0 && (e.id === 'menu-version' || e.classList.contains('about'))),
+			})`));
+			assert.equal(lu.titre, 'Réglages', `${dossier} : titre`);
+			assert.equal(lu.nom, TOURS.find((t) => t.dossier === dossier)!.nom.fr, `${dossier} : nom du tour sous le titre`);
+			assert.equal(lu.version, false, `${dossier} : une version est encore affichée`);
+			structures.push(lu.blocs.filter((b, i, liste) => b !== 'réglage' || liste[i - 1] !== 'réglage'));
+			await page.evaluate(dansLeTour(`document.querySelector('#close-btn').click()`));
+			await attendreLeMenu(page);
+		}
+		// Le même ordre partout : l'en-tête, les réglages propres au tour, puis les blocs communs.
+		for (const structure of structures) assert.deepEqual(structure, ['en-tête', 'réglage', 'aides', 'écran', 'gestes', 'défauts']);
+	});
+});
+
+test('écrou ⚙ : en anglais, « Settings » et le nom anglais du tour', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await choisirLangue(page, 'en');
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#menu')) && !document.querySelector('#menu').hidden`, true);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('.titre-reglages').textContent`)), 'Settings');
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('.nom-du-tour').textContent`)), 'Heads or tails');
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#close-btn').getAttribute('aria-label')`)), 'Close');
+	});
+});
+
+/* ================= Le bouton FR / EN ================= */
 
 test('FR / EN : le menu change de langue, et s’en souvient', TIMEOUT, async () => {
 	await withApp(async (page) => {
