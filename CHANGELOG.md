@@ -10,11 +10,14 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.2.0] | 6 | 2026-10-03 | Tous les tours dans une seule application, un écrou ⚙ par tour, à sa nouvelle adresse |
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
 
-## [Non publié]
+## [0.2.0] — 2026-10-03
+
+6 commits
 
 - **Tous les tours dans une seule application.** Mes tours ne se contente plus d'ouvrir les apps des tours : elle contient sa propre copie de chacun (Boule de cristal, Pile ou face, Les six prédictions, Analyseur Q), dans `src/tours/` et `public/tours/`, et les affiche en plein écran dans un cadre qui isole leurs styles et leurs gestes. Les dépôts d'origine ne sont pas touchés : leurs adresses continuent de fonctionner seules.
 - **Un écrou ⚙ sur chaque tuile** ouvre les réglages du tour, et seulement eux (dos des cartes, délai, routine, langue…) ; « Fermer » ramène au menu. Le menu du tour ne s'ouvre plus pendant la routine.
@@ -61,4 +64,5 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.2.0]: https://github.com/dezande/mes-tours/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dezande/mes-tours/releases/tag/v0.1.0

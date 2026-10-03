@@ -4,4 +4,4 @@
  * tests/logic/version.test.ts refuse un écart entre les deux.
  */
 
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.2.0';
