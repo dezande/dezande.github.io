@@ -103,7 +103,7 @@ async function pressKey(page: Page, key: string): Promise<void> {
 
 /* ================= Le menu principal ================= */
 
-test('le menu 16 bits montre les quatre tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
+test('le menu 16 bits montre les cinq tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		const tuiles = await page.evaluate<{ nom: string; icone: boolean; ecrou: string | null }[]>(`[...document.querySelectorAll('#tours .tour')].map((t) => ({
 			nom: t.querySelector('.tour-nom').textContent,
@@ -177,6 +177,51 @@ test('Boule de cristal : le double toucher efface le nombre, la boule se réarme
 		assert.ok(await page.evaluate<boolean>(`location.pathname.includes('/tours/boule-de-cristal/')`), 'le double toucher a quitté la boule');
 		await page.tap(HAUT);
 		await attendre(page, dansLeTour(`document.querySelector('#number').classList.contains('shown')`), 'nouveau nombre', 8000);
+		await appuiLong(page);
+		await attendreLeMenu(page);
+	});
+});
+
+test('Boule de cristal : plus de choix de routine, les 3 bandes donnent 6, 16 et 26', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'boule-de-cristal', `Boolean(document.querySelector('#settings')) && !document.querySelector('#settings').hidden`, true);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelectorAll('#settings [data-routine], #routines').length`)), 0, 'un choix de routine reste dans les réglages');
+		assert.deepEqual(await page.evaluate(dansLeTour(`[...document.querySelectorAll('#routine-values b')].map((b) => b.textContent)`)), ['6', '16', '26']);
+		await page.evaluate(dansLeTour(`document.querySelector('#close-btn').click()`));
+		await attendreLeMenu(page);
+		await ouvrir(page, 'boule-de-cristal', `Boolean(document.querySelector('#number'))`);
+		await page.tap({ x: SCREEN.width * .85, y: SCREEN.height * .85 });
+		await attendre(page, dansLeTour(`document.querySelector('#number').classList.contains('shown')`), 'nombre affiché', 8000);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#number-text').textContent`)), '26');
+	});
+});
+
+test('Carte de visite : un coin la retourne sur son numéro, le double toucher la remet sur son recto, sur place', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await ouvrir(page, 'carte-de-visite', `Boolean(document.querySelector('#carte .verso #number')) && document.querySelectorAll('#table rect').length === 3`);
+		// Le tour se joue téléphone tenu en largeur : sur l'écran en portrait, la scène est pivotée d'un
+		// quart de tour, son haut à droite de l'écran. Le coin haut gauche de la scène est donc en haut à
+		// droite de l'écran.
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#app').dataset.rotation`)), '90', 'la carte n’est pas en paysage');
+		const scene = await page.evaluate<{ w: number; h: number }>(dansLeTour(`({ w: document.querySelector('#stage').clientWidth, h: document.querySelector('#stage').clientHeight })`));
+		assert.ok(scene.w > scene.h, `scène de ${scene.w} × ${scene.h} : pas en paysage`);
+		const coins: [Point, string][] = [
+			[{ x: SCREEN.width * .85, y: SCREEN.height * .15 }, '17'],
+			[{ x: SCREEN.width * .85, y: SCREEN.height * .85 }, '19'],
+			[{ x: SCREEN.width * .15, y: SCREEN.height * .15 }, '21'],
+			[{ x: SCREEN.width * .15, y: SCREEN.height * .85 }, '23'],
+		];
+		for (const [coin, numero] of coins) {
+			await page.tap(coin);
+			await attendre(page, dansLeTour(`document.querySelector('#carte').classList.contains('retournee')`), `carte retournée sur ${numero}`, 8000);
+			assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#number-text').textContent`)), numero);
+			await sleep(500);
+			await page.doubleTap(CENTRE);
+			await attendre(page, dansLeTour(`!document.querySelector('#carte').classList.contains('retournee')`), 'carte sur son recto', 3000);
+			// Le retournement fini, on est toujours sur la carte, prête pour un nouveau tour.
+			await sleep(2500);
+			assert.ok(await page.evaluate<boolean>(`location.pathname.includes('/tours/carte-de-visite/')`), 'le double toucher a quitté la carte');
+		}
 		await appuiLong(page);
 		await attendreLeMenu(page);
 	});
@@ -350,6 +395,7 @@ test('écrou ⚙ : les réglages du tour s’ouvrent seuls, « Fermer » ramène
 	await withApp(async (page) => {
 		for (const [dossier, panneau] of [
 			['boule-de-cristal', '#settings'],
+			['carte-de-visite', '#settings'],
 			['pile-ou-face', '#menu'],
 			['six-predictions', '#menu'],
 			['analyseur-q', '#menu'],
@@ -378,6 +424,7 @@ test('écrou ⚙ : une croix en haut à droite ferme les réglages, plus de bout
 	await withApp(async (page) => {
 		for (const [dossier, panneau] of [
 			['boule-de-cristal', '#settings'],
+			['carte-de-visite', '#settings'],
 			['pile-ou-face', '#menu'],
 			['six-predictions', '#menu'],
 			['analyseur-q', '#menu'],
@@ -409,6 +456,7 @@ test('écrou ⚙ : tous les réglages ont la même structure, le nom du tour en 
 		const structures: string[][] = [];
 		for (const [dossier, panneau] of [
 			['boule-de-cristal', '#settings'],
+			['carte-de-visite', '#settings'],
 			['pile-ou-face', '#menu'],
 			['six-predictions', '#menu'],
 			['analyseur-q', '#menu'],
@@ -584,15 +632,19 @@ test('chaque tour reçoit les marges de l’écran : rien sous la caméra fronta
 	// reçoit les vraies marges de l'écran.
 	await withApp(async (page) => {
 		await page.send('Emulation.setSafeAreaInsetsOverride', { insets: { top: 40, topMax: 40, bottom: 20, bottomMax: 20 } });
-		const marge = `(() => { const s = document.createElement('div'); s.style.paddingTop = 'var(--safe-t)'; s.style.paddingBottom = 'var(--safe-b)'; document.querySelector('#app').appendChild(s); const c = getComputedStyle(s); const r = [c.paddingTop, c.paddingBottom]; s.remove(); return r; })()`;
+		// Le haut et le bas de l'écran ; pour la carte de visite, pivotée en paysage (son haut à droite de
+		// l'écran), ce sont la gauche et la droite de la scène.
+		const marge = (haut: string, bas: string): string => `(() => { const s = document.createElement('div'); s.style.paddingTop = 'var(${haut})'; s.style.paddingBottom = 'var(${bas})'; document.querySelector('#app').appendChild(s); const c = getComputedStyle(s); const r = [c.paddingTop, c.paddingBottom]; s.remove(); return r; })()`;
 		for (const [dossier, pret] of [
 			['boule-de-cristal', `Boolean(document.querySelector('#number'))`],
+			['carte-de-visite', `Boolean(document.querySelector('#number'))`],
 			['pile-ou-face', `Boolean(document.querySelector('#table .carte'))`],
 			['six-predictions', `document.querySelectorAll('#paquet .carte').length === 6`],
 			['analyseur-q', `Boolean(document.querySelector('.slide.current'))`],
 		] as const) {
 			await ouvrir(page, dossier, pret);
-			assert.deepEqual(await page.evaluate(dansLeTour(marge)), ['40px', '20px'], `${dossier} : marges de l’écran`);
+			const [haut, bas] = dossier === 'carte-de-visite' ? ['--safe-l', '--safe-r'] : ['--safe-t', '--safe-b'];
+			assert.deepEqual(await page.evaluate(dansLeTour(marge(haut, bas))), ['40px', '20px'], `${dossier} : marges de l’écran`);
 			await page.evaluate(`history.back()`);
 			await attendreLeMenu(page);
 		}

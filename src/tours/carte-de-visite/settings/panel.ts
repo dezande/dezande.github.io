@@ -1,35 +1,27 @@
 /*
- * Panneau de réglages : formulaire, informations sur l'app, ouverture et fermeture.
- * Il s'ouvre par un appui de 3 s sur la scène (stage/touch.ts).
+ * Panneau de réglages : formulaire, ouverture et fermeture.
+ * Il s'ouvre par l'écrou ⚙ du menu principal (app.ts).
  */
 
 import { enReglages, quitter } from '../../pont.ts';
-import { BUILD } from '../../../kit/web/build.ts';
-import { describeWake, keepScreenAwake, onWakeChange } from '../../../kit/web/wake-lock.ts';
+import { keepScreenAwake } from '../../../kit/web/wake-lock.ts';
 import { hideHoldRing } from '../rehearsal/hold-ring.ts';
 import { setTestMode } from '../rehearsal/test-mode.ts';
-import { hardReset } from '../stage/ball.ts';
+import { hardReset } from '../stage/carte.ts';
 import { $ } from '../system/dom.ts';
-import { PREDICTIONS, settings, storeSettings, ZONE_NAMES } from './store.ts';
+import { enPaysage } from '../system/paysage.ts';
+import { NUMEROS, settings, storeSettings, ZONE_NAMES } from './store.ts';
 
 const settingsEl = $('#settings');
 const sheet = $('.sheet', settingsEl);
-
-// État du maintien de l'écran allumé (kit/web/wake-lock.ts), affiché dans les réglages.
-onWakeChange((state) => {
-	const wake = describeWake(state);
-	$('#wake-dot').className = `dot ${state.lock ? 'lock' : state.video ? 'video' : 'off'}`;
-	$('#wake-text').textContent = wake.text;
-	$('#wake-detail').textContent = wake.detail;
-});
 
 /** Nombre à la française, une décimale au plus (« 1,5 »). */
 const fmt = (n: number): string => n.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
 
 /* ---------- Champs ---------- */
 
-// Rappel des prédictions, bande par bande (lecture seule) : elles ne changent pas.
-$('#routine-values').append(...PREDICTIONS.map((value, i) => {
+// Rappel des numéros, coin par coin (lecture seule) : ils ne changent pas.
+$('#routine-values').append(...NUMEROS.map((value, i) => {
 	const row = document.createElement('div');
 	row.className = 'value-row';
 	const name = document.createElement('span');
@@ -56,7 +48,7 @@ const TOGGLES = [
 
 const root = document.documentElement;
 
-/** Répercute les réglages sur la scène : fondu, luminosité et aide à la répétition. */
+/** Répercute les réglages sur la scène : retournement, luminosité et aide à la répétition. */
 export function applySettings(): void {
 	root.style.setProperty('--fade', `${settings.fade}s`);
 	root.style.setProperty('--dim', String((100 - settings.brightness) / 100));
@@ -70,29 +62,6 @@ function renderForm(): void {
 		output.textContent = label(settings[key]);
 	}
 	for (const { key, input } of TOGGLES) input.checked = settings[key];
-}
-
-/** Remplit la carte d'informations : version, cache hors-ligne, mode d'affichage. */
-function renderAbout(): void {
-	$('#about-version').textContent = BUILD.version;
-	$('#about-commit').textContent = BUILD.commit;
-
-	const standalone = matchMedia('(display-mode: standalone)').matches
-		|| (navigator as Navigator & { standalone?: boolean }).standalone === true;
-	$('#about-display').textContent = standalone ? 'app installée' : 'navigateur';
-
-	const cacheEl = $('#about-cache');
-	if (!('caches' in window)) {
-		cacheEl.textContent = 'indisponible';
-		return;
-	}
-	caches.keys()
-		.then((keys) => {
-			cacheEl.textContent = keys.filter((key) => key.startsWith('voyante-')).join(', ') || 'pas encore installé';
-		})
-		.catch(() => {
-			cacheEl.textContent = 'indisponible';
-		});
 }
 
 /** Valide, enregistre et applique les réglages après chaque modification. `null` : réglages par défaut. */
@@ -122,20 +91,18 @@ $('#defaults-btn').addEventListener('click', () => commit(null));
 
 /* ---------- Ouverture et fermeture ---------- */
 
-export const isSettingsOpen = (): boolean => !settingsEl.hidden;
-
 /** Ferme le clavier virtuel s'il est ouvert. */
 function blurActiveElement(): void {
 	if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
 }
 
-/** Ouvre les réglages : efface la boule et quitte le mode test. */
+/** Ouvre les réglages : efface la carte et quitte le mode test. */
 export function openSettings(): void {
 	hideHoldRing();
 	hardReset();
 	setTestMode(false);
 	renderForm();
-	renderAbout();
+	enPaysage(false);
 	settingsEl.hidden = false;
 	sheet.scrollTop = 0;
 }
@@ -145,6 +112,8 @@ function closeSettings(): void {
 	blurActiveElement();
 	settingsEl.hidden = true;
 	setTestMode(false);
+	// Ouverts par l'écrou ⚙, les réglages ramènent au menu : la scène ne pivote pas pour rien.
+	if (!enReglages) enPaysage(true);
 	hardReset();
 	storeSettings();
 	void keepScreenAwake();
@@ -156,6 +125,7 @@ function closeSettings(): void {
 function startTest(): void {
 	blurActiveElement();
 	settingsEl.hidden = true;
+	enPaysage(true);
 	hardReset();
 	setTestMode(true);
 }

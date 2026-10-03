@@ -1,0 +1,53 @@
+@use "tokens" as *;
+@use "mixins" as *;
+
+:root {
+	--fade: 1.2s;
+	--dim: 0;
+}
+
+// Hygiène tactile : ni surbrillance, ni callout, ni sélection.
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+	@include user-select(none);
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: $bg;
+	color: $gold;
+}
+
+body {
+	position: fixed;
+	inset: 0;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	font-family: $sans;
+}
+
+input[type="text"] {
+	@include user-select(text);
+}
+
+[hidden] {
+	display: none !important;
+}
+
+// Voile de luminosité, piloté par --dim.
+#dim {
+	position: fixed;
+	inset: 0;
+	z-index: 20;
+	background: #000;
+	opacity: var(--dim);
+	pointer-events: none;
+}

@@ -2,8 +2,8 @@
  * Boule de cristal : point d'entrée de l'app.
  *
  * Déroulé d'un tour :
- *   1. le magicien touche discrètement une zone de l'écran (bande ou coin) ;
- *   2. la valeur de cette zone est « armée » : la brume s'agite pendant le délai réglé ;
+ *   1. le magicien touche discrètement une des 3 bandes de l'écran (haut, milieu, bas) ;
+ *   2. la prédiction de cette bande (6, 16 ou 26) est « armée » : la brume s'agite pendant le délai réglé ;
  *   3. le nombre apparaît dans la boule, l'écran reste verrouillé (plus aucun toucher n'arme) ;
  *   4. un double tap efface le nombre, l'app se réarme pour le tour suivant.
  * Un appui de 3 s n'importe où ouvre les réglages, à tout moment.

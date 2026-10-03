@@ -5,8 +5,8 @@ import { existsSync } from 'node:fs';
 import { LANGUES, TEXTES } from '../../src/content/textes.ts';
 import { TOURS } from '../../src/content/tours.ts';
 
-test('les quatre tours, chacun une seule fois', () => {
-	assert.deepEqual(TOURS.map((tour) => tour.dossier), ['boule-de-cristal', 'pile-ou-face', 'six-predictions', 'analyseur-q']);
+test('les cinq tours, chacun une seule fois', () => {
+	assert.deepEqual(TOURS.map((tour) => tour.dossier), ['boule-de-cristal', 'carte-de-visite', 'pile-ou-face', 'six-predictions', 'analyseur-q']);
 });
 
 test('chaque tour a un dossier valide, un nom et une description dans les deux langues', () => {
