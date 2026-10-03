@@ -2,8 +2,8 @@
  * Le menu principal, en pixel art façon console 16 bits : une fenêtre par tour (content/tours.ts),
  * avec son icône en pixels (content/pixels.ts), et la main des jeux de rôle qui montre la tuile
  * touchée. Toucher la tuile lance le tour ; l'écrou ⚙ à côté
- * ouvre ses réglages. Les deux s'affichent en plein écran (scene.ts), et le tour revient ici à la
- * fin de sa routine.
+ * ouvre ses réglages. Les deux ouvrent la page du tour en plein écran (scene.ts), et le tour revient
+ * ici à la fin de sa routine.
  *
  * Le bouton FR / EN choisit la langue du menu et de tous les tours (langue.ts) : le menu se
  * reconstruit aussitôt, et chaque tour l'ouvre dans cette langue.
@@ -66,7 +66,7 @@ function construire(): void {
 		const description = texte.appendChild(document.createElement('span'));
 		description.className = 'tour-description';
 		description.textContent = tour.description[lang];
-		surToucher(lancer, () => ouvrir(tour.dossier, nomDuTour, lang));
+		surToucher(lancer, () => ouvrir(tour.dossier, lang));
 
 		const reglages = tuile.appendChild(document.createElement('button'));
 		reglages.type = 'button';
@@ -74,7 +74,7 @@ function construire(): void {
 		const titreReglages = `${TEXTES.reglagesDe[lang]}${nomDuTour}`;
 		reglages.setAttribute('aria-label', titreReglages);
 		reglages.appendChild(dessinPixel(ECROU, 'ecrou'));
-		surToucher(reglages, () => ouvrir(tour.dossier, titreReglages, lang, true));
+		surToucher(reglages, () => ouvrir(tour.dossier, lang, true));
 	}
 
 	$('#version').textContent = `${TEXTES.version[lang]} ${APP_VERSION} — build ${BUILD.version} (${BUILD.commit})`;

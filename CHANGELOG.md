@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.7.0] | 16 | 2026-10-03 | Chaque tour dans sa propre page : plus de toucher perdu, rien sous la caméra |
 | [0.6.5] | 15 | 2026-10-03 | Dans les réglages des tours, un appui long agit aussi |
 | [0.6.4] | 14 | 2026-10-03 | De retour d'un tour, les tuiles répondent, appui bref ou long |
 | [0.6.3] | 13 | 2026-10-03 | Un appui long sur un bouton du menu agit aussi |
@@ -23,6 +24,16 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.7.0] — 2026-10-03
+
+16 commits
+
+- **Chaque tour s'ouvre maintenant dans sa propre page**, à la place du menu, au lieu d'un cadre posé par-dessus. C'est toujours une seule app installée, en plein écran et hors-ligne ; la fin de la routine, l'appui de 3 s, la croix des réglages et le geste retour d'Android ramènent au menu, qui réapparaît tel qu'on l'a laissé.
+- **Corrige les tours qui ne répondaient plus quand on en recommençait un.** Le cadre était la vraie cause des problèmes de toucher : sur Android, le fermer privait ensuite le menu — puis le tour rouvert — des événements « pointer » du doigt, dont les tours se servent pour leurs gestes. Une page ouverte normalement les reçoit toujours.
+- **Corrige le tour qui passait sous la caméra frontale** quand l'app se mettait en plein écran (la barre d'état disparaît, la page monte) : dans un cadre, les marges de sécurité de l'écran valaient 0. La page du tour reçoit les vraies marges.
+- Les corrections des versions 0.6.x restent : boutons du menu et des réglages qui agissent au lever du doigt, appui bref ou long.
+- Tests dans Chrome adaptés : chaque routine jouée en entier, de sa tuile au retour au menu, dans la page du tour ; les marges de l'écran reçues par chaque tour.
 
 ## [0.6.5] — 2026-10-03
 
@@ -165,6 +176,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.7.0]: https://github.com/dezande/mes-tours/releases/tag/v0.7.0
 [0.6.5]: https://github.com/dezande/mes-tours/releases/tag/v0.6.5
 [0.6.4]: https://github.com/dezande/mes-tours/releases/tag/v0.6.4
 [0.6.3]: https://github.com/dezande/mes-tours/releases/tag/v0.6.3

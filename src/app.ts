@@ -8,7 +8,7 @@
  * Organisation de src/ :
  *   app.ts       ce fichier : démarrage et mises à jour automatiques
  *   menu.ts      le menu principal : une tuile par tour, avec son écrou ⚙
- *   scene.ts     le tour ouvert, en plein écran dans un cadre, et le retour au menu
+ *   scene.ts     ouvrir un tour : sa page, à la place du menu
  *   content/     LA LISTE DES TOURS : tours.ts
  *   tours/       les tours eux-mêmes, copies de leurs apps, un dossier chacun ;
  *                pont.ts : ce qu'un tour dit à l'app (« fin », « quitter »)
@@ -25,9 +25,9 @@ import './kit/web/orientation.ts';
 import { setupUpdates } from './kit/web/updates.ts';
 import { keepScreenAwake } from './kit/web/wake-lock.ts';
 import './menu.ts';
-import { tourOuvert } from './scene.ts';
 
 void keepScreenAwake();
 
-// Une nouvelle version ne s'affiche que menu principal à l'écran : jamais en plein tour.
-setupUpdates({ canReload: () => !tourOuvert() });
+// Une nouvelle version s'installe depuis le menu : les tours sont des pages à part, jamais rechargées
+// en pleine routine.
+setupUpdates({ canReload: () => true });
