@@ -39,6 +39,9 @@ after(async () => {
 async function withApp(run: (page: Page) => Promise<void>, url = server.url): Promise<void> {
 	const page = await browser.newPage();
 	try {
+		// Téléphone en français : c'est la langue de départ de l'app (src/langue.ts).
+		const agent = await page.evaluate<string>('navigator.userAgent');
+		await page.send('Emulation.setUserAgentOverride', { userAgent: agent, acceptLanguage: 'fr-FR,fr' });
 		await page.goto(url);
 		await page.evaluate(`localStorage.clear(); sessionStorage.clear()`);
 		await page.reload();
@@ -89,9 +92,9 @@ test('le menu en pixel art montre les quatre tours, chacun avec son icône et so
 			icone: t.querySelectorAll('svg.tour-icone rect').length > 10,
 			ecrou: t.querySelector('.tour-reglages svg.ecrou rect') ? t.querySelector('.tour-reglages').getAttribute('aria-label') : null,
 		}))`);
-		assert.deepEqual(tuiles.map((t) => t.nom), TOURS.map((t) => t.nom));
+		assert.deepEqual(tuiles.map((t) => t.nom), TOURS.map((t) => t.nom.fr));
 		assert.ok(tuiles.every((t) => t.icone), 'une icône ne s’affiche pas');
-		assert.deepEqual(tuiles.map((t) => t.ecrou), TOURS.map((t) => `Réglages : ${t.nom}`));
+		assert.deepEqual(tuiles.map((t) => t.ecrou), TOURS.map((t) => `Réglages : ${t.nom.fr}`));
 		assert.match(await page.evaluate<string>(`document.querySelector('#version').textContent`), new RegExp(APP_VERSION.replace(/\./g, '\\.')));
 		// La police pixel, embarquée avec l'app, est bien chargée.
 		assert.equal(await page.evaluate<boolean>(`document.fonts.check('11px "Press Start 2P"')`), true, 'police pixel absente');
@@ -218,6 +221,66 @@ test('écrou ⚙ : un réglage changé vaut pour la routine suivante', TIMEOUT, 
 		await attendreLeMenu(page);
 		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte'))`);
 		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#table .carte').dataset.couleur`)), 'rouge');
+	});
+});
+
+/* ================= Le bouton FR / EN ================= */
+
+/** Touche le bouton de langue du menu principal. */
+async function choisirLangue(page: Page, lang: 'fr' | 'en'): Promise<void> {
+	const centre = await page.evaluate<Point>(`(() => { const r = document.querySelector('#langues button[data-langue="${lang}"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+	await page.tap(centre);
+	await page.waitFor(`document.documentElement.lang === '${lang}'`, `menu en ${lang}`);
+}
+
+test('FR / EN : le menu change de langue, et s’en souvient', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		assert.equal(await page.evaluate(`document.documentElement.lang`), 'fr', 'téléphone en français : menu en français');
+		assert.equal(await page.evaluate(`document.querySelector('#langues button[data-langue="fr"]').getAttribute('aria-checked')`), 'true');
+		await choisirLangue(page, 'en');
+		const noms = await page.evaluate<string[]>(`[...document.querySelectorAll('#tours .tour-nom')].map((n) => n.textContent)`);
+		assert.deepEqual(noms, TOURS.map((t) => t.nom.en));
+		assert.equal(await page.evaluate(`document.querySelector('.invite').textContent`), 'Pick a trick');
+		assert.equal(await page.evaluate(`document.querySelector('.tour-reglages').getAttribute('aria-label')`), `Settings: ${TOURS[0]!.nom.en}`);
+		await page.reload();
+		await page.waitFor(PRET, 'menu rechargé');
+		assert.equal(await page.evaluate(`document.documentElement.lang`), 'en', 'la langue choisie est gardée');
+	});
+});
+
+test('FR / EN : la langue du menu vaut pour les tours', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		await choisirLangue(page, 'en');
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
+		await page.tap(HAUT);
+		await page.waitFor(dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'carte retournée', 3000);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#table .prediction').innerText.replace(/\\n+/g, ' ')`)), '0.20 euro tails');
+		await page.evaluate(`history.back()`);
+		await attendreLeMenu(page);
+
+		await ouvrir(page, 'analyseur-q', `Boolean(document.querySelector('.slide.current'))`);
+		assert.equal(await page.evaluate(dansLeTour(`document.documentElement.lang`)), 'en', 'l’analyseur est en anglais');
+		await page.evaluate(`history.back()`);
+		await attendreLeMenu(page);
+
+		// Retour au français : les tours suivent.
+		await choisirLangue(page, 'fr');
+		await ouvrir(page, 'six-predictions', `document.querySelectorAll('#paquet .carte').length === 6`);
+		assert.equal(await page.evaluate(dansLeTour(`document.documentElement.lang`)), 'fr', 'les six prédictions sont en français');
+	});
+});
+
+test('FR / EN : plus aucun choix de langue dans les tours', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		for (const dossier of ['pile-ou-face', 'six-predictions']) {
+			await ouvrir(page, dossier, `Boolean(document.querySelector('#menu')) && !document.querySelector('#menu').hidden`, true);
+			assert.equal(await page.evaluate(dansLeTour(`Boolean(document.querySelector('#langue-seg').closest('[hidden]'))`)), true, `${dossier} : choix de langue visible dans les réglages`);
+			await page.evaluate(dansLeTour(`document.querySelector('#close-btn').click()`));
+			await attendreLeMenu(page);
+		}
+		// L'analyseur choisissait sa langue sur sa première slide : plus de boutons FR / EN.
+		await ouvrir(page, 'analyseur-q', `document.querySelector('.slide.current')?.dataset.index === '0'`);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelectorAll('.langues').length`)), 0, 'boutons FR / EN sur la première slide');
 	});
 });
 

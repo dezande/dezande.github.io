@@ -23,10 +23,12 @@
 	<div id="app">
 		<main id="menu-principal">
 			<h1>Mes tours</h1>
+			<!-- La langue du menu et de tous les tours (src/langue.ts). -->
+			<div id="langues" role="radiogroup"></div>
 			<!-- Clignote comme l'écran titre d'un jeu ; masqué pour les lecteurs d'écran. -->
-			<p class="invite" aria-hidden="true">Choisis un tour</p>
+			<p class="invite" aria-hidden="true"></p>
 			<!-- Une tuile par tour, construites par src/menu.ts depuis src/content/tours.ts. -->
-			<nav id="tours" aria-label="Tours"></nav>
+			<nav id="tours"></nav>
 			<p id="version"></p>
 		</main>
 

@@ -3,7 +3,7 @@
  * ajustement du texte à l'écran, fausse barre de chargement, note et écran noir.
  */
 
-import { finDeRoutine } from '../../pont.ts';
+import { finDeRoutine, langueDemandee } from '../../pont.ts';
 import { ui } from '../content/interface.ts';
 import { SLIDES } from '../content/slides.ts';
 import { applyMove, clampIndex, counterLabel, type Move } from '../logic/deck.ts';
@@ -130,7 +130,8 @@ function buildSlide(slide: Slide, i: number): HTMLElement {
 	}
 	// Choix de la langue : sur la première slide seulement, hors du corps de la slide pour ne pas
 	// entrer dans l'ajustement du texte (comme l'étiquette).
-	if (i === 0) section.appendChild(buildLangues());
+	// Dans « Mes tours », la langue se choisit dans le menu principal : pas de boutons ici.
+	if (i === 0 && !langueDemandee) section.appendChild(buildLangues());
 	return section;
 }
 
