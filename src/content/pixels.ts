@@ -1,136 +1,248 @@
 /*
- * LES DESSINS EN PIXELS du menu principal : l'icône de chaque tour et l'écrou ⚙ des réglages.
+ * LES DESSINS EN PIXELS du menu principal, façon console 16 bits : l'icône de chaque tour (32 × 32),
+ * l'écrou ⚙ des réglages (24 × 24) et la main qui montre la tuile touchée.
  *
- * Chaque dessin est une grille de 16 × 16 caractères, un par pixel : une lettre de la palette, ou
- * « . » pour un pixel vide. src/pixel.ts en fait un SVG de carrés, net à toutes les tailles.
- * Les tests (tests/logic/pixels.test.ts) vérifient la taille des grilles, les couleurs employées,
- * et que l'écrou est parfaitement symétrique, son trou au centre.
+ * Chaque dessin est une grille de caractères, un par pixel : une lettre de la palette, ou « . »
+ * pour un pixel vide. src/pixel.ts en fait un SVG de carrés, net à toutes les tailles.
+ *
+ * Les icônes et l'écrou sont ENGENDRÉS par outils/icones-16-bits.py (éclairage des volumes,
+ * tramage des ombres, comme sur les consoles 16 bits) : pour les changer, modifier le script et
+ * recopier sa sortie ici. Les tests (tests/logic/pixels.test.ts) vérifient la taille des grilles,
+ * les couleurs, et que l'écrou est parfaitement symétrique, son trou au centre.
  */
 
-/**
- * La palette, réduite comme sur une console des années 80 (palette « Sweetie 16 », domaine public).
- * « x » prend la couleur du texte : l'écrou suit ainsi la couleur de son bouton.
- */
-export const PALETTE = {
-	k: '#1a1c2c', // contour, presque noir
-	d: '#333c57', // gris bleuté sombre
-	S: '#94b0c2', // gris clair
-	w: '#f4f4f4', // blanc
-	p: '#5d275d', // prune
-	r: '#b13e53', // rouge
-	o: '#ef7d57', // orange
-	y: '#ffcd75', // or
-	g: '#38b764', // vert
-	B: '#3b5dc9', // bleu
-	c: '#41a6f6', // bleu ciel
-	C: '#73eff7', // cyan
-	x: 'currentColor',
-} as const;
+/** La palette des dessins : une lettre par couleur. */
+export const PALETTE: Readonly<Record<string, string>> = {
+	a: '#0d0a1c',
+	b: '#45258a',
+	c: '#2e1863',
+	d: '#1c0f3d',
+	e: '#6538ad',
+	f: '#d9c8f2',
+	g: '#ffffff',
+	h: '#0e0820',
+	i: '#fff0b0',
+	j: '#f2c55c',
+	k: '#c98c2e',
+	l: '#8f5a1c',
+	m: '#5a3410',
+	n: '#2a1606',
+	o: '#7d4c16',
+	p: '#b37a26',
+	q: '#4e2c0c',
+	r: '#e0aa44',
+	s: '#fff4c4',
+	t: '#f8d778',
+	u: '#160a10',
+	v: '#e6dcc4',
+	w: '#fbf6ea',
+	x: '#b13e53',
+	y: '#7a1c2c',
+	z: '#1c2743',
+	A: '#0b0b12',
+	B: '#d8e0ee',
+	C: '#b0520f',
+	D: '#f7931e',
+	E: '#ffc46b',
+	F: '#6b2a0a',
+	G: '#9aa6bd',
+	H: '#3a2208',
+	// La main : contour, blanc, ombre grise.
+	1: '#0b0b12',
+	2: '#ffffff',
+	3: '#c6cfe0',
+};
 
-export type Couleur = keyof typeof PALETTE;
+/** Taille des icônes des tours, en pixels. */
+export const TAILLE = 32;
 
-/** Taille des grilles, en pixels. */
-export const TAILLE = 16;
+/** Taille de l'écrou, en pixels. */
+export const TAILLE_ECROU = 24;
 
 /** L'icône de chaque tour, par dossier (content/tours.ts). */
 export const ICONES: Readonly<Record<string, readonly string[]>> = {
-	// La boule de cristal sur son pied doré, un reflet en haut à gauche.
 	'boule-de-cristal': [
-		'................',
-		'.....kkkkkk.....',
-		'...kkpBBBBpkk...',
-		'..kpBBBBBBBBpk..',
-		'..kBBwcBBBBBBk..',
-		'.kpBwcBBBBBBBpk.',
-		'.kBBcBBBBBBBBBk.',
-		'.kBBBBBBBBBcBBk.',
-		'.kpBBBBBBBccBpk.',
-		'..kpBBBBBBBBpk..',
-		'..kkpBBBBBBpkk..',
-		'....kkpppkkk....',
-		'.....kyyyyk.....',
-		'......kyyk......',
-		'...kkkyyyykkk...',
-		'...kyyyyyyyyk...',
+		'................................',
+		'............aaaaaaaa............',
+		'..........aabbbcbccdaa..........',
+		'.........abbbbbbccccdda.........',
+		'........abebebbbbcbcccda........',
+		'.......abefffbcbcbcbccdda.......',
+		'......abefgggfbbbbbbbccdda......',
+		'.....abbbggggfcbcbbbccddhha.....',
+		'.....abbefgggfbbbbbbbccddha.....',
+		'....abbbbfggfbcbbebbccddhhha....',
+		'....acbbbbbbbcbbebebbdchhhha....',
+		'....abbbcbcbcbbebebbcdhhhhha....',
+		'....acbbbcbcbbebebbccddhhhha....',
+		'....accbcbcccbbebbccddhhhhha....',
+		'....acccccbcbbebbccddhhhhhha....',
+		'....acdcdccbcbbbccddhhhhhhha....',
+		'....adcdccccbbbcbcdhdhhhdhha....',
+		'.....adddcdccbccddhhhhhhhha.....',
+		'.....addddcccccddhhhhhhhhha.....',
+		'......adhddcddddhhhhhhhhha......',
+		'.......adddddddhdhhhhhhha.......',
+		'........ahhhhdhhhhhhhhha........',
+		'.........ahhhhhhhhhhhha.........',
+		'..........aaiijjkkllaa..........',
+		'..........aiiiijjkklla..........',
+		'...........aaiijkklaa...........',
+		'............aiijjkka............',
+		'.........aaaaiiikklaaaa.........',
+		'........aiiiijjkjkklllla........',
+		'.......aiiiijjkjkklkllmma.......',
+		'......aiiiijijjkjkklkllmla......',
+		'.......aaaaaaaaaaaaaaaaaa.......',
 	],
-	// La carte écrite à la main, et la pièce de 20 centimes qui dépasse.
 	'pile-ou-face': [
-		'................',
-		'.kkkkkkkkkkkk...',
-		'.kwwwwwwwwwwk...',
-		'.kwSSwSSSSwwk...',
-		'.kwwwwwwwwwwk...',
-		'.kwwwSSSwwwwk...',
-		'.kwwwwwwwwwwk...',
-		'.kwSSSSSSSSwk...',
-		'.kwwwkkkkwwwkkk.',
-		'.kwwkyyyykwkyyk.',
-		'.kwkyyoyoykkyyk.',
-		'.kwkyoyoyykyyyk.',
-		'.kwkyyoyoykyyyk.',
-		'.kwwkyyyykwkyyk.',
-		'.kkkkkkkkkkkkk..',
-		'................',
+		'................................',
+		'................................',
+		'............nnn..nnn............',
+		'..........nnooonnpopnn..........',
+		'........nnoopopopoppppnn........',
+		'.......nooooooooqpopppppn.......',
+		'......nooooooooooooooprprn......',
+		'......noooqsrtrtrrrrsopppn......',
+		'.....nnoootttttrtrtrtroprnn.....',
+		'....noooqtrtrtrtrtrrrrroprpn....',
+		'...noopotrtrtrtrtrtrrrrrorrrn...',
+		'...nooqortrtrrrrrrrrrrrrqorrn...',
+		'..nopootttsstrtrtrsstrrrrorrtn..',
+		'..noopqtrsoostrrrsoosrprrorrrn..',
+		'..nopoortotrortrrorrorrrrotrtn..',
+		'..npooqtrrrsorrrrorrorprpoqtrn..',
+		'..noposrtrsotrrrtorrorrrrsortn..',
+		'..npopqtrsorrrrrroprorprportrn..',
+		'...npportosssrrrrossoprrrottn...',
+		'...nopqrroooorrrprooprprportn...',
+		'...nppootrrrtrrrrrrrrrrpoottn...',
+		'...nppporrrrrrprrrprprprqtrtn...',
+		'....nprporrrrrrrrprrrprotttn....',
+		'....npprporrprprprprppqttttn....',
+		'.....nrprrosrrrrrrrpsottttn.....',
+		'......nrrrroqoqoqoqoqttttn......',
+		'.......nrrrrtrtootttttttn.......',
+		'........nnnrrrrtrtrtrnnn........',
+		'...........ntrtrttttn...........',
+		'............nnnnnnnn............',
+		'................................',
+		'................................',
 	],
-	// Deux dos rouges en éventail, la carte du dessus retournée, écrite.
 	'six-predictions': [
-		'................',
-		'.kkkkk..........',
-		'.krrrkkkkk......',
-		'.krwrrrrrkkkkkk.',
-		'.krrrkrwrrkwwwk.',
-		'.krwrkrrrkwwwwk.',
-		'.krrrkrwrkwSSwk.',
-		'.krwrkrrrkwwwwk.',
-		'.krrrkrwrkwSSwk.',
-		'.kkkkkrrrkwwwwk.',
-		'....kkrwrkwSwwk.',
-		'......kkkkwwwwk.',
-		'.........kwwwwk.',
-		'.........kkkkkk.',
-		'................',
-		'................',
+		'................................',
+		'................................',
+		'................................',
+		'.........uuuuuuuuuuuu...........',
+		'........uvvvvvvvvvvvvu..........',
+		'...uuuuuvwwwwwwwwwwwwvu.........',
+		'..uvvvvvvwjxxxjxxxjxwvuuuuuuu...',
+		'.uvwwwwwvwxjxjxjvwvwvvvvvvvvvu..',
+		'.uvwjxxxvwxxjxxwwwwvwvwvwvvvvvu.',
+		'.uvwxjxjvwxjxjxwvwvwvwvvvvvvvvu.',
+		'.uvwxxjxvwjxxxjwwvwvwvwvwvwvvvu.',
+		'.uvwyjxjvwyjyjywvwzwzzzzvzzvvvu.',
+		'.uvwjxxxvwxxjxxwwwwvwvwvwvvvvvu.',
+		'.uvwxjyjvwyjyjywvwvwvwvvvvvvvvu.',
+		'.uvwxxjxvwjxxyjwwvzzzvzzzvwvvvu.',
+		'.uvwyjyjvwyjyjywvwvwvvvvvvvvvvu.',
+		'.uvwjxxyvwxyjyxwwwwvwvwvwvvvvvu.',
+		'.uvwyjyjvwyjyjywvwvwvwvvvvvvvvu.',
+		'.uvwxyjyvwjyxyjwwvwvwvwvwvwvvvu.',
+		'.uvwyjyjvwyjyjywvwvwvvvvvvvvvvu.',
+		'.uvwjyxyvwxyjyxwwwwzwzzzzvzvvvu.',
+		'.uvwyjyjvwyjyjywvwvwzzzzvzvvvvu.',
+		'.uvwxyjyvwwwwwwwwvwvwvwvwvwvvvu.',
+		'.uvwyjyjyvvvvvvwvwvwvvvvvvvvvvu.',
+		'.uvwwwwwwwwwwwwwwwwvwvwvwvvvvvu.',
+		'..uvvvvvvvvvvvvwvwvwvwvvvvvvvvu.',
+		'...uuuuuuuuuuuuwwvwvwvwvwvwvvvu.',
+		'..............uwvwvwvvvvvvvvvvu.',
+		'...............uwwwvwvwvwvvvvu..',
+		'................uuuuuuuuuuuuu...',
+		'................................',
+		'................................',
 	],
-	// Le pique blanc de l'analyseur, dans l'orbite orange de ses ondes.
 	'analyseur-q': [
-		'................',
-		'......kkkk......',
-		'...oo.kwwk.oo...',
-		'..o..kwwwwk..o..',
-		'.o..kwwwwwwk..o.',
-		'.o.kwwwwwwwwk.o.',
-		'o..kwwwwwwwwk..o',
-		'o..kkwwkkwwkk..o',
-		'o...kkkwwkkk...o',
-		'.o.....kk.....o.',
-		'.o....kwwk....o.',
-		'..o..kkkkkk..o..',
-		'...oo......oo...',
-		'.....oooooo.....',
-		'................',
-		'................',
+		'................................',
+		'................................',
+		'................................',
+		'................................',
+		'................................',
+		'...............AA...............',
+		'..............AggA.AAAAAAA......',
+		'..............AgBAACCDCDCDAA....',
+		'.............AggggCCAAAAADEDA...',
+		'............AgBgBgBA.....AAEA...',
+		'..........AAgggggBgBA.....AEA...',
+		'.........AFFBgBgBBBBAA....AEA...',
+		'........AFgggggBgBgBBBA...AEA...',
+		'.......AFgggBgBgBBBBBBGA..AEA...',
+		'......AFgggggBgBgBBBBGBGAAEEA...',
+		'.....AFFggBgBgBBBBBBGBGBAEDA....',
+		'....AFFAgggBgBgBgBBBBBBGEEA.....',
+		'...AFFAAggBgBgBBBBGBGBGEDA......',
+		'...AFA..ABgBgBgBBBBBBGEDA.......',
+		'...AFA...ABgBBABGAGBGDDA........',
+		'...AFA....AAAAABBAADEDA.........',
+		'...AFA.......ABBGDDDAA..........',
+		'...AFAA.....ABBDDDBA............',
+		'...AFCFAAAAACDCDGGGGA...........',
+		'....AACCCCDCDAAAAAAA............',
+		'......AAAAAAA...................',
+		'................................',
+		'................................',
+		'................................',
+		'................................',
+		'................................',
+		'................................',
 	],
 };
 
 /**
- * L'écrou ⚙ des réglages : huit dents autour d'un trou de 4 × 4 pixels, au centre exact de la
- * grille. Calculé pour être symétrique dans tous les sens, et non dessiné à la main.
+ * L'écrou ⚙ des réglages : huit dents autour d'un trou rond, au centre exact de la grille, en
+ * anneaux de lumière (sombre au bord du trou, clair au milieu, dents plus sombres). Calculé pour
+ * être symétrique dans tous les sens.
  */
 export const ECROU: readonly string[] = [
-	'......xxxx......',
-	'......xxxx......',
-	'..xxx.xxxx.xxx..',
-	'..xxxxxxxxxxxx..',
-	'..xxxxxxxxxxxx..',
-	'...xxxxxxxxxx...',
-	'xxxxxx....xxxxxx',
-	'xxxxxx....xxxxxx',
-	'xxxxxx....xxxxxx',
-	'xxxxxx....xxxxxx',
-	'...xxxxxxxxxx...',
-	'..xxxxxxxxxxxx..',
-	'..xxxxxxxxxxxx..',
-	'..xxx.xxxx.xxx..',
-	'......xxxx......',
-	'......xxxx......',
+	'........HkkkkkkH........',
+	'.....HH.HkkkkkkH.HH.....',
+	'....HkkHHkkkkkkHHkkH....',
+	'...HkkkH.HkkkkH.HkkkH...',
+	'..HkkkkkHjjjjjjHkkkkkH..',
+	'.HkkkkkjjjjiijjjjkkkkkH.',
+	'.HkkkkjjiiiiiiiijjkkkkH.',
+	'..HHkjjiiiiiiiiiijjkHH..',
+	'HHH.HjiiilllllliiijH.HHH',
+	'kkkHjjiillHHHHlliijjHkkk',
+	'kkkkjjiilH....Hliijjkkkk',
+	'kkkkjiiilH....Hliiijkkkk',
+	'kkkkjiiilH....Hliiijkkkk',
+	'kkkkjjiilH....Hliijjkkkk',
+	'kkkHjjiillHHHHlliijjHkkk',
+	'HHH.HjiiilllllliiijH.HHH',
+	'..HHkjjiiiiiiiiiijjkHH..',
+	'.HkkkkjjiiiiiiiijjkkkkH.',
+	'.HkkkkkjjjjiijjjjkkkkkH.',
+	'..HkkkkkHjjjjjjHkkkkkH..',
+	'...HkkkH.HkkkkH.HkkkH...',
+	'....HkkHHkkkkkkHHkkH....',
+	'.....HH.HkkkkkkH.HH.....',
+	'........HkkkkkkH........',
+];
+
+/** La main des menus de jeux de rôle 16 bits, qui montre la tuile touchée. */
+export const MAIN: readonly string[] = [
+	'................',
+	'...11111........',
+	'..1222221111111.',
+	'..12222222222221',
+	'..1222221111111.',
+	'.132222221......',
+	'.1322222221.....',
+	'.133222221......',
+	'..13332221......',
+	'...1133321......',
+	'.....1111.......',
+	'................',
 ];

@@ -1,6 +1,7 @@
 /*
- * Le menu principal, en pixel art façon console 8 bits : une tuile par tour (content/tours.ts),
- * avec son icône en pixels (content/pixels.ts). Toucher la tuile lance le tour ; l'écrou ⚙ à côté
+ * Le menu principal, en pixel art façon console 16 bits : une fenêtre par tour (content/tours.ts),
+ * avec son icône en pixels (content/pixels.ts), et la main des jeux de rôle qui montre la tuile
+ * touchée. Toucher la tuile lance le tour ; l'écrou ⚙ à côté
  * ouvre ses réglages. Les deux s'affichent en plein écran (scene.ts), et le tour revient ici à la
  * fin de sa routine.
  *
@@ -8,7 +9,7 @@
  * reconstruit aussitôt, et chaque tour l'ouvre dans cette langue.
  */
 
-import { ECROU, ICONES } from './content/pixels.ts';
+import { ECROU, ICONES, MAIN } from './content/pixels.ts';
 import { LANGUES, TEXTES } from './content/textes.ts';
 import { TOURS } from './content/tours.ts';
 import { BUILD } from './kit/web/build.ts';
@@ -53,7 +54,8 @@ function construire(): void {
 		const lancer = tuile.appendChild(document.createElement('button'));
 		lancer.type = 'button';
 		lancer.className = 'tour-lancer';
-		// L'icône du tour, en pixel art (content/pixels.ts).
+		// La main qui montre la tuile, le temps du toucher ; puis l'icône du tour, en pixel art.
+		lancer.appendChild(dessinPixel(MAIN, 'main'));
 		lancer.appendChild(dessinPixel(ICONES[tour.dossier]!, 'tour-icone'));
 		const texte = lancer.appendChild(document.createElement('span'));
 		texte.className = 'tour-texte';

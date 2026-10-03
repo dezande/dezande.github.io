@@ -21,7 +21,7 @@ Tous mes accessoires de scène dans **une seule application** : https://dezande.
 | **Geste retour** d'Android | Retour au menu |
 | Touche **R** (télécommande) | Fin de la routine ; **Échap** ou **M** : quitter le tour |
 
-**Les réglages des quatre tours ont la même structure**, chacun dans ses couleurs : une barre d'en-tête qui reste en haut quand on fait défiler — « Réglages » et, dessous, le nom du tour, avec la croix qui ferme —, puis les réglages propres au tour, les aides à la répétition (le test des zones de la boule y est), l'état de l'écran, les gestes et touches, et « Rétablir les réglages par défaut ». Plus de version ni d'informations techniques : la version de l'app est en bas du menu principal.
+**Les réglages des quatre tours ont la même structure**, chacun dans ses couleurs : une barre d'en-tête qui reste en haut quand on fait défiler — « Réglages » et, dessous, le nom du tour, avec la croix qui ferme —, puis les réglages propres au tour, les aides à la répétition (le test des zones de la boule y est), et « Rétablir les réglages par défaut ». Plus de version, d'état de l'écran, d'aide des gestes ni d'informations techniques : la version de l'app est en bas du menu principal.
 
 **La langue se choisit une fois, dans le menu principal** : les tours n'ont plus de choix de langue à eux (ni dans leurs réglages, ni sur la première slide de l'analyseur). En anglais, Pile ou face écrit « 0.20 euro / tails » et « heads ». La boule de cristal n'a qu'une interface en français ; ce qu'elle montre au public, un nombre, n'a pas de langue. À la toute première ouverture, l'app suit la langue du téléphone.
 
@@ -48,7 +48,7 @@ Jusqu'à la version 0.1.0, l'app était à la racine du site (`https://dezande.g
 
 1. Copier son `src/` (sans `kit`, `sw`, `icon`) dans `src/tours/<dossier>/` et son `public/` (sans manifeste, icônes ni polices) dans `public/tours/<dossier>/` ; faire pointer ses imports du kit vers `src/kit`.
 2. Brancher le pont : `finDeRoutine()` au geste de fin, `quitter()` à l'appui de 3 s et à la fermeture des réglages, `enReglages` pour n'ouvrir que les réglages.
-3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), son icône en pixels (16 × 16, dans la palette) dans [`src/content/pixels.ts`](src/content/pixels.ts), sa feuille de style dans le script `build` de `package.json`.
+3. Une ligne dans [`src/content/tours.ts`](src/content/tours.ts), son icône en pixels (32 × 32, ajoutée à `outils/icones-16-bits.py`) dans [`src/content/pixels.ts`](src/content/pixels.ts), sa feuille de style dans le script `build` de `package.json`.
 4. Ses tests unitaires dans `tests/tours/<dossier>/`, et sa routine dans les tests dans Chrome.
 
 ## Publication et développement
@@ -67,15 +67,15 @@ npm run typecheck
 npm run check:changelog
 ```
 
-### Le menu en pixel art
+### Le menu, façon console 16 bits
 
-Le menu principal a l'allure d'une console 8 bits : palette réduite (« Sweetie 16 »), police pixel **[Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P)** embarquée avec l'app (`public/fonts/`, 5 ko, licence [SIL OFL 1.1](public/fonts/OFL-press-start-2p.txt)), cadres aux coins crénelés, ombres sans flou, et « Choisis un tour » qui clignote comme un écran titre. Les tours eux-mêmes gardent leur allure : ce que voit le public ne change pas.
+Le menu principal a l'allure des menus de jeux de rôle des consoles 16 bits : fenêtres bleues en dégradé bordées de blanc, la main qui montre la tuile touchée, un ciel de nuit, la police pixel **[Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans)** embarquée avec l'app (`public/fonts/`, 12 ko, licence [SIL OFL 1.1](public/fonts/OFL-pixelify-sans.txt)). Les tours eux-mêmes gardent leur allure : ce que voit le public ne change pas.
 
-Les icônes des tours et l'écrou ⚙ sont des **grilles de 16 × 16 caractères**, un par pixel, dans [`src/content/pixels.ts`](src/content/pixels.ts) ; [`src/pixel.ts`](src/pixel.ts) en fait des SVG nets à toutes les tailles. L'écrou est calculé, et les tests vérifient qu'il est symétrique dans tous les sens, son trou de 4 × 4 pixels au centre exact.
+Les icônes des tours (32 × 32), l'écrou ⚙ (24 × 24) et la main sont des **grilles de caractères**, un par pixel, dans [`src/content/pixels.ts`](src/content/pixels.ts) ; [`src/pixel.ts`](src/pixel.ts) en fait des SVG nets à toutes les tailles. Les icônes et l'écrou sont **engendrés** par [`outils/icones-16-bits.py`](outils/icones-16-bits.py) — éclairage des volumes, tramage des ombres — : pour en changer un, modifier le script, le lancer (`python3 outils/icones-16-bits.py` écrit `icones.json` et un aperçu `apercu.svg`), puis recopier les grilles et la palette dans `src/content/pixels.ts`. Les tests vérifient que l'écrou est symétrique dans tous les sens, son trou au centre exact.
 
 ### Icônes
 
-L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes en pixels des quatre tours, chacune dans son cadre ; elle est engendrée depuis `src/content/pixels.ts`. Les PNG de `public/icons/` en sont rendus avec Chrome sans interface :
+L'icône de l'app ([`src/icon/icon.svg`](src/icon/icon.svg)) réunit les icônes des quatre tours, chacune dans une fenêtre bleue bordée de blanc, comme le menu ; elle est engendrée depuis leurs grilles. Les PNG de `public/icons/` en sont rendus avec Chrome sans interface :
 
 ```sh
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \

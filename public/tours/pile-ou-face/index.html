@@ -67,28 +67,26 @@
 					<label class="toggle-row" for="show-hold-ring"><span data-texte="menu.jauge"></span> <input id="show-hold-ring" type="checkbox"></label>
 				</div>
 
-				<div class="card status">
-					<span class="dot" id="wake-dot"></span>
-					<div><span id="wake-text"></span><small id="wake-detail"></small></div>
-				</div>
-
-				<details class="card help">
-					<summary data-texte="aide.titre"></summary>
-					<ul>
-						<li data-texte="aide.haut"></li>
-						<li data-texte="aide.bas"></li>
-						<li data-texte="aide.delai"></li>
-						<li data-texte="aide.double"></li>
-						<li data-texte="aide.appui"></li>
-						<li data-texte="aide.clavier"></li>
-					</ul>
-				</details>
-
 				<button type="button" id="defaults-btn" class="link" data-texte="menu.defauts"></button>
 
 				<!-- Ce qui ne sert qu'au tour ouvert seul (hors de « Mes tours ») : gardé pour son code,
 				     jamais affiché ici. -->
 				<div hidden>
+					<details class="card help">
+						<summary data-texte="aide.titre"></summary>
+						<ul>
+							<li data-texte="aide.haut"></li>
+							<li data-texte="aide.bas"></li>
+							<li data-texte="aide.delai"></li>
+							<li data-texte="aide.double"></li>
+							<li data-texte="aide.appui"></li>
+							<li data-texte="aide.clavier"></li>
+						</ul>
+					</details>
+					<div class="card status">
+						<span class="dot" id="wake-dot"></span>
+						<div><span id="wake-text"></span><small id="wake-detail"></small></div>
+					</div>
 					<div class="card about">
 						<div class="about-row"><span data-texte="menu.version"></span> <span id="about-version"></span></div>
 						<div class="about-row"><span data-texte="menu.cache"></span> <span id="about-cache"></span></div>

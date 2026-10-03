@@ -85,7 +85,7 @@ async function pressKey(page: Page, key: string): Promise<void> {
 
 /* ================= Le menu principal ================= */
 
-test('le menu en pixel art montre les quatre tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
+test('le menu 16 bits montre les quatre tours, chacun avec son icône et son écrou ⚙', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		const tuiles = await page.evaluate<{ nom: string; icone: boolean; ecrou: string | null }[]>(`[...document.querySelectorAll('#tours .tour')].map((t) => ({
 			nom: t.querySelector('.tour-nom').textContent,
@@ -97,7 +97,7 @@ test('le menu en pixel art montre les quatre tours, chacun avec son icône et so
 		assert.deepEqual(tuiles.map((t) => t.ecrou), TOURS.map((t) => `Réglages : ${t.nom.fr}`));
 		assert.match(await page.evaluate<string>(`document.querySelector('#version').textContent`), new RegExp(APP_VERSION.replace(/\./g, '\\.')));
 		// La police pixel, embarquée avec l'app, est bien chargée.
-		assert.equal(await page.evaluate<boolean>(`document.fonts.check('11px "Press Start 2P"')`), true, 'police pixel absente');
+		assert.equal(await page.evaluate<boolean>(`document.fonts.check('16px "Pixelify Sans"')`), true, 'police pixel absente');
 		// L'app a son propre identifiant, dans son dossier du site : pas celui de la racine.
 		assert.deepEqual(
 			await page.evaluate(`fetch('manifest.json').then((r) => r.json()).then((m) => [m.id, m.start_url, m.scope])`),
@@ -288,7 +288,8 @@ test('écrou ⚙ : tous les réglages ont la même structure, le nom du tour en 
 			await attendreLeMenu(page);
 		}
 		// Le même ordre partout : l'en-tête, les réglages propres au tour, puis les blocs communs.
-		for (const structure of structures) assert.deepEqual(structure, ['en-tête', 'réglage', 'aides', 'écran', 'gestes', 'défauts']);
+		// Ni l'état de l'écran allumé (il reste allumé sans qu'on ait à le voir), ni l'aide des gestes.
+		for (const structure of structures) assert.deepEqual(structure, ['en-tête', 'réglage', 'aides', 'défauts']);
 	});
 });
 
@@ -375,7 +376,7 @@ test('hors-ligne : le menu et les tours s’ouvrent serveur arrêté', TIMEOUT, 
 			closed = true;
 			await page.reload();
 			await page.waitFor(PRET, 'menu rechargé hors-ligne', 10_000);
-			assert.equal(await page.evaluate<boolean>(`document.fonts.check('11px "Press Start 2P"')`), true, 'police pixel absente hors-ligne');
+			assert.equal(await page.evaluate<boolean>(`document.fonts.check('16px "Pixelify Sans"')`), true, 'police pixel absente hors-ligne');
 			await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
 			await page.tap(HAUT);
 			await page.waitFor(dansLeTour(`document.querySelector('#table .carte').classList.contains('retournee')`), 'routine jouée hors-ligne', 3000);
