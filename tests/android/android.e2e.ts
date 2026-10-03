@@ -144,7 +144,7 @@ async function doubleToucher(p: Point): Promise<void> {
 		return;
 	}
 	// Ce que la page reçoit, dit dans le journal si ce n'est pas un double toucher.
-	await page.evaluate(`(() => { window.__doigts = []; for (const t of ['touchstart', 'touchend']) addEventListener(t, (e) => __doigts.push(Math.round(performance.now()) + ' ' + t + ' ' + Math.round(e.changedTouches[0].clientX) + ',' + Math.round(e.changedTouches[0].clientY)), true); })()`);
+	await page.evaluate(`(() => { window.__doigts = []; if (window.__doigtsSuivis) return; window.__doigtsSuivis = true; for (const t of ['touchstart', 'touchend']) addEventListener(t, (e) => __doigts.push(Math.round(performance.now()) + ' ' + t + ' ' + Math.round(e.changedTouches[0].clientX) + ',' + Math.round(e.changedTouches[0].clientY)), true); })()`);
 	ecrireDesTouchers(tactile, x, y, 2);
 	await sleep(500);
 	const recus = await page.evaluate<string[]>(`window.__doigts ?? []`).catch(() => []);
@@ -395,6 +395,34 @@ test('Android : Boule de cristal, le double toucher efface le nombre sans quitte
 	// La boule est réarmée : un nouveau toucher donne un nouveau nombre.
 	toucher(await haut());
 	await attendre(dansLeTour(`document.querySelector('#number').classList.contains('shown')`), 'nouveau nombre', 8000);
+});
+
+test('Android : Carte de visite, en largeur, chaque coin la retourne sur son numéro, le double toucher la remet sur son recto', TIMEOUT, async () => {
+	await auMenu();
+	await ouvrir('carte-de-visite', `Boolean(document.querySelector('#carte .verso #number')) && document.querySelectorAll('#table rect').length === 3`);
+	// Joué téléphone tenu en largeur : sur l'écran en portrait, la scène est pivotée d'un quart de
+	// tour, son haut à droite de l'écran. Le coin haut gauche de la scène est en haut à droite.
+	assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#app').dataset.rotation`)), '90', 'la carte n’est pas en paysage');
+	const { l, h } = await page.evaluate<{ l: number; h: number }>(`({ l: innerWidth, h: innerHeight })`);
+	const coins: [Point, string][] = [
+		[{ x: l * .85, y: h * .15 }, '17'],
+		[{ x: l * .85, y: h * .85 }, '19'],
+		[{ x: l * .15, y: h * .15 }, '21'],
+		[{ x: l * .15, y: h * .85 }, '23'],
+	];
+	for (const [coin, numero] of coins) {
+		toucher(coin);
+		await attendre(dansLeTour(`document.querySelector('#carte').classList.contains('retournee')`), `carte retournée sur ${numero}`, 10_000);
+		assert.equal(await page.evaluate(dansLeTour(`document.querySelector('#number-text').textContent`)), numero);
+		await sleep(500);
+		await doubleToucher(await milieu());
+		await attendre(dansLeTour(`!document.querySelector('#carte').classList.contains('retournee')`), 'carte sur son recto', 5000);
+		// Le retournement fini, on est toujours sur la carte, prête pour un nouveau tour.
+		await sleep(2500);
+		assert.ok(await page.evaluate<boolean>(`location.pathname.includes('/tours/carte-de-visite/')`), 'le double toucher a quitté la carte');
+	}
+	appuyer(await milieu(), 3400);
+	await attendre(AU_MENU, 'retour au menu après l’appui de 3 s', 20_000);
 });
 
 /* ================= L'écran ================= */

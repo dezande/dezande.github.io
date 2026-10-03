@@ -36,7 +36,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
   - qu'une tuile s'ouvre au toucher bref comme à l'appui long ;
   - que l'appui de 3 s et la touche retour ramènent au menu, et que le menu répond ensuite ;
   - l'écrou ⚙ et la croix ;
-  - que la fin de routine reste dans le tour (Pile ou face, Boule de cristal) ;
+  - que la fin de routine reste dans le tour (Pile ou face, Boule de cristal, et la Carte de visite, jouée en largeur : ses quatre coins) ;
   - que les marges de l'écran ne changent pas une fois le tour posé.
   Le README explique comment installer le même émulateur sur un Mac.
 
