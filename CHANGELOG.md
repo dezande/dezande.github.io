@@ -10,6 +10,7 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 
 | Version | Commits | Date | En une phrase |
 | --- | --- | --- | --- |
+| [0.6.2] | 12 | 2026-10-03 | De retour au menu, les tuiles répondent tout de suite |
 | [0.6.1] | 11 | 2026-10-03 | Le « 5 » et le « î » redessinés dans la police du menu |
 | [0.6.0] | 10 | 2026-10-03 | Le menu principal façon console 16 bits, icônes redessinées |
 | [0.5.0] | 9 | 2026-10-03 | Les réglages des tours : une même structure, le nom du tour, une croix pour fermer |
@@ -19,6 +20,15 @@ Les numéros suivent [semver](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORR
 | [0.1.0] | 2 | 2026-10-02 | Première version : le menu de tous les tours, installé une seule fois |
 
 ---
+
+## [0.6.2] — 2026-10-03
+
+12 commits
+
+- **De retour au menu, les tuiles répondent tout de suite.** Sur le téléphone, après un tour, une tuile touchée aussitôt ne réagissait pas. Deux causes, corrigées :
+  - le retour au menu passait par l'historique (un « retour » d'Android), qui prend du temps sur le téléphone : le menu revient maintenant aussitôt, sans attendre l'historique. Le geste retour d'Android referme toujours un tour, et l'historique ne grandit plus d'un tour à l'autre ;
+  - la garde contre le doigt de l'appui de 3 s (qui empêche ce doigt, en se relevant, de relancer la tuile placée dessous) s'armait à chaque retour, même sans doigt posé. Le tour dit maintenant si un doigt est encore sur l'écran : la garde ne s'arme que dans ce cas.
+- Tests dans Chrome : une autre tuile touchée dès le retour s'ouvre au premier toucher, après la croix comme après la fin d'une routine ; l'historique ne grandit pas.
 
 ## [0.6.1] — 2026-10-03
 
@@ -129,6 +139,7 @@ gh release create v0.2.0 --title "v0.2.0 — Titre" --notes-file notes.md
 
 
 
+[0.6.2]: https://github.com/dezande/mes-tours/releases/tag/v0.6.2
 [0.6.1]: https://github.com/dezande/mes-tours/releases/tag/v0.6.1
 [0.6.0]: https://github.com/dezande/mes-tours/releases/tag/v0.6.0
 [0.5.0]: https://github.com/dezande/mes-tours/releases/tag/v0.5.0

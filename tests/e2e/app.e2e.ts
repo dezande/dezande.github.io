@@ -186,6 +186,52 @@ test('appui de 3 s pendant un tour : sortie de secours, retour au menu', TIMEOUT
 	});
 });
 
+test('de retour au menu, une tuile répond au premier toucher, tout de suite', TIMEOUT, async () => {
+	// Le bogue : de retour au menu, les tuiles ne répondaient pas tout de suite. On touche une autre
+	// tuile dès le retour, sans attendre, après chaque façon de revenir.
+	await withApp(async (page) => {
+		const tuile = async (dossier: string) => page.evaluate<Point>(`(() => { const r = document.querySelector('#tours .tour[data-dossier="${dossier}"] .tour-lancer').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+		const autreTuileOuvre = async (comment: string) => {
+			await attendreLeMenu(page);
+			await page.tap(await tuile('six-predictions'));
+			await page.waitFor(`!document.querySelector('#scene').hidden && document.querySelector('#scene iframe')?.src.includes('six-predictions')`, `tuile ouverte au premier toucher après ${comment}`, 2000);
+			await page.evaluate(`history.back()`);
+			await attendreLeMenu(page);
+		};
+
+		// La croix des réglages.
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#menu')) && !document.querySelector('#menu').hidden`, true);
+		const croix = await page.evaluate<Point>(dansLeTour(`(() => { const r = document.querySelector('#close-btn').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`));
+		await page.tap(croix);
+		await autreTuileOuvre('la croix');
+
+		// La fin d'une routine (double toucher).
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte .dos svg'))`);
+		await page.tap(HAUT);
+		await sleep(900);
+		await page.doubleTap(CENTRE);
+		await autreTuileOuvre('la fin de la routine');
+	});
+});
+
+test('l’historique ne grandit pas d’un tour à l’autre', TIMEOUT, async () => {
+	await withApp(async (page) => {
+		const depart = await page.evaluate<number>(`history.length`);
+		for (let i = 0; i < 3; i++) {
+			await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#menu')) && !document.querySelector('#menu').hidden`, true);
+			await page.evaluate(dansLeTour(`document.querySelector('#close-btn').click()`));
+			await attendreLeMenu(page);
+			// Une touche lève la garde, comme un toucher.
+			await pressKey(page, 'Shift');
+		}
+		assert.ok(await page.evaluate<number>(`history.length`) <= depart + 1, 'trois tours ouverts et refermés ont allongé l’historique');
+		// Le geste retour referme encore un tour ouvert ensuite.
+		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte'))`);
+		await page.evaluate(`history.back()`);
+		await attendreLeMenu(page);
+	});
+});
+
 test('geste retour d’Android pendant un tour : retour au menu', TIMEOUT, async () => {
 	await withApp(async (page) => {
 		await ouvrir(page, 'pile-ou-face', `Boolean(document.querySelector('#table .carte'))`);
